@@ -1,175 +1,265 @@
-#include <iostream>
-#include <algorithm>
-#include <ctime>
-#include <cstdlib>
+#include <string>
+#include <assert.h>
 
-#include "Game/Game.h"
+#include "ImageAnalyzer/ImageAnalyzer.h"
 #include "QLearning/QLearning.h"
-#include "ActionCritic/ActionCritic.h"
 
-#include "testFunctions.h"
+enum DeathReason {unknown, timeOut, enemy, pitfall};
 
-struct HistoryRecord
+//Objects
+ImageAnalyzer analyzer;
+
+//Situation data
+std::vector<bool> controllerInput;
+
+DeathReason deathReason;
+
+std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, cv::Point& position, cv::Point& velocity)
 {
-	HistoryRecord(State t_prevState, State t_state, int t_action, double t_result)
+	std::vector<int> sceneState;
+	for(int y=0; y<image.rows; y++)
 	{
-		prevState = t_prevState;
-		state = t_state;
-		action = t_action;
-		result = t_result;
-	}
-	State prevState;
-	State state;
-	int action;
-	double result;
-};
-
-void qLearning(Game* t_game, QLearning* t_bot)
-{
-	std::vector<HistoryRecord> history;
-	history.clear();
-
-	while(true)
-	{
-		State prevState = t_game->getState();
-		Control control = Control(t_bot->chooseAction(State(prevState)));
-		std::pair<double,bool> result = t_game->execute(control);
-		State state = t_game->getState();
-
-		HistoryRecord historyRecord(prevState, state, control.getInt(), result.first);
-		history.push_back(historyRecord);
-		t_bot->learn(historyRecord.prevState,historyRecord.state,historyRecord.action,historyRecord.result);
-
-		if(result.second)
+		for(int x=0; x<image.cols; x++)
 		{
-			double err = 0;
-			for(int i=history.size()-1; i>=0; i--)
-			{
-				err += fabs(t_bot->learn(history[i].prevState,history[i].state,history[i].action,history[i].result));
-			}
-			std::cout << err/history.size() << "\n";
-			history.clear();
-			t_game->reset();
-		}
-		t_bot->printValuesMap(state,"Table");
+			uchar* ptr = image.ptr(y)+x*3;
 
-		cv::waitKey(20);
-		t_game->display();
+			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(1);
+			else sceneState.push_back(0);
+			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(1);
+			else sceneState.push_back(0);
+		}
+	}
+	for(bool ci : controllerInput)
+	{
+		if(ci==true) sceneState.push_back(1);
+		else sceneState.push_back(0);
+	}
+	sceneState.push_back(position.x > 0 ?1:0);
+	sceneState.push_back(position.y > 0 ?1:0);
+	sceneState.push_back(velocity.x > 0 ?1:0);
+	sceneState.push_back(velocity.y > 0 ?1:0);
+
+	return sceneState;
+}
+
+std::vector<int> enrichSceneState(std::vector<int>& sceneState, std::vector<bool>& controllerInput, cv::Point& position, cv::Point& velocity)
+{
+	for(bool ci : controllerInput)
+	{
+		if(ci==true) sceneState.push_back(1);
+		else sceneState.push_back(0);
+	}
+	sceneState.push_back(position.x > 0 ?1:0);
+	sceneState.push_back(position.y > 0 ?1:0);
+	sceneState.push_back(velocity.x > 0 ?1:0);
+	sceneState.push_back(velocity.y > 0 ?1:0);
+//	sceneData.push_back(0);
+//	sceneData.push_back(0);
+//	sceneData.push_back(0);
+//	sceneData.push_back(0);
+
+	return sceneState;
+}
+
+void printAction(int t_action)
+{
+	switch(t_action)
+	{
+	case 0: //Right
+		std::cout << ">\n";
+		break;
+	case 1: //Right jump
+		std::cout << "^>\n";
+		break;
+	case 2: //Left
+		std::cout << "<\n";
+		break;
+	case 3: //Jump
+		std::cout << "^\n";
+		break;
+	case 4: //Left Jump
+		std::cout << "<^\n";
+		break;
+	default:
+		std::cout << t_action << "\n";
+		assert("No such action!");
 	}
 }
 
-void acLearning(Game* t_game, ActionCritic* t_bot)
+std::vector<bool> determineControllerInput(int t_action)
 {
-	std::vector<HistoryRecord> history;
-	history.clear();
+	std::vector<bool> w;
+	w.push_back(false);
+	w.push_back(false);
+	w.push_back(false);
+	w.push_back(false);
+	w.push_back(false);
+	w.push_back(false);
 
-	while(true)
+	switch(t_action)
 	{
-		// Critic
-		while(true)
-		{
-			State prevState = t_game->getState();
-			Control control = Control(t_bot->chooseAction(State(prevState)));
-			std::pair<double,bool> result = t_game->execute(control);
-			State state = t_game->getState();
-
-			HistoryRecord historyRecord(prevState, state, control.getInt(), result.first);
-			history.push_back(historyRecord);
-//			t_bot->learnCritic(historyRecord.prevState,historyRecord.state,historyRecord.action,historyRecord.result);
-
-			if(result.second)
-			{
-				double err = 0;
-				for(int i=history.size()-1; i>=0; i--)
-				{
-					err += fabs(t_bot->learnCritic(history[i].prevState,history[i].state,history[i].action,history[i].result));
-				}
-				std::cout << err/history.size() << "\n";
-				int historySize = history.size();
-				history.clear();
-				t_game->reset();
-				if(err/historySize < 0.002)
-				{
-					std::cout << "Critic done\n";
-					break;
-				}
-			}
-			t_bot->printCriticMap(state,"Critic");
-
-			cv::waitKey(20);
-			t_game->display();
-		}
-		//	Actor
-		while(true)
-		{
-			State prevState = t_game->getState();
-			Control control = Control(t_bot->chooseAction(State(prevState)));
-			std::pair<double,bool> result = t_game->execute(control);
-			State state = t_game->getState();
-
-			HistoryRecord historyRecord(prevState, state, control.getInt(), result.first);
-			history.push_back(historyRecord);
-			t_bot->learnActor(historyRecord.prevState,historyRecord.state,historyRecord.action,historyRecord.result);
-
-			if(result.second)
-			{
-				double err = 0;
-				for(int i=history.size()-1; i>=0; i--)
-				{
-					err += fabs(t_bot->learnActor(history[i].prevState,history[i].state,history[i].action,history[i].result));
-				}
-				std::cout << err/history.size() << "\n";
-				int historySize = history.size();
-				history.clear();
-				t_game->reset();
-				if(err/historySize < 0.05)
-				{
-					std::cout << "Actor done\n";
-					break;
-				}
-			}
-			t_bot->printActorMap(state,"Actor");
-
-			cv::waitKey(20);
-			t_game->display();
-		}
+	case 0: //Right
+		w[4] = true;
+		break;
+	case 1: //Right jump
+		w[0] = true;
+		w[4] = true;
+		break;
+	case 2: //Left
+		w[2] = true;
+		break;
+	case 3: //Jump
+		w[0] = true;
+		break;
+	case 4: //Left Jump
+		w[0] = true;
+		w[2] = true;
+		break;
+	default:
+		std::cout << t_action << "\n";
+		assert("No such action!");
 	}
+
+	return w;
 }
+
+//void printSceneData(std::vector<int>& sceneData)
+//{
+//	for(int i=0; i<sceneData.size()-10; i+=2)
+//	{
+//		std::cout << (sceneData[i+1] > 0? "#" : ".");
+//		if(i%32==0) std::cout << "\n";
+//	}
+//	std::cout << "\n\n";
+//}
 
 /*
  *
  */
 int main()
 {
-//	testNN();
-//	return 0;
+	try
+	{
+		std::vector<int> sceneState;
+		int action = 0;
+		//QLearning bot;
 
-	srand( unsigned ( std::time(0)));
+		/*  Initialize */
+		cv::waitKey(3000);
+		//Load game in order to avoid not finding player during initializing
+		DesktopHandler::getPtr()->releaseControllerButton();
+		DesktopHandler::loadGame();
 
-	Game game(10,10);
-	QLearning bot(4,std::initializer_list<int>{10,10,10,10},table);
-	//QLearning bot(4,game.getState());
+		//push 6 controller inputs
+		for(int i=0; i<6; i++) controllerInput.push_back(false);
 
-	std::vector<std::vector<bool>> level;
-	level.push_back(std::vector<bool>{0,0,0,0,0,0,0,0,0,0});
-	level.push_back(std::vector<bool>{0,0,0,0,0,0,0,0,0,0});
-	level.push_back(std::vector<bool>{0,0,1,1,1,1,1,1,0,0});
-	level.push_back(std::vector<bool>{0,0,1,0,0,0,0,1,0,0});
-	level.push_back(std::vector<bool>{0,0,1,0,0,0,0,1,0,0});
-	level.push_back(std::vector<bool>{0,0,1,0,0,0,0,1,0,0});
-	level.push_back(std::vector<bool>{0,0,1,0,0,0,0,1,0,0});
-	level.push_back(std::vector<bool>{0,0,1,1,1,0,1,1,0,0});
-	level.push_back(std::vector<bool>{0,0,0,0,0,0,0,0,0,0});
-	level.push_back(std::vector<bool>{0,0,0,0,0,0,0,0,0,0});
-	game.setLevel(level);
+		//Initialize bot
+		QLearning bot = QLearning(5, std::vector<int>(sceneState.size(),1), hashmap);
 
-	int i = 0;
+		//Initialize scene data
+		ImageAnalyzer::AnalyzeResult analyzeResult;
+		for(int i=1; i<11; i++)
+		{
+			analyzeResult = analyzer.processImage();
+			if(analyzeResult.additionalInfo != ImageAnalyzer::AnalyzeResult::notFound) break;
+			cv::waitKey(1000);
+			std::cout << "Could not find player, atteption: " << i << "\n";
+		}
+		if(analyzeResult.additionalInfo == ImageAnalyzer::AnalyzeResult::notFound)
+					throw std::string("Could not initialize, check player visibility");
+		sceneState = analyzeResult.data;
+		enrichSceneState(sceneState,
+						controllerInput,
+						analyzeResult.playerCoords,
+						analyzeResult.playerVelocity);
+		ImageAnalyzer::printAnalyzeData(sceneState, true);
+		cv::waitKey(3000);
 
-	std::vector<HistoryRecord> history;
-	history.clear();
+		while(1)
+		{
+			DesktopHandler::getPtr()->releaseControllerButton();
+			DesktopHandler::loadGame();
+			cv::waitKey(3000);
 
-	qLearning(&game,&bot);
+			deathReason = unknown;
+			double change = 0;
+			int time = 250;
 
-	std::cout << "Toasty\n";
-	return 0;
+			while(1)
+			{
+				std::vector<int> oldSceneState = sceneState;
+				int oldAction = action;
+
+				//Analyze situation
+				ImageAnalyzer::AnalyzeResult analyzeResult = analyzer.processImage();
+				sceneState = analyzeResult.data;
+				enrichSceneState(sceneState,
+								controllerInput,
+								analyzeResult.playerCoords,
+								analyzeResult.playerVelocity);
+				double reward = analyzeResult.reward;
+				//If player disappeard then gameplay is stopped
+				if(analyzeResult.additionalInfo == ImageAnalyzer::AnalyzeResult::notFound) reward = -100;
+
+				ImageAnalyzer::printAnalyzeData(sceneState, true);
+//				std::cout << "\n";
+//				printAction(oldAction);
+//				std::cout << bot.getQValue(oldSceneState,oldAction) << " + " << reward << "\n";
+
+				//Learn bot
+				change += fabs(bot.learn(oldSceneState,sceneState,oldAction,reward));
+				bot.addDiscoveredState(sceneState);
+
+				//Determine new controller input
+				action = bot.chooseAction(sceneState);
+				controllerInput = determineControllerInput(action);
+				DesktopHandler::getPtr()->pressControllerButton(controllerInput);
+
+				if(reward == 0)
+				{
+					time--;
+					if(time<0)
+					{
+						deathReason = timeOut;
+						break;
+					}
+					std::cout << time << "\n";
+				}
+				else time = 250;
+
+				//Stop game?
+				if(reward == -100)
+				{
+					if(analyzeResult.additionalInfo == ImageAnalyzer::AnalyzeResult::fallenInPitfall)
+					{
+						deathReason = pitfall;
+					}
+					else
+					{
+						deathReason = enemy;
+					}
+					break;
+				}
+			}
+
+			switch(deathReason)
+			{
+				case timeOut:
+					std::cout << "TimeOut" << "\n"; break;
+				case enemy:
+					std::cout << "Enemy" << "\n"; break;
+				case pitfall:
+					std::cout << "Pitfall " << "\n"; break;
+				default:
+					std::cout << "????" << "\n"; break;
+			}
+			std::cout << "Change:" << change << "\n";
+			DesktopHandler::getPtr()->releaseControllerButton();
+			if(change < 100) bot.learnActions();
+		}
+	}
+	catch(std::string e)
+	{
+		std::cout << "Exception occured: " << e << "\n";
+	}
 }

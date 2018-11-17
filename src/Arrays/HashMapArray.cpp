@@ -37,7 +37,7 @@ double HashMapArray::getValue(std::vector<int> t_state, int t_action)
 	}
 	else
 	{
-		result = 20;
+		result = 1000;
 	}
 
 	return result;
@@ -66,3 +66,14 @@ void HashMapArray::setValue(std::vector<int> t_state, int t_action, double t_val
 }
 
 
+std::vector<int> HashMapArray::getRandomState()
+{
+
+	int randomAction = rand()%numberOfActions;
+	while(cache[randomAction].size()<=0) randomAction = rand()%numberOfActions;
+
+	auto it = cache[randomAction].begin();
+	int ad = rand()%(cache[randomAction].size());
+	std::advance(it, ad);
+	return it->first;
+}

@@ -15,12 +15,25 @@ NeuralNetworkArray::NeuralNetworkArray(int t_nActions, std::vector<int> t_dimens
 	maxValues = t_dimensionsSize;
 	input = std::vector<double>(t_dimensionsSize.size());
 
-//	std::vector<int> layers = std::vector<int>{225,210,200,190,t_nActions};
-//	std::vector<double> n = std::vector<double>{0.000001,0.00003,0.0001,0.0003,0.001};
+//	std::vector<int> layers = std::vector<int>{200,190,180,170,160,150,140,t_nActions};
+//	std::vector<double> n = std::vector<double>{0.000007531,
+//												0.000015625,
+//												0.00003125,
+//												0.0000625,
+//												0.000125,
+//												0.00025,
+//												0.0005,
+//												0.001};
 //	double b = 8.2;
 
-	std::vector<int> layers = std::vector<int>{65,60,60,60,t_nActions};
-	std::vector<double> n = std::vector<double>{0.000001,0.00003,0.0001,0.0003,0.001};
+	std::vector<int> layers = std::vector<int>{300,290,280,270,260,250,t_nActions};
+	std::vector<double> n = std::vector<double>{0.000007531,
+												0.000015625,
+												0.00003125,
+												0.0000625,
+												0.000125,
+												0.00025,
+												0.0005};
 	double b = 8.2;
 
 
@@ -72,6 +85,20 @@ void NeuralNetworkArray::setValue(std::vector<int> t_state, int t_action, double
 
 	//learn
 	neuralNetwork->learnBackPropagation(z);
+}
+
+/*
+ *
+ */
+std::vector<double> NeuralNetworkArray::setValues(std::vector<int> t_state, std::vector<double> t_values)
+{
+	setInputValues(t_state);
+	std::vector<double> result = neuralNetwork->determineY();
+
+	//learn
+	neuralNetwork->learnBackPropagation(t_values);
+
+	return result;
 }
 
 /*

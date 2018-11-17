@@ -137,7 +137,7 @@ void NeuralNetwork::learnBackPropagation(std::vector<double> z)
 {
 //	modifyLearningRate();
 
-	assert("z.size() != hiddenLayer.back().size())" && z.size() == hiddenLayers.back().size());
+	assert(z.size() == hiddenLayers.back().size());
 	int i=0;
 	for(std::vector<Neuron>::iterator it=hiddenLayers.back().begin(); it!=hiddenLayers.back().end(); it++,i++)
 	{

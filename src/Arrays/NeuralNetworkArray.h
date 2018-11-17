@@ -23,6 +23,7 @@ public:
 	virtual double getValue(std::vector<int> t_state, int t_action);
 	virtual std::vector<double> getValues(std::vector<int> t_state);
 	virtual void setValue(std::vector<int> t_state, int t_action, double t_value);
+	virtual std::vector<double> setValues(std::vector<int> t_state, std::vector<double> t_values);
 
 	void setInputValues(std::vector<int> t_state);
 
