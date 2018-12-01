@@ -12,33 +12,33 @@
  */
 ImageAnalyzer::ImageAnalyzer()
 {
-	cv::Mat image = cv::imread("graphics/mario.bmp", CV_LOAD_IMAGE_COLOR);
+	cv::Mat image = cv::imread("graphics/mario.bmp", cv::IMREAD_COLOR);
 	playerHistogram = determineHistogram(image);
-	enemyImage1 = cv::imread("graphics/goomba.bmp", CV_LOAD_IMAGE_COLOR);
-	enemyImage1v2 = cv::imread("graphics/goomba2.bmp", CV_LOAD_IMAGE_COLOR);
+	enemyImage1 = cv::imread("graphics/goomba.bmp", cv::IMREAD_COLOR);
+	enemyImage1v2 = cv::imread("graphics/goomba2.bmp", cv::IMREAD_COLOR);
 
-	enemyImage2 = cv::imread("graphics/koopa.bmp", CV_LOAD_IMAGE_COLOR);
-	enemyImage2v2 = cv::imread("graphics/koopa2.bmp", CV_LOAD_IMAGE_COLOR);
+	enemyImage2 = cv::imread("graphics/koopa.bmp", cv::IMREAD_COLOR);
+	enemyImage2v2 = cv::imread("graphics/koopa2.bmp", cv::IMREAD_COLOR);
 
-	floorImage1 = cv::imread("graphics/floor.bmp", CV_LOAD_IMAGE_COLOR);
-	floorImage1v2 = cv::imread("graphics/floor2.bmp", CV_LOAD_IMAGE_COLOR);
+	floorImage1 = cv::imread("graphics/floor.bmp", cv::IMREAD_COLOR);
+	floorImage1v2 = cv::imread("graphics/floor2.bmp", cv::IMREAD_COLOR);
 
-	wallimage1 = cv::imread("graphics/wall.bmp", CV_LOAD_IMAGE_COLOR);
-	wallImage1v2 = cv::imread("graphics/wall2.bmp", CV_LOAD_IMAGE_COLOR);
+	wallimage1 = cv::imread("graphics/wall.bmp", cv::IMREAD_COLOR);
+	wallImage1v2 = cv::imread("graphics/wall2.bmp", cv::IMREAD_COLOR);
 
-	blockImage1 = cv::imread("graphics/block1.bmp", CV_LOAD_IMAGE_COLOR);
-	blockImage1v2 = cv::imread("graphics/block1v2.bmp", CV_LOAD_IMAGE_COLOR);
+	blockImage1 = cv::imread("graphics/block1.bmp", cv::IMREAD_COLOR);
+	blockImage1v2 = cv::imread("graphics/block1v2.bmp", cv::IMREAD_COLOR);
 
-	blockImage2 = cv::imread("graphics/block2.bmp", CV_LOAD_IMAGE_COLOR);
-	blockImage2v2 = cv::imread("graphics/block2v2.bmp", CV_LOAD_IMAGE_COLOR);
+	blockImage2 = cv::imread("graphics/block2.bmp", cv::IMREAD_COLOR);
+	blockImage2v2 = cv::imread("graphics/block2v2.bmp", cv::IMREAD_COLOR);
 
-	blockImage3 = cv::imread("graphics/block3.bmp", CV_LOAD_IMAGE_COLOR);
-	blockImage3v2 = cv::imread("graphics/block3v2.bmp", CV_LOAD_IMAGE_COLOR);
+	blockImage3 = cv::imread("graphics/block3.bmp", cv::IMREAD_COLOR);
+	blockImage3v2 = cv::imread("graphics/block3v2.bmp", cv::IMREAD_COLOR);
 
-	pipeImage = cv::imread("graphics/pipe.bmp", CV_LOAD_IMAGE_COLOR);
-	deadImage = cv::imread("graphics/dead.bmp", CV_LOAD_IMAGE_COLOR);
-	mushroomImage = cv::imread("graphics/mushroom.bmp", CV_LOAD_IMAGE_COLOR);
-	cloudImage = cv::imread("graphics/cloud.bmp", CV_LOAD_IMAGE_COLOR);
+	pipeImage = cv::imread("graphics/pipe.bmp", cv::IMREAD_COLOR);
+	deadImage = cv::imread("graphics/dead.bmp", cv::IMREAD_COLOR);
+	mushroomImage = cv::imread("graphics/mushroom.bmp", cv::IMREAD_COLOR);
+	cloudImage = cv::imread("graphics/cloud.bmp", cv::IMREAD_COLOR);
 }
 
 /*

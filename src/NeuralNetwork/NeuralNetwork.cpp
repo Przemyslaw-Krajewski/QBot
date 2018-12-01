@@ -194,7 +194,7 @@ void NeuralNetwork::displayNeuralNetwork()
 		cv::Point p = cv::Point(15,15+15*y);
 		int c = ((double)inputNeuron.getY())*255;
 		int t = 1;
-		if(fabs(inputNeuron.getY()>0.5)) t = CV_FILLED;
+		if(fabs(inputNeuron.getY()>0.5)) t = cv::FILLED;
 		if(c>=0) cv::rectangle(image, p, p+cv::Point(9,9), cv::Scalar(255, c, 0), t);
 		else cv::rectangle(image, p, p+cv::Point(9,9), cv::Scalar(255, 0, -c), t);
 		y++;
@@ -210,7 +210,7 @@ void NeuralNetwork::displayNeuralNetwork()
 			cv::Point p = cv::Point(30+15*x,15+15*y);
 			int c = ((double)neuron.getY())*255;
 			int t = 1;
-			if(fabs(neuron.getY()>0.5)) t = CV_FILLED;
+			if(fabs(neuron.getY()>0.5)) t = cv::FILLED;
 			if(c>=0) cv::rectangle(image, p, p+cv::Point(9,9), cv::Scalar(0, c, 0), t);
 			else cv::rectangle(image, p, p+cv::Point(9,9), cv::Scalar(0, 0, -c), t);
 			y++;
