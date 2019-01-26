@@ -11,6 +11,8 @@
 #include <vector>
 #include <string>
 
+#include "../Flags.h"
+
 #include "../Arrays/Array.h"
 #include "../Arrays/Table.h"
 #include "../Arrays/HashMapArray.h"
@@ -27,16 +29,25 @@ public:
 	QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, ValueMap t_valueMap);
 	virtual ~QLearning();
 
+	//Basic methods
 	double learn(State t_prevState, State t_state, int t_action, double t_reward);
-	int chooseAction(State t_state);
+	std::pair<bool,int> chooseAction(State t_state);
 	void learnActions();
+	//Extended methods
+	void addDiscoveredState(State t_state) {discoveredStates.insert(t_state);}
 
+	//Info methods
+	void printArrayInfo() {qValues->printInfo();}
+private:
+	//Log methods
+	void logNewSetMessage();
+	void logLearningCompleteMessage();
+
+public:
+	//Debug methods
 	void setQValue(State t_state, int t_action, double t_value) {qValues->setValue(t_state, t_action, t_value);}
 	double getQValue(State t_state, int t_action) { return qValues->getValue(t_state,t_action);}
 
-	void printArrayInfo() {qValues->printInfo();}
-
-	void addDiscoveredState(State t_state) {discoveredStates.insert(t_state);}
 
 private:
 	double gamma;

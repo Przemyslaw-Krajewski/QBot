@@ -118,5 +118,5 @@ double Neuron::getSum()
  */
 double Neuron::getRandomWeight()
 {
-	return ((double)(rand()%100))/100-0.5;
+	return ((double)((rand()%100))/100-0.5)*0.5;
 }

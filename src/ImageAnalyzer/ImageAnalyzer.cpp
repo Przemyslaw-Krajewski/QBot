@@ -185,8 +185,8 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage()
 		reward = -100;
 		additionalInfo = AnalyzeResult::killedByEnemy;
 	}
-
-	if(playerCoords.y > 374)
+//	std::cout << playerCoords.y << "  " << playerCoords.x << "\n";
+	if(playerCoords.y > 375)
 	{
 		reward = -100;
 		additionalInfo = AnalyzeResult::fallenInPitfall;

@@ -6,6 +6,7 @@
  */
 
 #include "NeuralNetworkArray.h"
+#include <cstdio>
 
 /*
  *
@@ -26,15 +27,20 @@ NeuralNetworkArray::NeuralNetworkArray(int t_nActions, std::vector<int> t_dimens
 //												0.001};
 //	double b = 8.2;
 
-	std::vector<int> layers = std::vector<int>{300,290,280,270,260,250,t_nActions};
-	std::vector<double> n = std::vector<double>{0.000007531,
-												0.000015625,
-												0.00003125,
-												0.0000625,
-												0.000125,
-												0.00025,
-												0.0005};
-	double b = 8.2;
+//	std::vector<int> layers = std::vector<int>{200,190,180,170,160,150,t_nActions};
+//	std::vector<double> n = std::vector<double>{0.0000001,
+//												0.00000032,
+//												0.000001,
+//												0.0000032,
+//												0.00001,
+//												0.000032,
+//												0.0001};
+//	double b = 8.2;
+
+	std::vector<int> layers = std::vector<int>{200,t_nActions};
+	std::vector<double> n = std::vector<double>{0.015,
+												0.030};
+	double b = 2.9;
 
 
 	std::vector<double*> inputPtr;
@@ -95,6 +101,8 @@ std::vector<double> NeuralNetworkArray::setValues(std::vector<int> t_state, std:
 	setInputValues(t_state);
 	std::vector<double> result = neuralNetwork->determineY();
 
+	logLearnedValues(t_values,result);
+
 	//learn
 	neuralNetwork->learnBackPropagation(t_values);
 
@@ -112,3 +120,33 @@ void NeuralNetworkArray::setInputValues(std::vector<int> t_state)
 	}
 }
 
+void NeuralNetworkArray::logLearnedValues(std::vector<double> t_values, std::vector<double> t_result)
+{
+	#ifdef ENABLE_LOGGING
+		std::cerr << "-----------------------------------------------------------------------\n";
+		std::cerr << "Input values" << input.size() << " :\n";
+		for(int i=0; i<t_values.size(); i++) std::cerr << t_values[i] << "  "; std::cerr << "\n";
+		std::cerr << "Actual:\n";
+		for(int i=0; i<t_result.size(); i++) std::cerr << t_result[i] << "  "; std::cerr << "\n";
+
+		int imageSize = (input.size())/2 - 5;
+		int xScreenSize = sqrt(imageSize*8/14);
+		int yScreenSize = xScreenSize*14/8;
+
+		for(int y=0; y<yScreenSize; y++)
+		{
+			for(int x=0; x<xScreenSize; x++)
+			{
+				bool block = input[(x)*yScreenSize+y]==1;
+				bool enemy = input[(x)*yScreenSize+y + imageSize]==1;
+				if(block && enemy) std::cerr << "W";
+				else if(block) std::cerr << "#";
+				else if(enemy) std::cerr << "O";
+				else std::cerr << ".";
+			}
+			std::cerr << "\n";
+		}
+//		std::cerr << "\n";
+		std::cerr << "\n-----------------------------------------------------------------------\n";
+	#endif
+}
