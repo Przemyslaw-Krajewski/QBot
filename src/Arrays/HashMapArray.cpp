@@ -37,7 +37,7 @@ double HashMapArray::getValue(std::vector<int> t_state, int t_action)
 	}
 	else
 	{
-		result = 1000;
+		result = 150;
 	}
 
 	return result;

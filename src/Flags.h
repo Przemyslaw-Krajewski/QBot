@@ -10,5 +10,4 @@
 
 //#define ENABLE_LOGGING
 
-
 #endif /* SRC_FLAGS_H_ */

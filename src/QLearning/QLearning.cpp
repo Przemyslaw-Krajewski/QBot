@@ -14,7 +14,7 @@ QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, Val
 {
 
 	alpha = 0.85;
-	gamma = 0.90;
+	gamma = 0.80;
 
 //	if(t_valueMap == table) qValues = new Table(t_nActions,t_dimensionStatesSize);
 //	else if(t_valueMap == hashmap) qValues = new HashMapArray(t_nActions,t_dimensionStatesSize);
@@ -61,7 +61,7 @@ double QLearning::learn(State t_prevState, State t_state, int t_action, double t
  */
 std::pair<bool,int> QLearning::chooseAction(State t_state)
 {
-	std::vector<double> nnValues = actions->getValues(t_state);
+	std::vector<double> nnValues = qValues->getValues(t_state);
 	double nnMaxValue = -999;
 	int nnAction;
 	for(int i=0; i<numberOfActions; i++)
@@ -72,6 +72,7 @@ std::pair<bool,int> QLearning::chooseAction(State t_state)
 			nnAction = i;
 		}
 	}
+
 	return std::pair<bool,int>(true,nnAction);
 
 //	std::vector<double> qlValues = qValues->getValues(t_state);

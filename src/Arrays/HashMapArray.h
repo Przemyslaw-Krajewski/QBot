@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 
+#include "../Flags.h"
 #include "Array.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
 

@@ -1,13 +1,16 @@
 #include <string>
 #include <assert.h>
 
+#include "Flags.h"
 #include "ImageAnalyzer/ImageAnalyzer.h"
 #include "QLearning/QLearning.h"
 
 enum DeathReason {unknown, timeOut, enemy, pitfall};
 
-const int maxValue = 1;
-const int minValue = 0;
+const int MAX_INPUT_VALUE = 1;
+const int MIN_INPUT_VALUE= 0;
+
+const int TIME_LIMIT = 150;
 
 void testNN();
 
@@ -28,21 +31,21 @@ std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInp
 		{
 			uchar* ptr = image.ptr(y)+x*3;
 
-			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(maxValue);
-			else sceneState.push_back(minValue);
-			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(maxValue);
-			else sceneState.push_back(minValue);
+			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(MAX_INPUT_VALUE);
+			else sceneState.push_back(MIN_INPUT_VALUE);
+			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(MAX_INPUT_VALUE);
+			else sceneState.push_back(MIN_INPUT_VALUE);
 		}
 	}
 	for(bool ci : controllerInput)
 	{
-		if(ci==true) sceneState.push_back(maxValue);
-		else sceneState.push_back(minValue);
+		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+		else sceneState.push_back(MIN_INPUT_VALUE);
 	}
-	sceneState.push_back(position.x > 0 ? maxValue: minValue);
-	sceneState.push_back(position.y > 0 ? maxValue: minValue);
-	sceneState.push_back(velocity.x > 0 ? maxValue: minValue);
-	sceneState.push_back(velocity.y > 0 ? maxValue: minValue);
+	sceneState.push_back(position.x > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
+	sceneState.push_back(position.y > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
+	sceneState.push_back(velocity.x > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
+	sceneState.push_back(velocity.y > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
 
 	return sceneState;
 }
@@ -51,13 +54,13 @@ std::vector<int> enrichSceneState(std::vector<int>& sceneState, std::vector<bool
 {
 	for(bool ci : controllerInput)
 	{
-		if(ci==true) sceneState.push_back(maxValue);
-		else sceneState.push_back(minValue);
+		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+		else sceneState.push_back(MIN_INPUT_VALUE);
 	}
-	sceneState.push_back(position.x > 0 ? maxValue: minValue);
-	sceneState.push_back(position.y > 0 ? maxValue: minValue);
-	sceneState.push_back(velocity.x > 0 ? maxValue: minValue);
-	sceneState.push_back(velocity.y > 0 ? maxValue: minValue);
+	sceneState.push_back(position.x > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
+	sceneState.push_back(position.y > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
+	sceneState.push_back(velocity.x > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
+	sceneState.push_back(velocity.y > 0 ? MAX_INPUT_VALUE: MIN_INPUT_VALUE);
 //	sceneData.push_back(-1);
 //	sceneData.push_back(-1);
 //	sceneData.push_back(-1);
@@ -128,15 +131,21 @@ std::vector<bool> determineControllerInput(int t_action)
 	return w;
 }
 
-//void printSceneData(std::vector<int>& sceneData)
-//{
-//	for(int i=0; i<sceneData.size()-10; i+=2)
-//	{
-//		std::cout << (sceneData[i+1] > 0? "#" : ".");
-//		if(i%32==0) std::cout << "\n";
-//	}
-//	std::cout << "\n\n";
-//}
+struct HistoryEntry
+{
+	HistoryEntry(State t_oldState, State t_state, int t_action, double t_reward)
+	{
+		state = t_state;
+		oldState = t_oldState;
+		reward = t_reward;
+		action = t_action;
+	}
+
+	State state;
+	State oldState;
+	int action;
+	double reward;
+};
 
 /*
  *
@@ -190,10 +199,19 @@ int main()
 			DesktopHandler::loadGame();
 			cv::waitKey(3000);
 
+			std::list<HistoryEntry> historyScenario;
+
 			deathReason = unknown;
-			double change = 0;
-			long numberOfProbes = 0;
-			int time = 100;
+			int time = TIME_LIMIT;
+
+			//Analyze situation
+			ImageAnalyzer::AnalyzeResult analyzeResult = analyzer.processImage();
+			sceneState = analyzeResult.data;
+			enrichSceneState(sceneState,
+							controllerInput,
+							analyzeResult.playerCoords,
+							analyzeResult.playerVelocity);
+			action = 0;
 
 			while(1)
 			{
@@ -213,9 +231,8 @@ int main()
 
 				ImageAnalyzer::printAnalyzeData(sceneState, true);
 
-				//Learn bot
-				change += fabs(bot.learn(oldSceneState,sceneState,oldAction,reward));
-				numberOfProbes++;
+				//add learning info to history
+				historyScenario.push_front(HistoryEntry(oldSceneState, sceneState, oldAction, reward));
 
 				if(sceneState.size() == 906) bot.addDiscoveredState(sceneState);
 //				else throw "Bad size";
@@ -226,7 +243,11 @@ int main()
 				controllerInput = determineControllerInput(action);
 				DesktopHandler::getPtr()->pressControllerButton(controllerInput);
 
-				if(reward == 0)
+				for(int i=0; i<5; i++) std::cout << (int) bot.getQValue(oldSceneState,i) << " ";
+				std::cout << ": " << reward << "   " << time << "\n";
+
+				//Stop game?
+				if(reward != 50)
 				{
 					time--;
 					if(time<0)
@@ -235,23 +256,28 @@ int main()
 						break;
 					}
 				}
-				else time = 100;
-
-				//Stop game?
+				else time = TIME_LIMIT;
 				if(reward == -100)
 				{
-					if(analyzeResult.additionalInfo == ImageAnalyzer::AnalyzeResult::fallenInPitfall)
-					{
-						deathReason = pitfall;
-					}
-					else
-					{
-						deathReason = enemy;
-					}
+					historyScenario.push_front(HistoryEntry(oldSceneState, sceneState, oldAction, reward));
+
+					if(analyzeResult.additionalInfo == ImageAnalyzer::AnalyzeResult::fallenInPitfall) deathReason = pitfall;
+					else deathReason = enemy;
+
 					break;
 				}
 			}
 
+			//Learn bot
+			double change = 0;
+			long numberOfProbes = 0;
+			for(std::list<HistoryEntry>::iterator historyIterator = historyScenario.begin(); historyIterator!=historyScenario.end(); historyIterator++)
+			{
+				change += fabs(bot.learn(historyIterator->oldState, historyIterator->state, historyIterator->action, historyIterator->reward));
+				numberOfProbes++;
+			}
+
+			//Print death reason
 			switch(deathReason)
 			{
 				case timeOut:
@@ -263,9 +289,10 @@ int main()
 				default:
 					std::cout << "????" << "\n"; break;
 			}
+
+			//Summarize scenario
 			std::cout << "Change:" << change/numberOfProbes << "\n";
 			DesktopHandler::getPtr()->releaseControllerButton();
-			if(change/numberOfProbes < 7) bot.learnActions();
 		}
 	}
 	catch(std::string e)
