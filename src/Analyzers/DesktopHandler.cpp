@@ -5,7 +5,7 @@
  *      Author: przemo
  */
 
-#include "../ImageAnalyzer/DesktopHandler.h"
+#include "../Analyzers/DesktopHandler.h"
 
 DesktopHandler* DesktopHandler::ptr = nullptr;
 Display* DesktopHandler::display = nullptr;

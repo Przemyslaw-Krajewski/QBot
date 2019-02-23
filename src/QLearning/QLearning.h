@@ -18,13 +18,12 @@
 #include "../Arrays/HashMapArray.h"
 #include "../Arrays/NeuralNetworkArray.h"
 
-#include "../ImageAnalyzer/ImageAnalyzer.h"
-
 using State = std::vector<int>;
 
 enum ValueMap {table, hashmap};
 
 class QLearning {
+
 public:
 	QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, ValueMap t_valueMap);
 	virtual ~QLearning();
@@ -38,6 +37,7 @@ public:
 
 	//Info methods
 	void printArrayInfo() {qValues->printInfo();}
+
 private:
 	//Log methods
 	void logNewSetMessage();

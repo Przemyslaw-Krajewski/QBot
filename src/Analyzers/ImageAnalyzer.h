@@ -5,12 +5,12 @@
  *      Author: przemo
  */
 
-#ifndef SRC_IMAGEANALYZER_IMAGEANALYZER_H_
-#define SRC_IMAGEANALYZER_IMAGEANALYZER_H_
+#ifndef SRC_ANALYZERS_IMAGEANALYZER_H_
+#define SRC_ANALYZERS_IMAGEANALYZER_H_
 
 #include <opencv2/opencv.hpp>
 
-#include "../ImageAnalyzer/DesktopHandler.h"
+#include "../Analyzers/DesktopHandler.h"
 
 //#define PRINT_ANALYZED_IMAGE
 
@@ -19,13 +19,9 @@ class ImageAnalyzer {
 public:
 	struct AnalyzeResult
 	{
-		enum AdditionalInfo {noInfo,fallenInPitfall,killedByEnemy,notFound};
-
-		std::vector<int> data;
-		double reward;
-		cv::Point playerCoords;
-		cv::Point playerVelocity;
-		AdditionalInfo additionalInfo{noInfo};
+		cv::Mat fieldAndEnemiesLayout;
+		bool playerFound;
+		bool playerIsDead;
 	};
 
 	typedef std::vector<cv::Mat> Histogram;
@@ -33,20 +29,21 @@ public:
 public:
 	ImageAnalyzer();
 
-	AnalyzeResult processImage();
-
-	static void printAnalyzeData(std::vector<int> sceneData, bool containsAdditionalData);
+	AnalyzeResult processImage(cv::Mat* image);
 
 private:
 	cv::Point findPlayer(cv::Mat &image);
-	std::vector<cv::Point> findObject(cv::Mat &image, Histogram &pattern, cv::Point offset, cv::Point size, cv::Scalar sample, cv::Scalar range);
 	std::vector<cv::Point> findObject(cv::Mat &image, cv::Mat &pattern, cv::Point offset, cv::Scalar sample, cv::Rect searchBounds = cv::Rect(-1,-1,-1,-1));
 	Histogram determineHistogram(cv::Mat &image);
 	cv::Mat copyMat(cv::Mat src, cv::Point offset, cv::Point size);
 	bool compareMat(cv::Mat &mat1, cv::Mat &mat2);
 	bool compareMat(cv::Mat &image, cv::Mat &pattern, cv::Point offset);
 
+	void markObjectInImage(cv::Mat& resultImage, cv::Point blockSize, cv::Point point, cv::Point translation, cv::Point correction, int objectType);
+
 private:
+	cv::Point imageSize;
+
 	Histogram playerHistogram;
 
 	cv::Mat enemyImage1,enemyImage1v2;
@@ -62,11 +59,6 @@ private:
 	cv::Mat cloudImage;
 
 	cv::Point playerSize;
-
-	int oldPositionReferenceFloor;
-	int oldPositionReferenceCloud;
-	int oldPlayerPosition;
-	int oldPlayerHeight;
 };
 
-#endif /* SRC_IMAGEANALYZER_IMAGEANALYZER_H_ */
+#endif /* SRC_ANALYZERS_IMAGEANALYZER_H_ */

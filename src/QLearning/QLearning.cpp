@@ -32,8 +32,8 @@ QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, Val
  */
 QLearning::~QLearning()
 {
-	delete qValues;
-	delete actions;
+	if(qValues!=nullptr) delete qValues;
+	if(actions!=nullptr) delete actions;
 }
 
 

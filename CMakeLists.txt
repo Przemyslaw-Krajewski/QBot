@@ -14,8 +14,11 @@ endif()
 
 add_executable(QBot
                             src/main.cpp
-                            src/ImageAnalyzer/DesktopHandler.cpp
-                            src/ImageAnalyzer/ImageAnalyzer.cpp
+                            src/Bot/Bot.cpp
+                            src/Analyzers/StateAnalyzer.cpp
+                            src/Analyzers/DesktopHandler.cpp
+                            src/Analyzers/ImageAnalyzer.cpp
+                            src/Analyzers/MemoryAnalyzer.cpp
                             src/NeuralNetwork/NeuralNetwork.cpp
                             src/NeuralNetwork/Neuron.cpp
                             src/NeuralNetwork/InputNeuron.cpp
