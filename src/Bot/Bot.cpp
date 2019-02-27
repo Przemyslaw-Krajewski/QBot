@@ -185,10 +185,10 @@ void Bot::run()
 
 			//Stop game?
 			if(manageScenarioTime(analyzeResult.reward==50)) break;
-
 			if(analyzeResult.endScenario)
 			{
-				historyScenario.push_front(HistoryEntry(oldSceneState, sceneState, oldAction, analyzeResult.reward));
+				historyScenario.pop_front();
+				historyScenario.front().reward=-1000;
 				deathReason = analyzeResult.additionalInfo;
 				break;
 			}
@@ -266,3 +266,17 @@ void Bot::printDeathReason()
 	}
 }
 
+/*
+ *
+ */
+void Bot::testStateAnalyzer()
+{
+	while(1)
+	{
+		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
+		//Print info
+		StateAnalyzer::printAnalyzeData(analyzeResult);
+		std::cout << ": " << analyzeResult.reward << "   " << time << "\n";
+		std::cout << analyzeResult.playerVelocity.x << "  " << analyzeResult.playerVelocity.y << "\n";
+	}
+}

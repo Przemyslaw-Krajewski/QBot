@@ -100,20 +100,20 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 	}
 
 	//Mark objects
-	int interval = 32;
+	int interval = 16;
 	cv::Point transl = cv::Point(256-playerCoords.x,448-playerCoords.y); // translation
-	cv::Point blockSize = cv::Point(interval,interval);
-
-	if(floors.size()>0)	rectangle(analyzedImage, cv::Rect(cv::Point(transl.x+interval, floors[0].y+transl.y),
-											     	 	  cv::Point(895,               floors[0].y+transl.y+interval)),
+	cv::Point blockSize = cv::Point(32,32);
+	markObjectInImage(analyzedImage, blockSize, cv::Point(256,448), cv::Point(0,0), cv::Point(0,0), 2);
+	if(floors.size()>0)	rectangle(analyzedImage, cv::Rect(cv::Point(transl.x+blockSize.x, floors[0].y+transl.y),
+											     	 	  cv::Point(895,                  floors[0].y+transl.y+blockSize.y)),
 														  cv::Scalar(0,0,220), -1);
 	for(cv::Point p : goombas) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 1);
 	for(cv::Point p : koopas)  markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 1);
 	for(cv::Point p : floors)  markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 0);
 	for(cv::Point p : walls)   markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 0);
-	for(cv::Point p : blocks1) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(2,0), 0);
-	for(cv::Point p : blocks2) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,2), 0);
-	for(cv::Point p : blocks3) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-4,0), 0);
+	for(cv::Point p : blocks1) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,0), 0);
+	for(cv::Point p : blocks2) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,2), 0);
+	for(cv::Point p : blocks3) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,2), 0);
 	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+64,416)+transl),cv::Scalar(100  ,100  ,100), -1);
 
 	//Writing DATA OUTPUT
@@ -128,7 +128,7 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 		}
 	}
 
-	//Player death TODO simplify or erase
+	//Player death
 	bool playerIsDead = false;
 	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty()) playerIsDead = true; //Killed by enemy
 	if(playerCoords.y > 375) 																			playerIsDead = true; //pitfall
@@ -137,7 +137,7 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 	#ifdef PRINT_ANALYZED_IMAGE
 		//Print
 		imshow("Objects", analyzedImage);
-		cv::waitKey(80);
+		cv::waitKey(10);
 	#endif
 
 	analyzeResult.fieldAndEnemiesLayout = fael;
@@ -292,8 +292,9 @@ bool ImageAnalyzer::compareMat(cv::Mat &mat1, cv::Mat &mat2)
 void ImageAnalyzer::markObjectInImage(cv::Mat& resultImage, cv::Point blockSize, cv::Point point, cv::Point translation, cv::Point correction, int objectType)
 {
 	cv::Scalar color = cv::Scalar(0  ,0  ,220);
-	if(objectType == 1) color = cv::Scalar(0  ,0  ,220);
-	else if(objectType == 0) color = cv::Scalar(100  ,100  ,100);
+	if(objectType == 2) color = cv::Scalar(255 ,255 ,255);
+	else if(objectType == 1) color = cv::Scalar(0 ,0 ,220);
+	else if(objectType == 0) color = cv::Scalar(100 ,100 ,100);
 
 	rectangle(resultImage, cv::Rect(point+translation+correction,
 									point+translation+correction+blockSize),

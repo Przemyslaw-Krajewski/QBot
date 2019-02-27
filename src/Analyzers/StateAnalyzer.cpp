@@ -36,7 +36,7 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	double reward = 0;
 	bool endScenario = false;
 	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = -100; endScenario = true;}
-	if(imageAnalyzeResult.playerIsDead) 			 										 	 {reward = -100; endScenario = true;}
+	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = -1000; endScenario = true;}
 	else if(memoryAnalyzeResult.playerPositionX > 99 && memoryAnalyzeResult.playerVelocityX > 6) {reward = 50;}
 	else if(memoryAnalyzeResult.playerVelocityX > 5) 										 	 {reward = 10;}
 
@@ -70,11 +70,12 @@ void StateAnalyzer::printAnalyzeData(AnalyzeResult& sceneData)
 	{
 		for(int y=0; y<yScreenSize; y++)
 		{
-			int fieldValue, enemyValue;
+			int fieldValue, enemyValue, playerValue;
 			uchar* ptrSrc = sceneData.fieldAndEnemiesLayout.ptr(y)+(x)*3;
-			if(ptrSrc[0]==100) {fieldValue=1;enemyValue=0;}
-			else if(ptrSrc[2]==220) {fieldValue=0;enemyValue=1;}
-			else {fieldValue=0;enemyValue=0;}
+			if(ptrSrc[0]==100) {fieldValue=1;enemyValue=0;playerValue=0;}
+			else if(ptrSrc[2]==220) {fieldValue=0;enemyValue=1;playerValue=0;}
+			else if(ptrSrc[2]==255) {fieldValue=0;enemyValue=0;playerValue=1;}
+			else {fieldValue=0;enemyValue=0;playerValue=0;}
 
 			for(int xx=0; xx<blockSize; xx++)
 			{
@@ -82,7 +83,8 @@ void StateAnalyzer::printAnalyzeData(AnalyzeResult& sceneData)
 				{
 					uchar* ptr = map.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
 					if(fieldValue == 1) {ptr[0] = 100;ptr[1] = 100;ptr[2] = 100;}
-					else if(enemyValue == 1) {ptr[0] = 220;ptr[1] = 0;ptr[2] = 0;}
+					else if(enemyValue == 1) {ptr[0] = 0;ptr[1] = 0;ptr[2] = 220;}
+					else if(playerValue == 1) {ptr[0] = 255;ptr[1] = 255;ptr[2] = 255;}
 					else {ptr[0] = 0;ptr[1] = 0;ptr[2] = 0;}
 				}
 			}

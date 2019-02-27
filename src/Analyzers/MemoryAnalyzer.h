@@ -40,11 +40,11 @@ public:
 
 private:
 	int pid;
-	//TODO retrieve MEMORY_ADDR
-	const off_t RAM_ADDR{0x555555b8c660};
-	const off_t RAM_VEL_X_ADDR{0x57};
-	const off_t RAM_VEL_Y_ADDR{0x9f};
-	const off_t RAM_POS_X_ADDR{0x4ac};
+	off_t MEM_ADDR{0x0};
+	const off_t RAM_OFFSET{0x282630};
+	const off_t RAM_VEL_X_OFFSET{0x57};
+	const off_t RAM_VEL_Y_OFFSET{0x9f};
+	const off_t RAM_POS_X_OFFSET{0x4ac};
 };
 
 #endif /* SRC_ANALYZERS_MEMORYANALYZER_H_ */

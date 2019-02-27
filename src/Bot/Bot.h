@@ -40,6 +40,7 @@ public:
 	virtual ~Bot();
 
 	void run();
+	void testStateAnalyzer();
 
 private:
 	void prepareGameBeforeRun();
@@ -52,6 +53,7 @@ private:
 
 	std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
 	std::vector<int> createSceneState(cv::Mat& sceneState, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
+
 private:
 	//
 	StateAnalyzer analyzer;
