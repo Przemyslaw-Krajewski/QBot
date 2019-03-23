@@ -19,9 +19,9 @@
 class Bot {
 	using DeathReason = StateAnalyzer::AnalyzeResult::AdditionalInfo;
 
-	struct HistoryEntry
+	struct SARS
 	{
-		HistoryEntry(State t_oldState, State t_state, int t_action, double t_reward)
+		SARS(State t_oldState, State t_state, int t_action, double t_reward)
 		{
 			state = t_state;
 			oldState = t_oldState;
@@ -53,6 +53,8 @@ private:
 
 	std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
 	std::vector<int> createSceneState(cv::Mat& sceneState, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
+	StateAnalyzer::AnalyzeResult extractSceneState(std::vector<int> sceneData);
+
 
 private:
 	//
@@ -63,7 +65,7 @@ private:
 	std::vector<int> sceneState;
 	std::vector<bool> controllerInput;
 	int action = 0;
-	std::list<HistoryEntry> historyScenario;
+	std::list<SARS> historyScenario;
 	DeathReason deathReason;
 	int time;
 

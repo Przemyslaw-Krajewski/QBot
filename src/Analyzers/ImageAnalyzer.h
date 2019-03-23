@@ -10,7 +10,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "../Analyzers/DesktopHandler.h"
+#include "DesktopHandler.h"
 
 //#define PRINT_ANALYZED_IMAGE
 

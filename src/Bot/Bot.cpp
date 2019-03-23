@@ -140,6 +140,53 @@ std::vector<int> Bot::createSceneState(cv::Mat& fieldAndEnemiesLayout, std::vect
 /*
  *
  */
+StateAnalyzer::AnalyzeResult Bot::extractSceneState(std::vector<int> sceneData)
+{
+	cv::Mat fieldAndEnemiesLayout = cv::Mat(56, 32, CV_8UC3);
+
+	for(int x=0; x<fieldAndEnemiesLayout.cols; x++)
+	{
+		for(int y=0; y<fieldAndEnemiesLayout.rows; y++)
+		{
+			uchar* ptr = fieldAndEnemiesLayout.ptr(y)+x*3;
+			ptr[0]=0;
+			ptr[1]=0;
+			ptr[2]=0;
+		}
+	}
+
+	//Terrain
+	long i=0;
+	for(int x=0; x<fieldAndEnemiesLayout.cols; x++)
+	{
+		for(int y=0; y<fieldAndEnemiesLayout.rows; y++)
+		{
+			uchar* ptr = fieldAndEnemiesLayout.ptr(y)+x*3;
+			if(sceneData[i] == 1) {ptr[0]=100; ptr[1]=100; ptr[2]=100;}
+			else {ptr[0]=0; ptr[1]=0; ptr[2]=0;}
+			i++;
+		}
+	}
+	//Enemies
+	for(int x=0; x<fieldAndEnemiesLayout.cols; x++)
+	{
+		for(int y=0; y<fieldAndEnemiesLayout.rows; y++)
+		{
+			uchar* ptr = fieldAndEnemiesLayout.ptr(y)+x*3;
+			if(sceneData[i] == 1) {ptr[0]=0; ptr[1]=0; ptr[2]=220;}
+			i++;
+		}
+	}
+
+	StateAnalyzer::AnalyzeResult result;
+	result.fieldAndEnemiesLayout = fieldAndEnemiesLayout;
+
+	return result;
+}
+
+/*
+ *
+ */
 void Bot::run()
 {
 	while(1)
@@ -168,8 +215,8 @@ void Bot::run()
 										  analyzeResult.playerVelocity);
 
 			//add learning info to history
-			historyScenario.push_front(HistoryEntry(oldSceneState, sceneState, oldAction, analyzeResult.reward));
-			if(sceneState.size() == 906) qLearning->addDiscoveredState(sceneState);
+			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
+			if(sceneState.size() > 100) qLearning->addDiscoveredState(sceneState);
 //			else assert("Bad size" && false);
 
 			//Determine new controller input
@@ -178,7 +225,7 @@ void Bot::run()
 			DesktopHandler::getPtr()->pressControllerButton(controllerInput);
 
 			//Print info
-			StateAnalyzer::printAnalyzeData(analyzeResult);
+			//StateAnalyzer::printAnalyzeData(analyzeResult);
 			for(int i=0; i<5; i++) std::cout << (int) qLearning->getQValue(oldSceneState,i) << " ";
 			std::cout << ": " << analyzeResult.reward << "   " << time << "\n";
 			std::cout << analyzeResult.playerVelocity.x << "  " << analyzeResult.playerVelocity.y << "\n";
@@ -187,8 +234,6 @@ void Bot::run()
 			if(manageScenarioTime(analyzeResult.reward==50)) break;
 			if(analyzeResult.endScenario)
 			{
-				historyScenario.pop_front();
-				historyScenario.front().reward=-1000;
 				deathReason = analyzeResult.additionalInfo;
 				break;
 			}
@@ -237,11 +282,29 @@ bool Bot::manageScenarioTime(bool resetTimer)
  */
 void Bot::learnQLearningScenario()
 {
+	int lastReward = historyScenario.front().reward;
+	std::vector<int> state = historyScenario.front().oldState;
+	while(historyScenario.size()>0 && deathReason==DeathReason::killedByEnemy)
+	{
+		state = historyScenario.front().oldState;
+		if(	state[2659]==0&&state[2660]==0&&state[2661]==0&&state[2662]==0&&state[2715]==0&&state[2771]==0&&state[2718]==0&&state[2774]==0&&
+			state[2830]==0&&state[2829]==0&&state[2828]==0&&state[2827]==0&&state[2658]==0&&state[2663]==0&&state[2714]==0&&state[2719]==0&&
+			state[2770]==0&&state[2775]==0&&state[2831]==0&&state[2826]==0&&state[2602]==0&&state[2603]==0&&state[2604]==0&&state[2605]==0&&
+			state[2606]==0&&state[2607]==0&&state[2882]==0&&state[2883]==0&&state[2884]==0&&state[2885]==0&&state[2886]==0&&state[2887]==0)
+					historyScenario.pop_front();
+		else break;
+	}
+	if(historyScenario.size()==0) std::cout << "UPS!!!\n";
+	historyScenario.front().reward=lastReward;
+
+	StateAnalyzer::AnalyzeResult tmpResult = extractSceneState(state);
+	StateAnalyzer::printAnalyzeData(tmpResult);
+
 	double change = 0;
 	long numberOfProbes = 0;
-	for(std::list<HistoryEntry>::iterator historyIterator = historyScenario.begin(); historyIterator!=historyScenario.end(); historyIterator++)
+	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 	{
-		change += fabs(qLearning->learn(historyIterator->oldState, historyIterator->state, historyIterator->action, historyIterator->reward));
+		change += fabs(qLearning->learn(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward));
 		numberOfProbes++;
 	}
 	std::cout << "Change:" << change/numberOfProbes << "\n";

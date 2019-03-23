@@ -50,7 +50,6 @@ public:
 
 private:
 	ImageAnalyzer imageAnalyzer;
-	MemoryAnalyzer memoryAnalyzer;
 };
 
 #endif /* SRC_ANALYZERS_STATEANALYZER_H_ */

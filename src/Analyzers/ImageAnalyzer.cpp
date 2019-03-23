@@ -103,7 +103,6 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 	int interval = 16;
 	cv::Point transl = cv::Point(256-playerCoords.x,448-playerCoords.y); // translation
 	cv::Point blockSize = cv::Point(32,32);
-	markObjectInImage(analyzedImage, blockSize, cv::Point(256,448), cv::Point(0,0), cv::Point(0,0), 2);
 	if(floors.size()>0)	rectangle(analyzedImage, cv::Rect(cv::Point(transl.x+blockSize.x, floors[0].y+transl.y),
 											     	 	  cv::Point(895,                  floors[0].y+transl.y+blockSize.y)),
 														  cv::Scalar(0,0,220), -1);
@@ -131,7 +130,7 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 	//Player death
 	bool playerIsDead = false;
 	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty()) playerIsDead = true; //Killed by enemy
-	if(playerCoords.y > 375) 																			playerIsDead = true; //pitfall
+	if(playerCoords.y > 388) 																			playerIsDead = true; //pitfall
 	if(playerCoords.x < 20) 																			playerIsDead = true; // left border
 
 	#ifdef PRINT_ANALYZED_IMAGE

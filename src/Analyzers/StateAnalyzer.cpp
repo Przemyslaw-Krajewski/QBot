@@ -20,12 +20,10 @@ StateAnalyzer::~StateAnalyzer()
 StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 {
 	//Get Desktop Screen
-	cv::Mat image;
-	image = cv::Mat(448, 512, CV_8UC3);
-	DesktopHandler::getPtr()->getDesktop(&image);
+	cv::Mat image = MemoryAnalyzer::getPtr()->fetchScreenData();
 
 	ImageAnalyzer::AnalyzeResult imageAnalyzeResult = imageAnalyzer.processImage(&image);
-	MemoryAnalyzer::AnalyzeResult memoryAnalyzeResult = memoryAnalyzer.fetchData();
+	MemoryAnalyzer::AnalyzeResult memoryAnalyzeResult = MemoryAnalyzer::getPtr()->fetchData();
 
 	//Additional info
 	AnalyzeResult::AdditionalInfo additionalInfo;
@@ -71,11 +69,13 @@ void StateAnalyzer::printAnalyzeData(AnalyzeResult& sceneData)
 		for(int y=0; y<yScreenSize; y++)
 		{
 			int fieldValue, enemyValue, playerValue;
+			int addition = 0;
 			uchar* ptrSrc = sceneData.fieldAndEnemiesLayout.ptr(y)+(x)*3;
 			if(ptrSrc[0]==100) {fieldValue=1;enemyValue=0;playerValue=0;}
 			else if(ptrSrc[2]==220) {fieldValue=0;enemyValue=1;playerValue=0;}
 			else if(ptrSrc[2]==255) {fieldValue=0;enemyValue=0;playerValue=1;}
 			else {fieldValue=0;enemyValue=0;playerValue=0;}
+			if((x==xScreenSize/2||x==xScreenSize/2+1) && (y==yScreenSize/2||y==yScreenSize/2+1)) addition = 50;
 
 			for(int xx=0; xx<blockSize; xx++)
 			{
@@ -86,26 +86,13 @@ void StateAnalyzer::printAnalyzeData(AnalyzeResult& sceneData)
 					else if(enemyValue == 1) {ptr[0] = 0;ptr[1] = 0;ptr[2] = 220;}
 					else if(playerValue == 1) {ptr[0] = 255;ptr[1] = 255;ptr[2] = 255;}
 					else {ptr[0] = 0;ptr[1] = 0;ptr[2] = 0;}
+					ptr[0] += addition;
+					ptr[1] += addition;
+					ptr[2] += addition;
 				}
 			}
 		}
 	}
-//	if(containsAdditionalData)
-//	{
-//		for(int x=0; x<10; x++)
-//		{
-//			int infoValue = sceneData[x+imageSize+imageSize];
-//			for(int xx=0; xx<blockSize; xx++)
-//			{
-//				for(int yy=0; yy<blockSize; yy++)
-//				{
-//					uchar* ptr = map.ptr(yScreenSize*blockSize+yy)+(x*blockSize+xx)*3;
-//					if(infoValue == 1) {ptr[0] = 255;ptr[1] = 255;ptr[2] = 255;}
-//					else {ptr[0] = 0;ptr[1] = 0;ptr[2] = 0;}
-//				}
-//			}
-//		}
-//	}
 
 	//Print
 	imshow("AnalyzedSceneData", map);

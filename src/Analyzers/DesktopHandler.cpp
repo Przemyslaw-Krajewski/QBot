@@ -23,6 +23,7 @@ DesktopHandler::DesktopHandler()
 	display = XOpenDisplay(NULL);
 	root = DefaultRootWindow(display);
 	XGetInputFocus(display, &window, &revert);
+	std::cout << "Window ID:" << window << "\n";
 
 	xdo = xdo_new(NULL);
 }
@@ -116,22 +117,22 @@ void DesktopHandler::holdControllerButton(std::vector<bool> b)
 	}
 	if(b[2])
 	{
-		const char buttons[] = {'j',0};
+		const char buttons[] = {'L','e','f','t',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);
 	}
 	if(b[3] && 0)
 	{
-		const char buttons[] = {'k',0};
+		const char buttons[] = {'D','o','w','n',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);
 	}
 	if(b[4])
 	{
-		const char buttons[] = {'l',0};
+		const char buttons[] = {'R','i','g','h','t',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);
 	}
 	if(b[5] && 0)
 	{
-		const char buttons[] = {'i',0};
+		const char buttons[] = {'U','p',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);
 	}
 }
@@ -141,7 +142,7 @@ void DesktopHandler::holdControllerButton(std::vector<bool> b)
  */
 void DesktopHandler::releaseControllerButton()
 {
-	const char a[] = {'z','+','x','+','j','+','k','+','l',0};
+	const char a[] = {'z','+','x','+','U','p','+','R','i','g','h','t','+','D','o','w','n','+','L','e','f','t',0};
 
 	xdo_send_keysequence_window_up(xdo,window,a, 20);
 }
@@ -163,24 +164,25 @@ void DesktopHandler::releaseControllerButton(std::vector<bool> b)
 	}
 	if(!b[2])
 	{
-		const char buttons[] = {'j',0};
+		const char buttons[] = {'L','e','f','t',0};
 		xdo_send_keysequence_window_up(xdo,window,buttons, 20);
 	}
 	if(!b[3])
 	{
-		const char buttons[] = {'k',0};
+		const char buttons[] = {'D','o','w','n',0};
 		xdo_send_keysequence_window_up(xdo,window,buttons, 20);
 	}
 	if(!b[4])
 	{
-		const char buttons[] = {'l',0};
+		const char buttons[] = {'R','i','g','h','t',0};
 		xdo_send_keysequence_window_up(xdo,window,buttons, 20);
 	}
 	if(!b[5])
 	{
-		const char przycisk[] = {'i',0};
-		xdo_send_keysequence_window_up(xdo,window,przycisk, 20);
+		const char buttons[] = {'U','p',0};
+		xdo_send_keysequence_window_up(xdo,window,buttons, 20);
 	}
+
 }
 
 /*
