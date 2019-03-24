@@ -129,7 +129,8 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 
 	//Player death
 	bool playerIsDead = false;
-	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty()) playerIsDead = true; //Killed by enemy
+	bool killedByEnemy = false;
+	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty()) {playerIsDead = true; killedByEnemy = true;} //Killed by enemy
 	if(playerCoords.y > 388) 																			playerIsDead = true; //pitfall
 	if(playerCoords.x < 20) 																			playerIsDead = true; // left border
 
@@ -141,6 +142,7 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 
 	analyzeResult.fieldAndEnemiesLayout = fael;
 	analyzeResult.playerIsDead = playerIsDead;
+	analyzeResult.killedByEnemy = killedByEnemy;
 	analyzeResult.playerFound = true;
 
 	return analyzeResult;

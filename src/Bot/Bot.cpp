@@ -89,7 +89,7 @@ std::vector<bool> Bot::determineControllerInput(int t_action)
 		break;
 	default:
 		std::cout << t_action << "\n";
-		assert("No such action!");
+		assert("No such action!" && false);
 	}
 
 	return w;
@@ -294,7 +294,7 @@ void Bot::learnQLearningScenario()
 					historyScenario.pop_front();
 		else break;
 	}
-	if(historyScenario.size()==0) std::cout << "UPS!!!\n";
+	if(historyScenario.size()==0) assert("All SARS has been removed" && false);
 	historyScenario.front().reward=lastReward;
 
 	StateAnalyzer::AnalyzeResult tmpResult = extractSceneState(state);

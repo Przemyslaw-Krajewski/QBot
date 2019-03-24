@@ -28,7 +28,8 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	//Additional info
 	AnalyzeResult::AdditionalInfo additionalInfo;
 	if(!imageAnalyzeResult.playerFound) additionalInfo = AnalyzeResult::AdditionalInfo::notFound;
-	else if(imageAnalyzeResult.playerIsDead) additionalInfo = AnalyzeResult::AdditionalInfo::killedByEnemy;
+	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = AnalyzeResult::AdditionalInfo::killedByEnemy;
+	else if(imageAnalyzeResult.playerIsDead) additionalInfo = AnalyzeResult::AdditionalInfo::fallenInPitfall;
 
 	//reward
 	double reward = 0;

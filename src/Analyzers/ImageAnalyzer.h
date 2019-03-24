@@ -22,6 +22,7 @@ public:
 		cv::Mat fieldAndEnemiesLayout;
 		bool playerFound;
 		bool playerIsDead;
+		bool killedByEnemy;
 	};
 
 	typedef std::vector<cv::Mat> Histogram;
