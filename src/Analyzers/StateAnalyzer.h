@@ -30,7 +30,7 @@ public:
 
 	struct AnalyzeResult
 	{
-		enum AdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut};
+		enum AdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};
 
 		cv::Mat fieldAndEnemiesLayout;
 		double reward;

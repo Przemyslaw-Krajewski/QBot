@@ -41,6 +41,7 @@ ImageAnalyzer::ImageAnalyzer()
 	deadImage = cv::imread("graphics/dead.bmp", cv::IMREAD_COLOR);
 	mushroomImage = cv::imread("graphics/mushroom.bmp", cv::IMREAD_COLOR);
 	cloudImage = cv::imread("graphics/cloud.bmp", cv::IMREAD_COLOR);
+	winImage = cv::imread("graphics/win.bmp", cv::IMREAD_COLOR);
 }
 
 /*
@@ -130,9 +131,11 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 	//Player death
 	bool playerIsDead = false;
 	bool killedByEnemy = false;
+	bool playerWon = false;
 	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty()) {playerIsDead = true; killedByEnemy = true;} //Killed by enemy
 	if(playerCoords.y > 388) 																			playerIsDead = true; //pitfall
 	if(playerCoords.x < 20) 																			playerIsDead = true; // left border
+	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())  playerWon = true; //Killed by enemy
 
 	#ifdef PRINT_ANALYZED_IMAGE
 		//Print
@@ -144,6 +147,7 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 	analyzeResult.playerIsDead = playerIsDead;
 	analyzeResult.killedByEnemy = killedByEnemy;
 	analyzeResult.playerFound = true;
+	analyzeResult.playerWon = playerWon;
 
 	return analyzeResult;
 }

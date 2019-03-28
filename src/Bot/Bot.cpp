@@ -12,7 +12,7 @@
  */
 Bot::Bot()
 {
-	deathReason = DeathReason::noInfo;
+	scenarioResult = ScenarioResult::noInfo;
 	time = 0;
 
 	/*  Initialize */
@@ -192,7 +192,7 @@ void Bot::run()
 	while(1)
 	{
 		prepareGameBeforeRun();
-		deathReason = DeathReason::noInfo;
+		scenarioResult = ScenarioResult::noInfo;
 		time = TIME_LIMIT;
 		action = 0;
 
@@ -231,14 +231,14 @@ void Bot::run()
 			std::cout << analyzeResult.playerVelocity.x << "  " << analyzeResult.playerVelocity.y << "\n";
 
 			//Stop game?
-			if(manageScenarioTime(analyzeResult.reward==50)) break;
+			if(manageScenarioTime(analyzeResult.reward>=50)) break;
 			if(analyzeResult.endScenario)
 			{
-				deathReason = analyzeResult.additionalInfo;
+				scenarioResult = analyzeResult.additionalInfo;
 				break;
 			}
 		}
-		printDeathReason();
+		printScenarioResult();
 		learnQLearningScenario();
 		DesktopHandler::getPtr()->releaseControllerButton();
 	}
@@ -265,7 +265,7 @@ bool Bot::manageScenarioTime(bool resetTimer)
 		time--;
 		if(time<0)
 		{
-			deathReason = DeathReason::timeOut;
+			scenarioResult = ScenarioResult::timeOut;
 			return true;
 		}
 		return false;
@@ -284,7 +284,7 @@ void Bot::learnQLearningScenario()
 {
 	int lastReward = historyScenario.front().reward;
 	std::vector<int> state = historyScenario.front().oldState;
-	while(historyScenario.size()>0 && deathReason==DeathReason::killedByEnemy)
+	while(historyScenario.size()>0 && scenarioResult==ScenarioResult::killedByEnemy)
 	{
 		state = historyScenario.front().oldState;
 		if(	state[2659]==0&&state[2660]==0&&state[2661]==0&&state[2662]==0&&state[2715]==0&&state[2771]==0&&state[2718]==0&&state[2774]==0&&
@@ -306,6 +306,9 @@ void Bot::learnQLearningScenario()
 	{
 		change += fabs(qLearning->learn(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward));
 		numberOfProbes++;
+//		for(int i=0; i<5; i++) std::cout << (int) qLearning->getQValue(sarsIterator->oldState,i) << " ";
+//		std::cout << ": " << sarsIterator->reward << "\n";
+
 	}
 	std::cout << "Change:" << change/numberOfProbes << "\n";
 }
@@ -313,16 +316,18 @@ void Bot::learnQLearningScenario()
 /*
  *
  */
-void Bot::printDeathReason()
+void Bot::printScenarioResult()
 {
 	//Print death reason
-	switch(deathReason)
+	switch(scenarioResult)
 	{
-		case DeathReason::timeOut:
+		case ScenarioResult::won:
+			std::cout << "Won" << "\n"; break;
+		case ScenarioResult::timeOut:
 			std::cout << "TimeOut" << "\n"; break;
-		case DeathReason::killedByEnemy:
+		case ScenarioResult::killedByEnemy:
 			std::cout << "Enemy" << "\n"; break;
-		case DeathReason::fallenInPitfall:
+		case ScenarioResult::fallenInPitfall:
 			std::cout << "Pitfall " << "\n"; break;
 		default:
 			std::cout << "????" << "\n"; break;

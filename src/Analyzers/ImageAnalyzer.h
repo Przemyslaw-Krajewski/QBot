@@ -23,6 +23,7 @@ public:
 		bool playerFound;
 		bool playerIsDead;
 		bool killedByEnemy;
+		bool playerWon;
 	};
 
 	typedef std::vector<cv::Mat> Histogram;
@@ -56,6 +57,7 @@ private:
 	cv::Mat blockImage3,blockImage3v2;
 	cv::Mat pipeImage;
 	cv::Mat deadImage;
+	cv::Mat winImage;
 	cv::Mat mushroomImage;
 	cv::Mat cloudImage;
 

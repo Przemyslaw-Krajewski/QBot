@@ -30,12 +30,14 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	if(!imageAnalyzeResult.playerFound) additionalInfo = AnalyzeResult::AdditionalInfo::notFound;
 	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = AnalyzeResult::AdditionalInfo::killedByEnemy;
 	else if(imageAnalyzeResult.playerIsDead) additionalInfo = AnalyzeResult::AdditionalInfo::fallenInPitfall;
+	else if(imageAnalyzeResult.playerWon) additionalInfo = AnalyzeResult::AdditionalInfo::won;
 
 	//reward
 	double reward = 0;
 	bool endScenario = false;
-	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = -100; endScenario = true;}
+	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = -100;  endScenario = true;}
 	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = -1000; endScenario = true;}
+	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward =  1000; endScenario = true;}
 	else if(memoryAnalyzeResult.playerPositionX > 99 && memoryAnalyzeResult.playerVelocityX > 6) {reward = 50;}
 	else if(memoryAnalyzeResult.playerVelocityX > 5) 										 	 {reward = 10;}
 

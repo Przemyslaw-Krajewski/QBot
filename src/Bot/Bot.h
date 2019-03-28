@@ -17,7 +17,7 @@
 #include "../Flags.h"
 
 class Bot {
-	using DeathReason = StateAnalyzer::AnalyzeResult::AdditionalInfo;
+	using ScenarioResult = StateAnalyzer::AnalyzeResult::AdditionalInfo;
 
 	struct SARS
 	{
@@ -47,7 +47,7 @@ private:
 	bool manageScenarioTime(bool resetTimer);
 	void learnQLearningScenario();
 
-	void printDeathReason();
+	void printScenarioResult();
 
 	std::vector<bool> determineControllerInput(int t_action);
 
@@ -66,7 +66,7 @@ private:
 	std::vector<bool> controllerInput;
 	int action = 0;
 	std::list<SARS> historyScenario;
-	DeathReason deathReason;
+	ScenarioResult scenarioResult;
 	int time;
 
 	//Const parameters
