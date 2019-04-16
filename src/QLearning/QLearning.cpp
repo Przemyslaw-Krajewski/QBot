@@ -10,21 +10,15 @@
 /*
  *
  */
-QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, ValueMap t_valueMap)
+QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, ValueMap t_valueMap) :
+	qValues(NeuralNetwork(t_dimensionStatesSize.size(),std::initializer_list<int>({80,70,60,50,t_nActions}),
+			std::initializer_list<double>({0.000032,0.0001,0.00032,0.001,0.0032,}),6.2))
 {
-
-	alpha = 0.85;
+	target = new NeuralNetwork(qValues);
+	alpha = 1;
 	gamma = 0.80;
-
-//	if(t_valueMap == table) qValues = new Table(t_nActions,t_dimensionStatesSize);
-//	else if(t_valueMap == hashmap) qValues = new HashMapArray(t_nActions,t_dimensionStatesSize);
-
-	qValues = new HashMapArray(t_nActions,t_dimensionStatesSize);
-
-
 	dimensionStatesSize = t_dimensionStatesSize;
 	numberOfActions = t_nActions;
-	actions = new NeuralNetworkArray(t_nActions,t_dimensionStatesSize);
 }
 
 /*
@@ -32,26 +26,33 @@ QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, Val
  */
 QLearning::~QLearning()
 {
-	if(qValues!=nullptr) delete qValues;
-	if(actions!=nullptr) delete actions;
+	delete target;
 }
-
 
 /*
  *
  */
 double QLearning::learn(State t_prevState, State t_state, int t_action, double t_reward)
 {
+	std::vector<double> state;
+	for(int i=0; i<t_state.size();i++) state.push_back((double)t_state[i]/dimensionStatesSize[i]);
+
+	std::vector<double> tv = target->determineY(state);
 	double maxValue = -999;
 	for(int i_action=0; i_action<numberOfActions; i_action++)
 	{
-		double value = qValues->getValue(t_state,i_action);
-		if(maxValue < value) maxValue = value;
+		if(maxValue < tv[i_action]) maxValue = tv[i_action];
 	}
 
-	double prevValue = qValues->getValue(t_prevState,t_action);
+	std::vector<double> qv = qValues.determineY(state);
+	double prevValue = qv[t_action];
 	double value = prevValue + alpha*(t_reward+gamma*maxValue - prevValue);
-	qValues->setValue(t_prevState, t_action, value);
+
+	std::vector<double> z = qv;
+	z[t_action] = value;
+	for(int i=0; i<z.size(); i++) if(z[i]>0.7) z[i]=0.61;
+//	std::cout << prevValue << " --> " << value << "   (" << t_reward << " + " << gamma << "*" << maxValue << ")\n";
+	qValues.learnBackPropagation(z);
 
 	return value - prevValue;
 }
@@ -59,115 +60,34 @@ double QLearning::learn(State t_prevState, State t_state, int t_action, double t
 /*
  *
  */
-std::pair<bool,int> QLearning::chooseAction(State t_state)
+int QLearning::chooseAction(State t_state)
 {
-	std::vector<double> nnValues = qValues->getValues(t_state);
+	std::vector<double> state;
+	for(int i=0; i<t_state.size();i++) state.push_back((double)t_state[i]/dimensionStatesSize[i]);
+
+	std::vector<double> nnValues = qValues.determineY(state);
 	double nnMaxValue = -999;
 	int nnAction;
 	for(int i=0; i<numberOfActions; i++)
 	{
+		if(nnValues[i] > 0.61 || nnValues[i] < 0.0001) {return i;}
 		if(nnMaxValue < nnValues[i])
 		{
 			nnMaxValue = nnValues[i];
 			nnAction = i;
 		}
 	}
-
-	return std::pair<bool,int>(true,nnAction);
-
-//	std::vector<double> qlValues = qValues->getValues(t_state);
-//	double qlMaxValue = -999;
-//	int qlAction;
-//	for(int i=0; i<numberOfActions; i++)
-//	{
-//		if(qlMaxValue < qlValues[i])
-//		{
-//			qlMaxValue = qlValues[i];
-//			qlAction = i;
-//		}
-//	}
-//
-//	if(qlValues[qlAction] > qlValues[nnAction]+150)
-//	{
-//		return std::pair<bool,int>(false,qlAction);
-//	}
-//	else return std::pair<bool,int>(true,nnAction);
+	return nnAction;
 }
 
 /*
  *
  */
-
-void QLearning::learnActions()
+std::vector<double> QLearning::getQValues(State t_state)
 {
-	std::cout << "I feel sleepy " << discoveredStates.size() << "\n";
-	if(discoveredStates.size() <= 0) return;
-	std::vector<const State*> shuffledStates;
-	for(std::set<State>::iterator i=discoveredStates.begin(); i!=discoveredStates.end(); i++)
-	{
-		const State* s = &(*i);
-		shuffledStates.push_back(s);
-	}
-
-	NeuralNetworkArray* newNN = new NeuralNetworkArray(numberOfActions,dimensionStatesSize);
-
-	//Learn NN
-	for(int iteration=0; iteration<discoveredStates.size()*20; iteration++)
-	{
-		double sumMistakes = 0;
-		double sumErr = 0;
-		double mistakeSumErr = 0;
-		std::random_shuffle(shuffledStates.begin(),shuffledStates.end());
-		logNewSetMessage();
-		for(int j=0; j<shuffledStates.size(); j++)
-		{
-			const std::vector<int> randomState = *(shuffledStates[j]);
-			std::vector<double> qValue = qValues->getValues(randomState);
-
-			double maxValue = -999;
-			int qlAction;
-			for(int i=0; i<qValue.size(); i++)
-			{
-				if(qValue[i] > maxValue)
-				{
-					maxValue = qValue[i];
-					qlAction = i;
-				}
-			}
-
-			std::vector<double> values;
-			for(int i=0; i<numberOfActions ;i++)
-			{
-				if(i==qlAction) values.push_back(0.9);
-				else values.push_back(0.1);
-			}
-
-			std::vector<double> prevValues = newNN->setValues(randomState,values);
-
-			maxValue = -999;
-			int nnAction;
-			double err = 0;
-			for(int i=0; i<prevValues.size(); i++)
-			{
-				if(prevValues[i] > maxValue)
-				{
-					maxValue = prevValues[i];
-					nnAction = i;
-				}
-				err += fabs(prevValues[i]-values[i]);
-			}
-
-			sumMistakes += (nnAction==qlAction ? 0 : 1);
-			sumErr += err;
-			if(nnAction!=qlAction) mistakeSumErr += err;
-		}
-		std::cout << "NN: "<< sumMistakes << "/" << discoveredStates.size() << "-" << iteration*0.1  << ":" << iteration << "   -   " << sumErr/(4*discoveredStates.size()) << ":" << mistakeSumErr/(4*sumMistakes) << "\n";
-		if(sumMistakes <= iteration*0.1) break;
-	}
-
-	logLearningCompleteMessage();
-	delete actions;
-	actions = newNN;
+	std::vector<double> input;
+	for(int i=0; i<t_state.size(); i++) input.push_back((double)t_state[i]);
+	return qValues.determineY(input);
 }
 
 void QLearning::logNewSetMessage()

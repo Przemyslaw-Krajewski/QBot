@@ -10,19 +10,17 @@
 /*
  *
  */
-NeuralNetwork::NeuralNetwork(std::vector<double*> t_input, std::vector<int> t_layers,std::vector<double> t_n, double t_b)
+NeuralNetwork::NeuralNetwork(int t_inputSize, std::vector<int> t_layers,std::vector<double> t_n, double t_b)
 {
-	oneValue = 1.0;
-
 	n = t_n;
 	b = t_b;
 
 	inputLayer.clear();
-	InputNeuron inputNeuron = InputNeuron(&oneValue);
+	InputNeuron inputNeuron = InputNeuron(1.0);
 	inputLayer.push_back(inputNeuron);
-	for(int i=0; i<t_input.size(); i++)
+	for(int i=0; i<t_inputSize; i++)
 	{
-		inputNeuron = InputNeuron(t_input[i]);
+		inputNeuron = InputNeuron();
 		inputLayer.push_back(inputNeuron);
 	}
 
@@ -46,7 +44,7 @@ NeuralNetwork::NeuralNetwork(std::vector<double*> t_input, std::vector<int> t_la
 	{
 		//Connections
 		std::vector<Neuron*> prevLayerReference;
-		prevLayerReference.push_back(&(*inputLayer.begin()));
+		prevLayerReference.push_back(&(*inputLayer.begin())); //Bias in other layers
 		for(std::vector<Neuron>::iterator it=hiddenLayers.back().begin(); it!=hiddenLayers.back().end(); it++)
 		{
 			prevLayerReference.push_back(&(*it));
@@ -71,10 +69,10 @@ NeuralNetwork::NeuralNetwork(std::vector<double*> t_input, std::vector<int> t_la
 	std::cout << "\n";
 	std::cout << "Core\n";
 	int j = 0;
-	for(std::list<std::list<Neuron>>::iterator iterator=hiddenLayers.begin(); iterator!=hiddenLayers.end(); iterator++)
+	for(std::list<std::vector<Neuron>>::iterator iterator=hiddenLayers.begin(); iterator!=hiddenLayers.end(); iterator++)
 	{
 		std::cout << "Layer: " << j << "\n";j++;
-		for(std::list<Neuron>::iterator it_neuron=iterator->begin(); it_neuron!=iterator->end(); it_neuron++)
+		for(std::vector<Neuron>::iterator it_neuron=iterator->begin(); it_neuron!=iterator->end(); it_neuron++)
 		{
 			std::cout << &(*it_neuron) << ":      ";
 			for(int i=0; i<it_neuron->input.size(); i++) std::cout << it_neuron->input[i] << "  ";
@@ -82,6 +80,23 @@ NeuralNetwork::NeuralNetwork(std::vector<double*> t_input, std::vector<int> t_la
 		}
 	}
 #endif
+}
+
+NeuralNetwork::NeuralNetwork(const NeuralNetwork& t_nn) : NeuralNetwork(t_nn.getInputSize(), t_nn.getLayersLayout(),t_nn.getLearningRates(),t_nn.getActivationFunctionParameter())
+{
+	const std::list<std::vector<Neuron>>* srcHiddenLayers = t_nn.getHiddenLayers();
+
+	std::list<std::vector<Neuron>>::iterator it_layer=hiddenLayers.begin();
+	std::list<std::vector<Neuron>>::const_iterator it_srcLayer=srcHiddenLayers->begin();
+	while(it_layer!=hiddenLayers.end())
+	{
+		for(int i=0; i<it_layer->size(); i++)
+		{
+			(*it_layer)[i].setW((*it_srcLayer)[i].getW());
+		}
+		it_srcLayer++;
+		it_layer++;
+	}
 }
 
 /*
@@ -95,8 +110,22 @@ NeuralNetwork::~NeuralNetwork()
 /*
  *
  */
-std::vector<double> NeuralNetwork::determineY()
+std::vector<double> NeuralNetwork::determineY(std::vector<double> x)
 {
+	//Prepare input
+	if(x.size() != inputLayer.size()-1)
+	{
+		std::cout << x.size() << "  " << inputLayer.size()-1 << "\n";
+		assert(x.size() == inputLayer.size()-1);
+	}
+	int i = 0;
+	for(std::list<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)
+	{
+		it_input->setY(x[i]);
+		i++;
+	}
+
+	//Calculate
 	for(std::list<std::vector<Neuron>>::iterator it_layer=hiddenLayers.begin(); it_layer!=hiddenLayers.end(); it_layer++)
 	{
 		int i;
@@ -108,6 +137,7 @@ std::vector<double> NeuralNetwork::determineY()
 
 	}
 
+	//Prepare result
 	std::vector<double> result;
 	for(std::vector<Neuron>::iterator it_neuron=hiddenLayers.back().begin(); it_neuron!=hiddenLayers.back().end(); it_neuron++)
 	{
@@ -121,13 +151,13 @@ std::vector<double> NeuralNetwork::determineY()
  */
 std::vector<double> NeuralNetwork::getY()
 {
-	std::vector<double> wynik;
+	std::vector<double> result;
 	for(std::vector<Neuron>::iterator it_neuron=hiddenLayers.back().begin(); it_neuron!=hiddenLayers.back().end(); it_neuron++)
 	{
-		wynik.push_back(it_neuron->getY());
+		result.push_back(it_neuron->getY());
 	}
 
-	return wynik;
+	return result;
 }
 
 /*
@@ -135,8 +165,6 @@ std::vector<double> NeuralNetwork::getY()
  */
 void NeuralNetwork::learnBackPropagation(std::vector<double> z)
 {
-//	modifyLearningRate();
-
 	assert(z.size() == hiddenLayers.back().size());
 	int i=0;
 	for(std::vector<Neuron>::iterator it=hiddenLayers.back().begin(); it!=hiddenLayers.back().end(); it++,i++)
@@ -154,17 +182,26 @@ void NeuralNetwork::learnBackPropagation(std::vector<double> z)
 	}
 }
 
-void NeuralNetwork::modifyLearningRate(double v)
+/*
+ *
+ */
+void NeuralNetwork::learnBackPropagation(std::vector<double> x, std::vector<double> z)
 {
-	n[0] = v*0.00001;
-	n[1] = v*0.00003;
-	n[2] = v*0.0001;
-	n[3] = v*0.0003;
-	n[4] = v*0.001;
-	n[5] = v*0.003;
-	n[6] = v*0.01;
-	n[7] = v*0.03;
-	n[8] = v*0.1;
+	determineY(x);
+	learnBackPropagation(z);
+}
+
+/*
+ *
+ */
+std::vector<int> NeuralNetwork::getLayersLayout() const
+{
+	std::vector<int> result;
+	for(std::list<std::vector<Neuron>>::const_iterator it_layer=hiddenLayers.begin(); it_layer!=hiddenLayers.end(); it_layer++)
+	{
+		result.push_back(it_layer->size());
+	}
+	return result;
 }
 
 /*####################################################################################*/
