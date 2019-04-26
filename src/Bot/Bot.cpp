@@ -44,6 +44,7 @@ Bot::Bot()
 								  analyzeResult.playerVelocity);
 	StateAnalyzer::printAnalyzeData(analyzeResult);
 	cv::waitKey(1000);
+
 	//Initialize qLearning
 	qLearning = new QLearning(5, std::vector<int>(sceneState.size(),1), hashmap);
 }
@@ -240,22 +241,29 @@ void Bot::run()
 			//Determine new controller input
 			if(randomAction <=0)
 			{
-				if(rand()%150==-1)
+				if(rand()%150==0)
 				{
+//					action = -1;
+//					int value=50000;
+//					for(int i=0; i<5; i++)
+//					{
+//						if(visitedStates[i].count(sceneState) <= 0) {action=i;break;}
+//						else if((visitedStates[i])[sceneState] < value)
+//						{
+//							action=i;
+//							value = (visitedStates[i])[sceneState];
+//						}
+//					}
 					action = rand()%5;
 					std::cout << action << "  SOMETHING NEW\n";
 					randomAction=20;
 				}
-				else
-				{
-					std::pair<int,double> result = qLearning->chooseAction(sceneState);
-					if(result.second > 0.4)	action = result.first;
-					else action = visitedSARS.getActionWithGreatestChange(sceneState);
-
-				}
+				else action = qLearning->chooseAction(sceneState);
 			}
 			else randomAction--;
-			action = 0;
+
+//			if(visitedStates[action].count(sceneState) <= 0)(visitedStates[action])[sceneState] = 1;
+//			else (visitedStates[action])[sceneState] = (visitedStates[action])[sceneState]+1;
 
 			controllerInput = determineControllerInput(action);
 			DesktopHandler::getPtr()->pressControllerButton(controllerInput);
@@ -318,7 +326,7 @@ bool Bot::manageScenarioTime(bool resetTimer)
 void Bot::learnQLearningScenario()
 {
 	//Eliminate invalid last states
-	double lastReward = historyScenario.front().reward;
+	int lastReward = historyScenario.front().reward;
 	std::vector<int> state = historyScenario.front().oldState;
 	while(historyScenario.size()>0 && scenarioResult==ScenarioResult::killedByEnemy)
 	{
@@ -336,13 +344,11 @@ void Bot::learnQLearningScenario()
 	StateAnalyzer::AnalyzeResult tmpResult = extractSceneState(state);
 	StateAnalyzer::printAnalyzeData(tmpResult);
 
-	long skipNumber;
 	//Add learn info
 	int counter = 0;
-	skipNumber=2;
 	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 	{
-		if(counter%skipNumber==0)
+		if(counter%5==0)
 			visitedSARS.addSARS(*sarsIterator);
 		counter++;
 	}
@@ -350,13 +356,12 @@ void Bot::learnQLearningScenario()
 	//Learn
 	double change = 0;
 	std::cout << "Number of probes:" << historyScenario.size() << "\n";
-	skipNumber=3;
 	for(int i=0; i<LEARNING_LOOPS; i++)
 	{
 		long counter = 0;
 		for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 		{
-			if(counter%skipNumber==0) change += fabs(qLearning->learn(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward));
+			if(counter%4==0) change += fabs(qLearning->learn(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward));
 			counter++;
 		}
 
@@ -373,33 +378,19 @@ void Bot::learnQLearningScenario()
 
 	//Learn2
 	std::cout << "Visited SARS Size: " << visitedSARS.size() << "\n";
-	skipNumber=sqrt(visitedSARS.size())/2;
-	if(skipNumber < 1) skipNumber = 1;
 	for(int i=0; i<LEARNING_LOOPS; i++)
 	{
-		int counter=0;
+		int j = 0;
 		for(VisitedSARS::Iterator it = visitedSARS.begin(); it.hasNextElement(); it++)
 		{
-			if(counter%skipNumber==0)
+			for(int a=0; a<5; a++)
 			{
-				for(int a=0; a<5; a++)
+				if(it.existsSars(a))
 				{
-					if(it.existsSars(a))
-					{
-						SARS s = it.getSars(a);
-						double change = qLearning->learn(s.oldState,s.state,s.action,s.reward);
-						//it.setChange(a,abs(change));
-					}
+					SARS sars = it.getSars(a);
+					qLearning->learn(sars.oldState,sars.state,sars.action,sars.reward);
 				}
-//			    std::vector<SARS> sars;
-//				for(int a=0; a<5; a++)
-//				{
-//					if(it.existsSars(a)) sars.push_back(it.getSars(a));
-//					else sars.push_back(SARS(State(), State(), -1, 0));
-//				}
-//				qLearning->learn(sars);
 			}
-			counter++;
 		}
 
 		//qValues -> target ?

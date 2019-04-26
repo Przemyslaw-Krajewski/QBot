@@ -56,7 +56,7 @@ private:
 	const off_t RAM_VEL_Y_OFFSET{0x9f};
 	const off_t RAM_POS_X_OFFSET{0x4ac};
 	const off_t RAM_ADDR{0x555555b8c630}; //RAM
-	const off_t XBUFF_ADDR{0x555555b5c5d0}; //XBackBuf
+	const off_t XBUFF_ADDR{0x555555b5c5d0}; //XBackBuff
 	const off_t PALETTE_ADDR{0x555555ac59c0}; //s_psdl
 };
 
