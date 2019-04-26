@@ -26,7 +26,8 @@ public:
 
 	//Basic methods
 	double learn(State t_prevState, State t_state, int t_action, double t_reward);
-	int chooseAction(State t_state);
+	double learn(std::vector<SARS> sars);
+	std::pair<int,double> chooseAction(State t_state);
 	//Extended methods
 	void persistNN() {delete target; target = new NeuralNetwork(qValues);}
 

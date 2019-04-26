@@ -24,6 +24,7 @@
 			state = State();
 			oldState = State();
 			reward = action = 0;
+			change = 1;
 		}
 		SARS(State t_oldState, State t_state, int t_action, double t_reward)
 		{
@@ -31,12 +32,14 @@
 			oldState = t_oldState;
 			reward = t_reward;
 			action = t_action;
+			change = 1;
 		}
 
 		State state;
 		State oldState;
 		int action;
 		double reward;
+		double change;
 	};
 
 	class VisitedSARS
@@ -89,6 +92,10 @@
 				return (vsarsPtr->sarsMaps)[t_action].count(*(vsarsPtr->shuffledStates[index])) > 0;
 			}
 
+			void setChange(int t_action, double t_change)
+			{
+				//(vsarsPtr->sarsMaps)[t_action][*(vsarsPtr->shuffledStates[index])].change = t_change;
+			}
 
 		};
 
@@ -96,6 +103,26 @@
 		{
 			discoveredStates.insert(reduceStateResolution(sars.oldState));
 			sarsMaps[sars.action][reduceStateResolution(sars.oldState)] = SARS(sars.oldState,sars.state,sars.action,sars.reward);
+		}
+
+		double getActionWithGreatestChange(State t_state)
+		{
+			int action;
+//			double maxValue = -1;
+//			for(int a=0; a<5; a++)
+//			{
+//				if((sarsMaps)[a].count(reduceStateResolution(t_state)) > 0)
+//				{
+//					return a;
+//				}
+//				else if (sarsMaps[a][reduceStateResolution(t_state)].change > maxValue)
+//				{
+//					action = a;
+//					maxValue = sarsMaps[a][reduceStateResolution(t_state)].change;
+//				}
+//			}
+
+			return action;
 		}
 
 		long size()
