@@ -23,6 +23,10 @@ add_executable(QBot
                             src/NeuralNetwork/Neuron.cpp
                             src/NeuralNetwork/InputNeuron.cpp
 							src/QLearning/QLearning.cpp
+							src/Arrays/Array.cpp
+							src/Arrays/Table.cpp
+							src/Arrays/HashMapArray.cpp
+							src/Arrays/NeuralNetworkArray.cpp
               )
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})

@@ -12,16 +12,28 @@
 #include <list>
 #include <math.h>
 
-#include "Common.h"
 #include "../Analyzers/StateAnalyzer.h"
 #include "../QLearning/QLearning.h"
 #include "../Flags.h"
 
 class Bot {
-
-public:
-
 	using ScenarioResult = StateAnalyzer::AnalyzeResult::AdditionalInfo;
+
+	struct SARS
+	{
+		SARS(State t_oldState, State t_state, int t_action, double t_reward)
+		{
+			state = t_state;
+			oldState = t_oldState;
+			reward = t_reward;
+			action = t_action;
+		}
+
+		State state;
+		State oldState;
+		int action;
+		double reward;
+	};
 
 public:
 	Bot();
@@ -39,8 +51,6 @@ private:
 
 	std::vector<bool> determineControllerInput(int t_action);
 
-	std::vector<int> reduceStateResolution(std::vector<int> t_state);
-
 	std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
 	std::vector<int> createSceneState(cv::Mat& sceneState, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
 	StateAnalyzer::AnalyzeResult extractSceneState(std::vector<int> sceneData);
@@ -55,24 +65,14 @@ private:
 	std::vector<int> sceneState;
 	std::vector<bool> controllerInput;
 	int action = 0;
-	int time;
-	int randomAction;
-
-	//Scenario result data
 	std::list<SARS> historyScenario;
 	ScenarioResult scenarioResult;
-
-	//Learning data
-	int persistCounter;
-	VisitedSARS visitedSARS;
-
+	int time;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
-	const int TIME_LIMIT = 90;
-	const int ITERATIONS_BEFORE_NN_PERSIST{1};
-	const int LEARNING_LOOPS{1};
+	const int TIME_LIMIT = 150;
 };
 
 #endif /* SRC_BOT_H_ */

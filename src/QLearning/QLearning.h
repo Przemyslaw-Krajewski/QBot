@@ -12,9 +12,13 @@
 #include <string>
 
 #include "../Flags.h"
-#include "../Bot/Common.h"
 
-#include "../NeuralNetwork/NeuralNetwork.h"
+#include "../Arrays/Array.h"
+#include "../Arrays/Table.h"
+#include "../Arrays/HashMapArray.h"
+#include "../Arrays/NeuralNetworkArray.h"
+
+using State = std::vector<int>;
 
 enum ValueMap {table, hashmap};
 
@@ -26,14 +30,13 @@ public:
 
 	//Basic methods
 	double learn(State t_prevState, State t_state, int t_action, double t_reward);
-	int chooseAction(State t_state);
+	std::pair<bool,int> chooseAction(State t_state);
+	void learnActions();
 	//Extended methods
-	void persistNN() {delete target; target = new NeuralNetwork(qValues);}
+	void addDiscoveredState(State t_state) {discoveredStates.insert(t_state);}
 
 	//Info methods
-	double getQValue(int t_action) {return qValues.getY()[t_action];}
-	std::vector<double> getQValues(State t_state);
-	void printArrayInfo() {/*DO NOTHING*/}
+	void printArrayInfo() {qValues->printInfo();}
 
 private:
 	//Log methods
@@ -42,8 +45,8 @@ private:
 
 public:
 	//Debug methods
-//	void setQValue(State t_state, int t_action, double t_value) {qValues->setValue(t_state, t_action, t_value);}
-//	double getQValue(State t_state, int t_action) { return qValues->getValue(t_state,t_action);}
+	void setQValue(State t_state, int t_action, double t_value) {qValues->setValue(t_state, t_action, t_value);}
+	double getQValue(State t_state, int t_action) { return qValues->getValue(t_state,t_action);}
 
 
 private:
@@ -52,8 +55,11 @@ private:
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	NeuralNetwork qValues;
-	NeuralNetwork* target;
+	HashMapArray *qValues;
+	Array *actions;
+	std::set<State> discoveredStates;
+
+
 };
 
 #endif /* SRC_QLEARNING_QLEARNING_H_ */

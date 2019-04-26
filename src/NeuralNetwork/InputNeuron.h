@@ -13,18 +13,17 @@
 class InputNeuron : public Neuron
 {
 public:
-	InputNeuron();
-	InputNeuron(double t_x);
+	InputNeuron(double* t_x);
 	virtual ~InputNeuron();
 
 	virtual double determineY();
 	virtual double getY();
 	virtual void learnBackPropagation();
 
-	double setY(double t_y) {x = t_y;}
+	double setY(double t_y) {output = t_y;}
 
 private:
-	double x;
+	double* x;
 };
 
 #endif /* SRC_NEURALNETWORK_INPUTNEURON_H_ */

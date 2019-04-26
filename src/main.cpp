@@ -6,7 +6,7 @@
 #include "QLearning/QLearning.h"
 #include "Bot/Bot.h"
 
-#include "TestFunctions.h"
+void testNN();
 
 /*
  *
@@ -17,7 +17,6 @@ int main()
 #ifdef ENABLE_LOGGING
 	freopen( "logs.log", "w", stderr );
 #endif
-
 	Bot bot;
 	try
 	{
