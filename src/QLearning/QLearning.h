@@ -32,6 +32,7 @@ public:
 	double learn(State t_prevState, State t_state, int t_action, double t_reward);
 	std::pair<bool,int> chooseAction(State t_state);
 	void learnActions();
+	double learnAction(State state);
 	//Extended methods
 	void addDiscoveredState(State t_state) {discoveredStates.insert(t_state);}
 
@@ -56,7 +57,7 @@ private:
 	std::vector<int> dimensionStatesSize;
 
 	HashMapArray *qValues;
-	Array *actions;
+	NeuralNetworkArray *actions;
 	std::set<State> discoveredStates;
 
 
