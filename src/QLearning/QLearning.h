@@ -57,6 +57,7 @@ private:
 	std::vector<int> dimensionStatesSize;
 
 	HashMapArray *qValues;
+	HashMapArray *qChanges;
 	NeuralNetworkArray *actions;
 	std::set<State> discoveredStates;
 

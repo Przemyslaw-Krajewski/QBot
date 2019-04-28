@@ -20,7 +20,7 @@ QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize, Val
 //	else if(t_valueMap == hashmap) qValues = new HashMapArray(t_nActions,t_dimensionStatesSize);
 
 	qValues = new HashMapArray(t_nActions,t_dimensionStatesSize);
-
+	qChanges = new HashMapArray(t_nActions,t_dimensionStatesSize);
 
 	dimensionStatesSize = t_dimensionStatesSize;
 	numberOfActions = t_nActions;
@@ -52,6 +52,7 @@ double QLearning::learn(State t_prevState, State t_state, int t_action, double t
 	double prevValue = qValues->getValue(t_prevState,t_action);
 	double value = prevValue + alpha*(t_reward+gamma*maxValue - prevValue);
 	qValues->setValue(t_prevState, t_action, value);
+	qChanges->setValue(t_prevState, 0, abs(value-prevValue));
 
 	return value - prevValue;
 }
@@ -109,6 +110,7 @@ void QLearning::learnActions()
 	}
 
 	int skip = sqrt(shuffledStates.size())/2;
+	skip = skip<1 ? 1 : skip;
 	//Learn NN
 	for(int iteration=0; iteration<1; iteration++)
 	{
@@ -129,7 +131,10 @@ void QLearning::learnActions()
  */
 double QLearning::learnAction(State state)
 {
+	if(qChanges->getValue(state,0) > 3) return 0;
+
 	std::vector<double> qValue = qValues->getValues(state);
+	std::vector<double> prevValues = actions->getValues(state);
 
 	double maxValue = -999;
 	int qlAction;
@@ -142,6 +147,19 @@ double QLearning::learnAction(State state)
 		}
 	}
 
+	maxValue = -999;
+	int nnAction;
+	for(int i=0; i<prevValues.size(); i++)
+	{
+		if(prevValues[i] > maxValue)
+		{
+			maxValue = prevValues[i];
+			nnAction = i;
+		}
+	}
+
+	if(qlAction == nnAction) return 0;
+
 	std::vector<double> values;
 	for(int i=0; i<numberOfActions ;i++)
 	{
@@ -149,10 +167,10 @@ double QLearning::learnAction(State state)
 		else values.push_back(0.1);
 	}
 
-	std::vector<double> prevValues = actions->setValues(state,values);
+	actions->setValues(state,values);
 
 	maxValue = -999;
-	int nnAction;
+	//int nnAction;
 	double err = 0;
 	for(int i=0; i<prevValues.size(); i++)
 	{

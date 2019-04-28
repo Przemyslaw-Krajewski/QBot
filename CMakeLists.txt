@@ -23,6 +23,7 @@ add_executable(QBot
                             src/NeuralNetwork/Neuron.cpp
                             src/NeuralNetwork/InputNeuron.cpp
 							src/QLearning/QLearning.cpp
+							src/Loggers/DataDrawer.cpp
 							src/Arrays/Array.cpp
 							src/Arrays/Table.cpp
 							src/Arrays/HashMapArray.cpp

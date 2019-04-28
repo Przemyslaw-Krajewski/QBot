@@ -46,59 +46,9 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	analyzeResult.fieldAndEnemiesLayout = imageAnalyzeResult.fieldAndEnemiesLayout;
 	analyzeResult.additionalInfo = additionalInfo;
 	analyzeResult.playerCoords = Point(0,0);
-	analyzeResult.playerVelocity = Point(memoryAnalyzeResult.playerVelocityX/2,memoryAnalyzeResult.playerVelocityY);
+	analyzeResult.playerVelocity = Point(memoryAnalyzeResult.playerVelocityX/4,memoryAnalyzeResult.playerVelocityY/2);
 	analyzeResult.reward = reward;
 	analyzeResult.endScenario = endScenario;
 
 	return analyzeResult;
-}
-
-/*
- *
- */
-void StateAnalyzer::printAnalyzeData(AnalyzeResult& sceneData)
-{
-	int blockSize = 15;
-
-	int xScreenSize = sceneData.fieldAndEnemiesLayout.cols;
-	int yScreenSize = sceneData.fieldAndEnemiesLayout.rows;
-
-	if(xScreenSize <= 0 && yScreenSize <=0) return;
-
-	cv::Mat map = cv::Mat(blockSize*(yScreenSize+1), blockSize*(xScreenSize), CV_8UC3);
-
-	for(int x=0; x<xScreenSize; x++)
-	{
-		for(int y=0; y<yScreenSize; y++)
-		{
-			int fieldValue, enemyValue, playerValue;
-			int addition = 0;
-			uchar* ptrSrc = sceneData.fieldAndEnemiesLayout.ptr(y)+(x)*3;
-			if(ptrSrc[0]==100) {fieldValue=1;enemyValue=0;playerValue=0;}
-			else if(ptrSrc[2]==220) {fieldValue=0;enemyValue=1;playerValue=0;}
-			else if(ptrSrc[2]==255) {fieldValue=0;enemyValue=0;playerValue=1;}
-			else {fieldValue=0;enemyValue=0;playerValue=0;}
-			if((x==xScreenSize/2||x==xScreenSize/2+1) && (y==yScreenSize/2||y==yScreenSize/2+1)) addition = 50;
-
-			for(int xx=0; xx<blockSize; xx++)
-			{
-				for(int yy=0; yy<blockSize; yy++)
-				{
-					uchar* ptr = map.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
-					if(fieldValue == 1) {ptr[0] = 100;ptr[1] = 100;ptr[2] = 100;}
-					else if(enemyValue == 1) {ptr[0] = 0;ptr[1] = 0;ptr[2] = 220;}
-					else if(playerValue == 1) {ptr[0] = 255;ptr[1] = 255;ptr[2] = 255;}
-					else {ptr[0] = 0;ptr[1] = 0;ptr[2] = 0;}
-					ptr[0] += addition;
-					ptr[1] += addition;
-					ptr[2] += addition;
-				}
-			}
-		}
-	}
-
-	//Print
-	imshow("AnalyzedSceneData", map);
-	cv::waitKey(10);
-
 }

@@ -46,8 +46,6 @@ public:
 
 	AnalyzeResult analyze();
 
-	static void printAnalyzeData(AnalyzeResult& sceneData);
-
 private:
 	ImageAnalyzer imageAnalyzer;
 };

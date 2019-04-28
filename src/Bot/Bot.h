@@ -15,6 +15,7 @@
 #include "../Analyzers/StateAnalyzer.h"
 #include "../QLearning/QLearning.h"
 #include "../Flags.h"
+#include "../Loggers/DataDrawer.h"
 
 class Bot {
 	using ScenarioResult = StateAnalyzer::AnalyzeResult::AdditionalInfo;
@@ -53,7 +54,7 @@ private:
 
 	std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
 	std::vector<int> createSceneState(cv::Mat& sceneState, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
-	StateAnalyzer::AnalyzeResult extractSceneState(std::vector<int> sceneData);
+	std::pair<StateAnalyzer::AnalyzeResult, std::vector<bool>> extractSceneState(std::vector<int> sceneData);
 
 
 private:
@@ -72,7 +73,7 @@ private:
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
-	const int TIME_LIMIT = 150;
+	const int TIME_LIMIT = 80;
 };
 
 #endif /* SRC_BOT_H_ */

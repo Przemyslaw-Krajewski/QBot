@@ -37,10 +37,11 @@ NeuralNetworkArray::NeuralNetworkArray(int t_nActions, std::vector<int> t_dimens
 //												0.0001};
 //	double b = 8.2;
 
-	std::vector<int> layers = std::vector<int>{200,t_nActions};
-	std::vector<double> n = std::vector<double>{0.015,
-												0.030};
-	double b = 2.9;
+	std::vector<int> layers = std::vector<int>{90,80,t_nActions};
+	std::vector<double> n = std::vector<double>{0.0032,
+												0.01,
+												0.032};
+	double b = 3.9;
 
 
 	std::vector<double*> inputPtr;
