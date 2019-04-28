@@ -28,7 +28,8 @@ public:
 	void addToDelta(double nd) {delta += nd;}
 	double getDelta() {return delta;}
 	//additional
-	std::vector<double> getW() {return weights;}
+	std::vector<double> getW() const {return weights;}
+	void setW(std::vector<double> t_w) {weights=t_w;}
 	double getSum();
 	//activation function
 	double activationFunction(double x);
@@ -38,6 +39,7 @@ private:
 	double getRandomWeight();
 
 protected:
+public:
 	std::vector<Neuron*> input;
 	std::vector<double> weights;
 	double output;

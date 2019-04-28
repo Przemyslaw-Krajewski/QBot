@@ -11,23 +11,12 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 
+#include "../Bot/Common.h"
 #include "ImageAnalyzer.h"
 #include "MemoryAnalyzer.h"
 
 class StateAnalyzer {
 public:
-
-	struct Point
-	{
-		Point() {x=y=0;}
-		Point(int t_x, int t_y) {x=t_x;y=t_y;}
-		Point& operator=(const cv::Point& t_p ) {x=t_p.x;y=t_p.y;return *this;}
-		Point& operator=(const Point & t_p ) {x=t_p.x;y=t_p.y;return *this;}
-		bool operator==(const Point & t_p ) {return (x==t_p.x && y==t_p.y);}
-		int x;
-		int y;
-	};
-
 	struct AnalyzeResult
 	{
 		enum AdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};

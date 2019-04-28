@@ -42,7 +42,7 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	else if(memoryAnalyzeResult.playerVelocityX > 5) 										 	 {reward = 10;}
 
 	//Preparing output
-	StateAnalyzer::AnalyzeResult analyzeResult;
+	AnalyzeResult analyzeResult;
 	analyzeResult.fieldAndEnemiesLayout = imageAnalyzeResult.fieldAndEnemiesLayout;
 	analyzeResult.additionalInfo = additionalInfo;
 	analyzeResult.playerCoords = Point(0,0);

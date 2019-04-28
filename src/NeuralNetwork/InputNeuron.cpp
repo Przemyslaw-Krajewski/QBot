@@ -7,7 +7,12 @@
 
 #include "InputNeuron.h"
 
-InputNeuron::InputNeuron(double* t_x) : Neuron()
+InputNeuron::InputNeuron() : Neuron()
+{
+	x = 0;
+}
+
+InputNeuron::InputNeuron(double t_x) : Neuron()
 {
 	x = t_x;
 }
@@ -19,14 +24,14 @@ InputNeuron::~InputNeuron()
 
 double InputNeuron::determineY()
 {
-	output = *x;
+	output = x;
 	delta = 0;
 	return output;
 }
 
 double InputNeuron::getY()
 {
-	output = *x;
+	output = x;
 	return output;
 }
 

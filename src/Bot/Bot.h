@@ -12,9 +12,9 @@
 #include <list>
 #include <math.h>
 
+#include "Common.h"
 #include "../Analyzers/StateAnalyzer.h"
 #include "../QLearning/QLearning.h"
-#include "../Flags.h"
 #include "../Loggers/DataDrawer.h"
 
 class Bot {
@@ -46,14 +46,16 @@ public:
 private:
 	void prepareGameBeforeRun();
 	bool manageScenarioTime(bool resetTimer);
-	void learnQLearningScenario();
+	void learnFromScenario();
+	void learnFromMemory();
+	void eraseInvalidLastStates(std::list<SARS>* t_history);
 
 	void printScenarioResult();
 
 	std::vector<bool> determineControllerInput(int t_action);
 
-	std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
-	std::vector<int> createSceneState(cv::Mat& sceneState, std::vector<bool>& controllerInput, StateAnalyzer::Point& position, StateAnalyzer::Point& velocity);
+	std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, Point& position, Point& velocity);
+	std::vector<int> createSceneState(cv::Mat& sceneState, std::vector<bool>& controllerInput, Point& position, Point& velocity);
 	std::pair<StateAnalyzer::AnalyzeResult, std::vector<bool>> extractSceneState(std::vector<int> sceneData);
 
 
@@ -61,6 +63,8 @@ private:
 	//
 	StateAnalyzer analyzer;
 	QLearning *qLearning;
+
+	std::set<State> discoveredStates;
 
 	//Scenario data
 	std::vector<int> sceneState;

@@ -5,8 +5,6 @@
  *      Author: mistrz
  */
 
-#include <opencv2/opencv.hpp>
-
 #include "DataDrawer.h"
 
 /*
@@ -41,27 +39,27 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, std::
 				color[2] += 50;
 			}
 
-			drawBlock(&map,blockSize,StateAnalyzer::Point(xb,yb),color);
+			drawBlock(&map,blockSize,Point(xb,yb),color);
 		}
 	}
 	//player pos x
 	drawBorderedBlock(&map,blockSize,
-			StateAnalyzer::Point(1*blockSize,yScreenSize*blockSize),
+			Point(1*blockSize,yScreenSize*blockSize),
 			cv::Scalar(sceneData.playerCoords.x,sceneData.playerCoords.x,sceneData.playerCoords.x));
 	//player pos y
 	drawBorderedBlock(&map,blockSize,
-			StateAnalyzer::Point(2*blockSize,yScreenSize*blockSize),
+			Point(2*blockSize,yScreenSize*blockSize),
 			cv::Scalar(sceneData.playerCoords.y,sceneData.playerCoords.y,sceneData.playerCoords.y));
 	//player vel x
 	drawBorderedBlock(&map,blockSize,
-			StateAnalyzer::Point(3*blockSize,yScreenSize*blockSize),
+			Point(3*blockSize,yScreenSize*blockSize),
 			cv::Scalar(
 					0,
 					sceneData.playerVelocity.x < 0 ? 0 : sceneData.playerVelocity.x*32,
 					sceneData.playerVelocity.x > 0 ? 0 : sceneData.playerVelocity.x*32));
 	//player vel y
 	drawBorderedBlock(&map,blockSize,
-			StateAnalyzer::Point(4*blockSize,yScreenSize*blockSize),
+			Point(4*blockSize,yScreenSize*blockSize),
 			cv::Scalar(
 					0,
 					sceneData.playerVelocity.y < 0 ? 0 : sceneData.playerVelocity.y*32,
@@ -71,7 +69,7 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, std::
 	{
 		int value = t_keys[i] ? 255 : 0;
 		drawBorderedBlock(&map,blockSize,
-				StateAnalyzer::Point((8+i)*blockSize,yScreenSize*blockSize),
+				Point((8+i)*blockSize,yScreenSize*blockSize),
 				cv::Scalar(value,value,value));
 	}
 
@@ -84,7 +82,7 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, std::
 /*
  *
  */
-void DataDrawer::drawBlock(cv::Mat *mat, int t_blockSize, StateAnalyzer::Point t_point, cv::Scalar t_color)
+void DataDrawer::drawBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color)
 {
 	for(int xx=0; xx<t_blockSize; xx++)
 	{
@@ -101,7 +99,7 @@ void DataDrawer::drawBlock(cv::Mat *mat, int t_blockSize, StateAnalyzer::Point t
 /*
  *
  */
-void DataDrawer::drawBorderedBlock(cv::Mat *mat, int t_blockSize, StateAnalyzer::Point t_point, cv::Scalar t_color)
+void DataDrawer::drawBorderedBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color)
 {
 	for(int xx=0; xx<t_blockSize; xx++)
 	{

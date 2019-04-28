@@ -15,6 +15,7 @@ endif()
 add_executable(QBot
                             src/main.cpp
                             src/Bot/Bot.cpp
+							src/QLearning/QLearning.cpp
                             src/Analyzers/StateAnalyzer.cpp
                             src/Analyzers/DesktopHandler.cpp
                             src/Analyzers/ImageAnalyzer.cpp
@@ -22,12 +23,8 @@ add_executable(QBot
                             src/NeuralNetwork/NeuralNetwork.cpp
                             src/NeuralNetwork/Neuron.cpp
                             src/NeuralNetwork/InputNeuron.cpp
-							src/QLearning/QLearning.cpp
+							src/HashMap/HashMap.cpp
 							src/Loggers/DataDrawer.cpp
-							src/Arrays/Array.cpp
-							src/Arrays/Table.cpp
-							src/Arrays/HashMapArray.cpp
-							src/Arrays/NeuralNetworkArray.cpp
               )
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})

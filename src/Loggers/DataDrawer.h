@@ -8,6 +8,8 @@
 #ifndef SRC_LOGGERS_DATADRAWER_H_
 #define SRC_LOGGERS_DATADRAWER_H_
 
+#include <opencv2/opencv.hpp>
+
 #include "../Analyzers/StateAnalyzer.h"
 
 class DataDrawer {
@@ -17,8 +19,8 @@ private:
 public:
 	static void drawAnalyzedData(StateAnalyzer::AnalyzeResult& t_sceneData, std::vector<bool> t_keys);
 private:
-	inline static void drawBlock(cv::Mat *mat, int t_blockSize, StateAnalyzer::Point t_point, cv::Scalar t_color);
-	inline static void drawBorderedBlock(cv::Mat *mat, int t_blockSize, StateAnalyzer::Point t_point, cv::Scalar t_color);
+	inline static void drawBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);
+	inline static void drawBorderedBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);
 };
 
 #endif /* SRC_LOGGERS_DATADRAWER_H_ */

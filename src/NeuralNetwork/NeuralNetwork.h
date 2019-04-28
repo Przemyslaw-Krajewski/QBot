@@ -19,25 +19,34 @@
 #include "InputNeuron.h"
 #include "Neuron.h"
 
+using NNInput = std::vector<double>;
+
 class NeuralNetwork {
 public:
-	NeuralNetwork(std::vector<double*> t_input, std::vector<int> t_layers,std::vector<double> t_n, double t_b);
+	NeuralNetwork(int t_inputSize, std::vector<int> t_layers,std::vector<double> t_n, double t_b);
+	NeuralNetwork(const NeuralNetwork& t_neuralNetwork);
 	virtual ~NeuralNetwork();
 
 	//basic
-	std::vector<double> determineY();
+	std::vector<double> determineY(std::vector<double> x);
 	std::vector<double> getY();
 	void learnBackPropagation(std::vector<double> z);
+	void learnBackPropagation(std::vector<double> x, std::vector<double> z);
 
-	//additional
-	void modifyLearningRate(double v);
+	//getInfo
+protected:
+	int getInputSize() const {return inputLayer.size()-1;}
+	double getActivationFunctionParameter() const {return b;}
+	std::vector<double> getLearningRates() const {return n;}
+	std::vector<int> getLayersLayout() const;
+	const std::list<std::vector<Neuron>>* getHiddenLayers() const { return &hiddenLayers;}
 
+public:
 	//display
 	void displayNeuralNetwork();
 	void writeNeuronsToFile();
 	void printNeuralNetworkInfo();
 
-	double oneValue;
 private:
 	std::list<InputNeuron> inputLayer;
 	std::list<std::vector<Neuron>> hiddenLayers;
