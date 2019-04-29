@@ -36,10 +36,10 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	double reward = 0;
 	bool endScenario = false;
 	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = -100;  endScenario = true;}
-	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = -1000; endScenario = true;}
-	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward =  1000; endScenario = true;}
-	else if(memoryAnalyzeResult.playerPositionX > 99 && memoryAnalyzeResult.playerVelocityX > 6) {reward = 50;}
-	else if(memoryAnalyzeResult.playerVelocityX > 5) 										 	 {reward = 10;}
+	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
+	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD; endScenario = true;}
+	else if(memoryAnalyzeResult.playerPositionX > 99 && memoryAnalyzeResult.playerVelocityX > 6) {reward = ADVANCE_REWARD;}
+	else if(memoryAnalyzeResult.playerVelocityX > 5) 										 	 {reward = NOTHING_REWARD;}
 
 	//Preparing output
 	AnalyzeResult analyzeResult;

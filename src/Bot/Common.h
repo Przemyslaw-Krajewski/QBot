@@ -10,8 +10,13 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <vector>
+
 const int numberOfActions = 5;
 const int numberOfControllerInputs = 6;
+
+using State = std::vector<int>;
+using ControllerInput = std::vector<bool>;
 
 struct Point
 {

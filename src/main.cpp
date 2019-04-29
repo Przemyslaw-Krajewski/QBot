@@ -15,7 +15,7 @@ int main()
 	Bot bot;
 	try
 	{
-		bot.run();
+		bot.execute();
 	}
 	catch(std::string& e)
 	{

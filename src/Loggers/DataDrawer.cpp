@@ -10,7 +10,7 @@
 /*
  *
  */
-void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, std::vector<bool> t_keys)
+void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, ControllerInput t_keys)
 {
 	int blockSize = 15;
 

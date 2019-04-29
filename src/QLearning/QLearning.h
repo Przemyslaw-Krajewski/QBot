@@ -11,10 +11,9 @@
 #include <vector>
 #include <string>
 
-#include "../HashMap/HashMap.h"
+#include "../Bot/Common.h"
+#include "../HashMap/QValues.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
-
-using State = std::vector<int>;
 
 class QLearning {
 
@@ -44,8 +43,10 @@ private:
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	HashMap qValues;
+	QValues qValues;
 	NeuralNetwork actions;
+
+	const double ACTION_LEARN_THRESHOLD = 3;
 
 
 };

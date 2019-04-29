@@ -13,7 +13,7 @@
 QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
 	actions(NeuralNetwork(t_dimensionStatesSize.size(),std::initializer_list<int>({90,80,t_nActions}),
 			std::initializer_list<double>({0.0032,0.01,0.032}),5.2)),
-	qValues(HashMap(t_nActions,t_dimensionStatesSize))
+	qValues(QValues(t_nActions,t_dimensionStatesSize))
 {
 	alpha = 0.85;
 	gamma = 0.80;
@@ -65,7 +65,7 @@ double QLearning::learnQL(State t_prevState, State t_state, int t_action, double
  */
 double QLearning::learnAction(State state)
 {
-	if(qValues.getChange(state) > 3) return 0;
+	if(qValues.getChange(state) > ACTION_LEARN_THRESHOLD) return 0;
 
 	std::vector<double> qlValues = qValues.getValues(state);
 	std::vector<double> nnValues = actions.determineY(convertState2NNInput((state)));

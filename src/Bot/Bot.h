@@ -40,23 +40,17 @@ public:
 	Bot();
 	virtual ~Bot();
 
-	void run();
+	void execute();
 	void testStateAnalyzer();
 
 private:
-	void prepareGameBeforeRun();
-	bool manageScenarioTime(bool resetTimer);
-	void learnFromScenario();
+	void learnFromScenario(std::list<SARS> &historyScenario);
 	void learnFromMemory();
-	void eraseInvalidLastStates(std::list<SARS>* t_history);
+	void eraseInvalidLastStates(std::list<SARS> &history);
 
-	void printScenarioResult();
-
-	std::vector<bool> determineControllerInput(int t_action);
-
-	std::vector<int> copySceneState(cv::Mat& image, std::vector<bool>& controllerInput, Point& position, Point& velocity);
-	std::vector<int> createSceneState(cv::Mat& sceneState, std::vector<bool>& controllerInput, Point& position, Point& velocity);
-	std::pair<StateAnalyzer::AnalyzeResult, std::vector<bool>> extractSceneState(std::vector<int> sceneData);
+	ControllerInput determineControllerInput(int t_action);
+	State createSceneState(cv::Mat& sceneState, ControllerInput& controllerInput, Point& position, Point& velocity);
+	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
 
 
 private:
@@ -66,18 +60,12 @@ private:
 
 	std::set<State> discoveredStates;
 
-	//Scenario data
-	std::vector<int> sceneState;
-	std::vector<bool> controllerInput;
-	int action = 0;
-	std::list<SARS> historyScenario;
-	ScenarioResult scenarioResult;
-	int time;
-
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 80;
+	const int LEARN_FROM_MEMORY_ITERATIONS = 1;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
 };
 
 #endif /* SRC_BOT_H_ */

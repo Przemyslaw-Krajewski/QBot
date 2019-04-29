@@ -12,19 +12,21 @@
 #include <vector>
 #include <map>
 
+#include "../Bot/Common.h"
+
 using CacheMemory = std::map<std::vector<int>,double>;
 
-class HashMap
+class QValues
 {
 public:
-	HashMap(int t_nActions, std::vector<int> t_dimensionsSize);
-	~HashMap();
+	QValues(int t_nActions, std::vector<int> t_dimensionsSize);
+	~QValues();
 
-	double getValue(std::vector<int> t_state, int t_action);
-	double getChange(std::vector<int> t_state);
-	std::vector<double> getValues(std::vector<int> t_state);
+	double getValue(State t_state, int t_action);
+	double getChange(State t_state);
+	std::vector<double> getValues(State t_state);
 
-	void setValue(std::vector<int> t_state, int t_action, double t_value);
+	void setValue(State t_state, int t_action, double t_value);
 
 	long getSize() {long sum = 0; for(int i=0;i<cache.size();i++) sum+=cache[i].size(); return sum;}
 
@@ -33,7 +35,7 @@ private:
 	std::vector<int> maxValues;
 	int changeIndex;
 
-	const int MAX_CHANGE{9999};
+	const int MAX_CHANGE = 9999;
 };
 
 #endif /* SRC_ARRAYS_HASHMAPARRAY_H_ */

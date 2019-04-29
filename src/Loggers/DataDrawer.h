@@ -10,6 +10,7 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "../Bot/Common.h"
 #include "../Analyzers/StateAnalyzer.h"
 
 class DataDrawer {
@@ -17,7 +18,7 @@ private:
 	DataDrawer();
 
 public:
-	static void drawAnalyzedData(StateAnalyzer::AnalyzeResult& t_sceneData, std::vector<bool> t_keys);
+	static void drawAnalyzedData(StateAnalyzer::AnalyzeResult& t_sceneData, ControllerInput t_keys);
 private:
 	inline static void drawBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);
 	inline static void drawBorderedBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);
