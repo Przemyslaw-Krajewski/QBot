@@ -54,7 +54,7 @@ std::vector<double> QValues::getValues(State t_state)
 double QValues::getChange(State t_state)
 {
 	double result;
-	if(cache[changeIndex].count(t_state) > 0) result = cache[0].find(t_state)->second;
+	if(cache[changeIndex].count(t_state) > 0) result = cache[changeIndex].find(t_state)->second;
 	else result = MAX_CHANGE;
 
 	return result;

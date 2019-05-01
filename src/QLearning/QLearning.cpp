@@ -65,14 +65,14 @@ double QLearning::learnQL(State t_prevState, State t_state, int t_action, double
  */
 double QLearning::learnAction(State state)
 {
-	if(qValues.getChange(state) > ACTION_LEARN_THRESHOLD) return 0;
+	if(qValues.getChange(state) > ACTION_LEARN_THRESHOLD) return -1;
 
 	std::vector<double> qlValues = qValues.getValues(state);
 	std::vector<double> nnValues = actions.determineY(convertState2NNInput((state)));
 	int qlAction = getIndexOfMaxValue(qlValues);
 	int nnAction = getIndexOfMaxValue(nnValues);
 
-	if(qlAction == nnAction) return 0;
+	if(qlAction == nnAction) return -2;
 
 	std::vector<double> z;
 	for(int i=0; i<numberOfActions ;i++) z.push_back(0.1);

@@ -79,13 +79,13 @@ void Bot::execute()
 		while(1)
 		{
 			int64 timeBefore = cv::getTickCount();
+
 			std::vector<int> oldSceneState = sceneState;
 			int oldAction = action;
 
 			//Analyze situation
 			StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
 			if(analyzeResult.fieldAndEnemiesLayout.cols == 0 || analyzeResult.fieldAndEnemiesLayout.rows == 0) continue;
-
 			sceneState = createSceneState(analyzeResult.fieldAndEnemiesLayout,
 						 	 	 	 	  controllerInput,
 										  analyzeResult.playerCoords,
@@ -93,7 +93,7 @@ void Bot::execute()
 
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
-			discoveredStates.insert(sceneState);
+			discoveredStates[reduceStateResolution(sceneState)] = sceneState;
 
 			//Determine new controller input
 			action = qLearning->chooseAction(sceneState).second;
@@ -105,10 +105,13 @@ void Bot::execute()
 			DataDrawer::drawAnalyzedData(extraxtedSceneData.first,extraxtedSceneData.second);
 
 			int64 timeAfter = cv::getTickCount();
-//			std::cout << (timeAfter - timeBefore)/ cv::getTickFrequency() << "\n";
+
+#ifdef PRINT_PROCESSING_TIME
+			std::cout << (timeAfter - timeBefore)/ cv::getTickFrequency() << "\n";
+#endif
 
 			//Stop game?
-			if(!analyzeResult.reward<StateAnalyzer::ADVANCE_REWARD)
+			if(analyzeResult.reward<StateAnalyzer::ADVANCE_REWARD)
 			{
 				time--;
 				if(time<0)
@@ -128,6 +131,7 @@ void Bot::execute()
 		DesktopHandler::getPtr()->releaseControllerButton();
 
 		//Learning
+		std::cout << "\nLEARNING\n";
 		if(scenarioResult==ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
 		learnFromScenario(historyScenario);
 		learnFromMemory();
@@ -162,17 +166,20 @@ void Bot::eraseInvalidLastStates(std::list<SARS> &t_history)
  */
 void Bot::learnFromScenario(std::list<SARS> &historyScenario)
 {
-	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
-	{
-		qLearning->learnQL(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward);
-	}
+	if(LEARN_FROM_HISTORY_ITERATIONS == 0) return;
+
 	for(int i=0; i<LEARN_FROM_HISTORY_ITERATIONS; i++)
 	{
+		int skipped = 0;
+		int alreadyOK = 0;
 		for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 		{
 			qLearning->learnQL(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward);
-			qLearning->learnAction(sarsIterator->oldState);
+			double learnResult = qLearning->learnAction(sarsIterator->oldState);
+			if( learnResult == -1) skipped++;
+			else if(learnResult == -2) alreadyOK++;
 		}
+		std::cout << "Skipped hist: " << skipped << "/" << alreadyOK << "/" << historyScenario.size() << "\n";
 	}
 }
 
@@ -181,25 +188,28 @@ void Bot::learnFromScenario(std::list<SARS> &historyScenario)
  */
 void Bot::learnFromMemory()
 {
+	if(LEARN_FROM_MEMORY_ITERATIONS == 0) return;
 	std::cout << "Discovered: " << discoveredStates.size() << "\n";
 	if(discoveredStates.size() <= 0) return;
 
 	//Prepare states
 	std::vector<const State*> shuffledStates;
-	for(std::set<State>::iterator i=discoveredStates.begin(); i!=discoveredStates.end(); i++) shuffledStates.push_back(&(*i));
+	for(std::map<State,State>::iterator i=discoveredStates.begin(); i!=discoveredStates.end(); i++) shuffledStates.push_back(&(i->second));
 
 	//Learn NN
-	int skipStep = skipStep >= 4 ? sqrt(shuffledStates.size())/2 : 1;
+	int skipStep = 2;
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
 	{
-		double sumErr = 0;
+		int skipped = 0;
+		int alreadyOK = 0;
 		std::random_shuffle(shuffledStates.begin(),shuffledStates.end());
 		for(int j=0; j<shuffledStates.size(); j+=skipStep)
 		{
-			double err = qLearning->learnAction(*(shuffledStates[j]));
-			sumErr += err;
+			double learnResult = qLearning->learnAction(*(shuffledStates[j]));
+			if( learnResult == -1) skipped++;
+			else if(learnResult == -2) alreadyOK++;
 		}
-		std::cout << "Learn error: "<< sumErr << "\n" ;
+		std::cout << "Skipped mem: "<< skipped << "/" << alreadyOK << "/" << (shuffledStates.size()/skipStep) << "\n" ;
 	}
 }
 

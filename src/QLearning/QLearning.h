@@ -46,7 +46,7 @@ private:
 	QValues qValues;
 	NeuralNetwork actions;
 
-	const double ACTION_LEARN_THRESHOLD = 3;
+	const double ACTION_LEARN_THRESHOLD = 10;
 
 
 };
