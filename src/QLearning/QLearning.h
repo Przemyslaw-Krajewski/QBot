@@ -26,6 +26,8 @@ public:
 	double learnQL(State t_prevState, State t_state, int t_action, double t_reward);
 	double learnAction(State state);
 
+	void resetActionsNN();
+
 
 private:
 	NNInput convertState2NNInput(State t_state);
@@ -44,9 +46,9 @@ private:
 	std::vector<int> dimensionStatesSize;
 
 	QValues qValues;
-	NeuralNetwork actions;
+	NeuralNetwork *actions;
 
-	const double ACTION_LEARN_THRESHOLD = 10;
+	const double ACTION_LEARN_THRESHOLD = 20;
 
 
 };

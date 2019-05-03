@@ -40,6 +40,8 @@ Bot::Bot()
 
 	//Initialize qLearning
 	qLearning = new QLearning(numberOfActions, std::vector<int>(sceneState.size(),1));
+
+	leftStatesToDiscoverBeforeReset = STATES_DISCOVERED_BEFORE_RESET_ACTIONS;
 }
 
 /*
@@ -65,6 +67,7 @@ void Bot::execute()
 		ScenarioResult scenarioResult = ScenarioResult::noInfo;
 		int time = TIME_LIMIT;
 
+		//Reload game
 		DesktopHandler::getPtr()->releaseControllerButton();
 		DesktopHandler::loadGame();
 		cv::waitKey(3000);
@@ -76,6 +79,8 @@ void Bot::execute()
 						analyzeResult.playerCoords,
 						analyzeResult.playerVelocity);
 
+		//Info variables
+		long discoveredStatesSize = discoveredStates.size();
 		while(1)
 		{
 			int64 timeBefore = cv::getTickCount();
@@ -130,8 +135,20 @@ void Bot::execute()
 		}
 		DesktopHandler::getPtr()->releaseControllerButton();
 
+		std::cout << "\n";
+		std::cout << "Added :" << discoveredStates.size() - discoveredStatesSize << " states\n";
+
+		leftStatesToDiscoverBeforeReset -= discoveredStates.size() - discoveredStatesSize;
+		if(leftStatesToDiscoverBeforeReset < 0)
+		{
+			std::cout << "RESET\n";
+			qLearning->resetActionsNN();
+			leftStatesToDiscoverBeforeReset = STATES_DISCOVERED_BEFORE_RESET_ACTIONS;
+			for(int i=0;i<4;i++) learnFromMemory();
+		}
+
 		//Learning
-		std::cout << "\nLEARNING\n";
+		std::cout << "LEARNING\n";
 		if(scenarioResult==ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
 		learnFromScenario(historyScenario);
 		learnFromMemory();
@@ -166,6 +183,11 @@ void Bot::eraseInvalidLastStates(std::list<SARS> &t_history)
  */
 void Bot::learnFromScenario(std::list<SARS> &historyScenario)
 {
+	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
+	{
+		qLearning->learnQL(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward);
+	}
+
 	if(LEARN_FROM_HISTORY_ITERATIONS == 0) return;
 
 	for(int i=0; i<LEARN_FROM_HISTORY_ITERATIONS; i++)
@@ -174,7 +196,6 @@ void Bot::learnFromScenario(std::list<SARS> &historyScenario)
 		int alreadyOK = 0;
 		for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 		{
-			qLearning->learnQL(sarsIterator->oldState, sarsIterator->state, sarsIterator->action, sarsIterator->reward);
 			double learnResult = qLearning->learnAction(sarsIterator->oldState);
 			if( learnResult == -1) skipped++;
 			else if(learnResult == -2) alreadyOK++;
@@ -197,7 +218,7 @@ void Bot::learnFromMemory()
 	for(std::map<State,State>::iterator i=discoveredStates.begin(); i!=discoveredStates.end(); i++) shuffledStates.push_back(&(i->second));
 
 	//Learn NN
-	int skipStep = 2;
+	int skipStep = 1;
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
 	{
 		int skipped = 0;
@@ -246,6 +267,26 @@ ControllerInput Bot::determineControllerInput(int t_action)
 	}
 
 	return w;
+}
+
+/*
+ *
+ */
+State Bot::reduceStateResolution(const State& t_state)
+{
+	int reduceLevel = 2;
+	std::vector<int> result;
+	for(int i=0;i<t_state.size()-10;i++)
+	{
+		if(i%reduceLevel!=0 ||( ((int)i/56)%reduceLevel!=0) ) continue;
+		result.push_back(t_state[i]);
+	}
+	for(int i=t_state.size()-10;i<t_state.size();i++)
+	{
+		result.push_back(t_state[i]);
+	}
+
+	return result;
 }
 
 /*

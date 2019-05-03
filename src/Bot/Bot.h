@@ -55,18 +55,7 @@ private:
 	State createSceneState(cv::Mat& sceneState, ControllerInput& controllerInput, Point& position, Point& velocity);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
 
-	static State reduceStateResolution(const State& t_state)
-	{
-		int reduceLevel = 2;
-		std::vector<int> result;
-		for(int i=0;i<t_state.size();i++)
-		{
-			if(i%reduceLevel!=0 ||( ((int)i/56)%reduceLevel!=0) ) continue;
-			result.push_back(t_state[i]);
-		}
-
-		return result;
-	}
+	static State reduceStateResolution(const State& t_state);
 
 private:
 	//
@@ -74,13 +63,15 @@ private:
 	QLearning *qLearning;
 
 	std::map<ReducedState,State> discoveredStates;
+	long leftStatesToDiscoverBeforeReset;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 80;
-	const int LEARN_FROM_HISTORY_ITERATIONS =1;
-	const int LEARN_FROM_MEMORY_ITERATIONS = 4;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 5;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
+	const long STATES_DISCOVERED_BEFORE_RESET_ACTIONS = 1000;
 };
 
 #endif /* SRC_BOT_H_ */

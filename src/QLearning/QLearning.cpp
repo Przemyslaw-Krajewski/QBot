@@ -11,8 +11,6 @@
  *
  */
 QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
-	actions(NeuralNetwork(t_dimensionStatesSize.size(),std::initializer_list<int>({90,80,t_nActions}),
-			std::initializer_list<double>({0.0032,0.01,0.032}),5.2)),
 	qValues(QValues(t_nActions,t_dimensionStatesSize))
 {
 	alpha = 0.85;
@@ -20,6 +18,9 @@ QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
 
 	dimensionStatesSize = t_dimensionStatesSize;
 	numberOfActions = t_nActions;
+
+	actions = nullptr;
+	resetActionsNN();
 }
 
 /*
@@ -33,9 +34,19 @@ QLearning::~QLearning()
 /*
  *
  */
+void QLearning::resetActionsNN()
+{
+	if(actions != nullptr) delete actions;
+	actions = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({90,80,numberOfActions}),
+				std::initializer_list<double>({0.0032,0.01,0.032}),5.2);
+}
+
+/*
+ *
+ */
 std::pair<bool,int> QLearning::chooseAction(State t_state)
 {
-	std::vector<double> nnValues = actions.determineY(convertState2NNInput(t_state));
+	std::vector<double> nnValues = actions->determineY(convertState2NNInput(t_state));
 	int nnAction = getIndexOfMaxValue(nnValues);
 
 	return std::pair<bool,int>(true,nnAction);
@@ -68,7 +79,7 @@ double QLearning::learnAction(State state)
 	if(qValues.getChange(state) > ACTION_LEARN_THRESHOLD) return -1;
 
 	std::vector<double> qlValues = qValues.getValues(state);
-	std::vector<double> nnValues = actions.determineY(convertState2NNInput((state)));
+	std::vector<double> nnValues = actions->determineY(convertState2NNInput((state)));
 	int qlAction = getIndexOfMaxValue(qlValues);
 	int nnAction = getIndexOfMaxValue(nnValues);
 
@@ -78,7 +89,7 @@ double QLearning::learnAction(State state)
 	for(int i=0; i<numberOfActions ;i++) z.push_back(0.1);
 	z[qlAction] = 0.9;
 
-	actions.learnBackPropagation(z);
+	actions->learnBackPropagation(z);
 
 	//Calculate error;
 	double err = 0;
