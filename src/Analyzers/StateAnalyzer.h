@@ -42,7 +42,7 @@ public:
 	static const int WIN_REWARD     = 1000;
 	static const int ADVANCE_REWARD = 50;
 	static const int NOTHING_REWARD = 10;
-	static const int DIE_REWARD 	 = -1000;
+	static const int DIE_REWARD 	= -1000;
 };
 
 #endif /* SRC_ANALYZERS_STATEANALYZER_H_ */

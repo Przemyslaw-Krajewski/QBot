@@ -43,7 +43,7 @@ double QValues::getValue(State t_state, int t_action)
 std::vector<double> QValues::getValues(State t_state)
 {
 	std::vector<double> result;
-	for(int a=0; a<cache.size();a++) result.push_back(getValue(t_state,a));
+	for(int a=0; a<cache.size()-1;a++) result.push_back(getValue(t_state,a));
 
 	return result;
 }

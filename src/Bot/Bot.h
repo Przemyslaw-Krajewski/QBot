@@ -47,6 +47,7 @@ public:
 	void testStateAnalyzer();
 
 private:
+	void learnFromScenarioQL(std::list<SARS> &historyScenario);
 	void learnFromScenario(std::list<SARS> &historyScenario);
 	void learnFromMemory();
 	void eraseInvalidLastStates(std::list<SARS> &history);
@@ -64,14 +65,16 @@ private:
 
 	std::map<ReducedState,State> discoveredStates;
 	long leftStatesToDiscoverBeforeReset;
+	int playsBeforeNNLearning;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 80;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 5;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
-	const long STATES_DISCOVERED_BEFORE_RESET_ACTIONS = 1000;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 3;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 2;
+	const long STATES_DISCOVERED_BEFORE_RESET_ACTIONS = 9000;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 10;
 };
 
 #endif /* SRC_BOT_H_ */

@@ -22,9 +22,9 @@ public:
 	virtual ~QLearning();
 
 	//Basic methods
-	std::pair<bool,int> chooseAction(State t_state);
+	std::pair<bool,int> chooseAction(State& t_state);
 	double learnQL(State t_prevState, State t_state, int t_action, double t_reward);
-	double learnAction(State state);
+	std::pair<double,int> learnAction(State state);
 
 	void resetActionsNN();
 
@@ -48,7 +48,8 @@ private:
 	QValues qValues;
 	NeuralNetwork *actions;
 
-	const double ACTION_LEARN_THRESHOLD = 20;
+public:
+	static constexpr double ACTION_LEARN_THRESHOLD = 40;
 
 
 };
