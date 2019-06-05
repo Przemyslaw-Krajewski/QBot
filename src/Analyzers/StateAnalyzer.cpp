@@ -38,8 +38,8 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = -100;  endScenario = true;}
 	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
 	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD; endScenario = true;}
-	else if(memoryAnalyzeResult.playerPositionX > 99 && memoryAnalyzeResult.playerVelocityX > 6) {reward = ADVANCE_REWARD;}
-	else if(memoryAnalyzeResult.playerVelocityX > 5) 										 	 {reward = NOTHING_REWARD;}
+	else if(memoryAnalyzeResult.playerPositionX > 60 && memoryAnalyzeResult.playerVelocityX > 16) {reward = ADVANCE_REWARD;}
+	else if(memoryAnalyzeResult.playerVelocityX > 16) 										 	 {reward = LITTLE_ADVANCE_REWARD;}
 
 	//Preparing output
 	AnalyzeResult analyzeResult;

@@ -10,7 +10,7 @@
 /*
  *
  */
-void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, ControllerInput t_keys)
+void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, ControllerInput t_keys, double reward, double change)
 {
 	int blockSize = 15;
 
@@ -40,6 +40,14 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 			}
 
 			drawBlock(&map,blockSize,Point(xb,yb),color);
+		}
+	}
+	for(int x=0; x<map.cols; x++)
+	{
+		for(int y=yScreenSize*blockSize; y<map.rows; y++)
+		{
+			uchar* ptr = map.ptr(y)+(x)*3;
+			ptr[0] = ptr[1] = ptr[2] = 20;
 		}
 	}
 	//player pos x
@@ -72,6 +80,24 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 				Point((8+i)*blockSize,yScreenSize*blockSize),
 				cv::Scalar(value,value,value));
 	}
+
+	reward = reward > 255 ? 255 : reward;
+	reward = reward < -255 ? -255 : reward;
+	//reward
+	drawBorderedBlock(&map,blockSize,
+			Point(20*blockSize,yScreenSize*blockSize),
+			cv::Scalar(
+					0,
+					reward > 0 ? 5*reward : 0,
+					reward < 0 ?   -reward : 0));
+	//change
+	change = abs(change);
+	drawBorderedBlock(&map,blockSize,
+			Point(21*blockSize,yScreenSize*blockSize),
+			cv::Scalar(
+					(change >= 40 && change < 9999) ? 255 : 0,
+					change < 40 ? 255 : 0,
+					change == 9999 ? 255 : 0));
 
 	//Print
 	imshow("AnalyzedSceneData", map);

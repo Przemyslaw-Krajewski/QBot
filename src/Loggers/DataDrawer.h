@@ -18,7 +18,7 @@ private:
 	DataDrawer();
 
 public:
-	static void drawAnalyzedData(StateAnalyzer::AnalyzeResult& t_sceneData, ControllerInput t_keys);
+	static void drawAnalyzedData(StateAnalyzer::AnalyzeResult& t_sceneData, ControllerInput t_keys, double reward, double change);
 private:
 	inline static void drawBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);
 	inline static void drawBorderedBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);

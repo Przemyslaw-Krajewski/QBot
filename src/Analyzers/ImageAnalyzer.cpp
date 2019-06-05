@@ -114,7 +114,7 @@ ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
 	for(cv::Point p : blocks1) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,0), 0);
 	for(cv::Point p : blocks2) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,2), 0);
 	for(cv::Point p : blocks3) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,2), 0);
-	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+64,416)+transl),cv::Scalar(100  ,100  ,100), -1);
+	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+64,448)+transl),cv::Scalar(100  ,100  ,100), -1);
 
 	//Writing DATA OUTPUT
 	cv::Mat fael = cv::Mat(imageSize.y*2/interval, imageSize.x/interval, CV_8UC3);

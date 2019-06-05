@@ -22,7 +22,7 @@ public:
 	virtual ~QLearning();
 
 	//Basic methods
-	std::pair<bool,int> chooseAction(State& t_state);
+	std::pair<bool,int> chooseAction(State& t_state, ControlMode mode);
 	double learnQL(State t_prevState, State t_state, int t_action, double t_reward);
 	std::pair<double,int> learnAction(State state);
 
@@ -37,6 +37,7 @@ public:
 	//Debug methods
 	void setQValue(State t_state, int t_action, double t_value) {qValues.setValue(t_state, t_action, t_value);}
 	double getQValue(State t_state, int t_action) { return qValues.getValue(t_state,t_action);}
+	double getQChange(State t_state) { return qValues.getChange(t_state);}
 
 
 private:

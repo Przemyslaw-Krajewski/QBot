@@ -13,7 +13,7 @@
 QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
 	qValues(QValues(t_nActions,t_dimensionStatesSize))
 {
-	alpha = 0.60;
+	alpha = 0.55;
 	gamma = 0.80;
 
 	dimensionStatesSize = t_dimensionStatesSize;
@@ -37,28 +37,24 @@ QLearning::~QLearning()
 void QLearning::resetActionsNN()
 {
 	if(actions != nullptr) delete actions;
-	actions = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({120,110,100,numberOfActions}),
-				std::initializer_list<double>({0.0001,0.00032,0.001,0.032}),6.2);
+	actions = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({120,100,numberOfActions}),
+				std::initializer_list<double>({0.033,0.15,0.5}),1.2);
 }
 
-/*
+/*z
  *
  */
-std::pair<bool,int> QLearning::chooseAction(State& t_state)
+std::pair<bool,int> QLearning::chooseAction(State& t_state, ControlMode mode)
 {
 	std::vector<double> values;
-	if(qValues.getChange(t_state) > ACTION_LEARN_THRESHOLD)
+	if(mode == ControlMode::NN)		  values = actions->determineY(convertState2NNInput(t_state));
+	else if (mode == ControlMode::QL) values = qValues.getValues(t_state);
+	else if (mode == ControlMode::Hybrid)
 	{
-		std::cout << "NN     ";
-		values = actions->determineY(convertState2NNInput(t_state));
+		if(qValues.getChange(t_state) > ACTION_LEARN_THRESHOLD) values = actions->determineY(convertState2NNInput(t_state));
+		else values = qValues.getValues(t_state);
 	}
-	else
-	{
-		std::cout << "     QL";
-		values = qValues.getValues(t_state);
-	}
-
-	std::cout << "   " << qValues.getChange(t_state) << "\n";
+	else assert("no such control mode" && 0);
 
 	int action = getIndexOfMaxValue(values);
 
@@ -70,7 +66,7 @@ std::pair<bool,int> QLearning::chooseAction(State& t_state)
  */
 double QLearning::learnQL(State t_prevState, State t_state, int t_action, double t_reward)
 {
-	double maxValue = qValues.getValue(t_state,t_action);
+	double maxValue = qValues.getValue(t_state,0);
 	for(int i_action=1; i_action<numberOfActions; i_action++)
 	{
 		double value = qValues.getValue(t_state,i_action);
@@ -89,6 +85,7 @@ double QLearning::learnQL(State t_prevState, State t_state, int t_action, double
  */
 std::pair<double,int> QLearning::learnAction(State state)
 {
+
 	if(qValues.getChange(state) > ACTION_LEARN_THRESHOLD) return std::pair<double,int>(0,2);
 
 	std::vector<double> qlValues = qValues.getValues(state);

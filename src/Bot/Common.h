@@ -29,4 +29,10 @@ struct Point
 	int y;
 };
 
+namespace ControlModeEnum
+{
+	enum ControlMode {QL, NN, Hybrid, NNNoLearn};
+}
+using ControlMode = ControlModeEnum::ControlMode;
+
 #endif /* SRC_BOT_COMMON_H_ */

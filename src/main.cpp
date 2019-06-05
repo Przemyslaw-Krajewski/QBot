@@ -16,6 +16,7 @@ int main()
 	try
 	{
 		bot.execute();
+//		bot.testStateAnalyzer();
 	}
 	catch(std::string& e)
 	{

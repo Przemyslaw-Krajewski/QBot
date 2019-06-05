@@ -13,6 +13,8 @@
 #include <vector>
 #include <list>
 #include <math.h>
+#include <iostream>
+#include <fstream>
 
 #include "Common.h"
 #include "../Analyzers/StateAnalyzer.h"
@@ -47,10 +49,13 @@ public:
 	void testStateAnalyzer();
 
 private:
+	void loadParameters();
+
 	void learnFromScenarioQL(std::list<SARS> &historyScenario);
 	void learnFromScenario(std::list<SARS> &historyScenario);
 	void learnFromMemory();
 	void eraseInvalidLastStates(std::list<SARS> &history);
+	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);
 	State createSceneState(cv::Mat& sceneState, ControllerInput& controllerInput, Point& position, Point& velocity);
@@ -63,17 +68,18 @@ private:
 	StateAnalyzer analyzer;
 	QLearning *qLearning;
 
-	std::map<ReducedState,State> discoveredStates;
-	long leftStatesToDiscoverBeforeReset;
+	std::set<State> discoveredStates;
 	int playsBeforeNNLearning;
+
+	ControlMode controlMode;
+	bool reset;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 80;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 3;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 2;
-	const long STATES_DISCOVERED_BEFORE_RESET_ACTIONS = 9000;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 4;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 4;
 	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 10;
 };
 
