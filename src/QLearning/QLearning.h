@@ -24,13 +24,13 @@ public:
 	//Basic methods
 	std::pair<bool,int> chooseAction(State& t_state, ControlMode mode);
 	double learnQL(State t_prevState, State t_state, int t_action, double t_reward);
-	std::pair<double,int> learnAction(State state);
+	std::pair<double,int> learnAction(const State *state, bool skipNotReady = true);
 
 	void resetActionsNN();
 
 
 private:
-	NNInput convertState2NNInput(State t_state);
+	NNInput convertState2NNInput(const State &t_state);
 	int getIndexOfMaxValue(std::vector<double> t_array);
 
 public:

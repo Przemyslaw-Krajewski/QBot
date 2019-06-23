@@ -18,6 +18,8 @@ Neuron::Neuron()
 	delta = 0;
 	input.clear();
 	weights.clear();
+
+	sum = 0;
 }
 
 /*
@@ -50,7 +52,7 @@ Neuron::~Neuron()
 double Neuron::determineY()
 {
 	//sum inputs*weights
-	double sum = 0;
+	sum = 0;
 	for(int i=0; i<input.size(); i++) sum += (input[i]->getY())*weights[i];
 
 	//calculate result
@@ -64,10 +66,6 @@ double Neuron::determineY()
  */
 void Neuron::learnDeltaRule()
 {
-	//sum inputs*weights
-	double sum = 0;
-	for(int i=0; i<input.size();i++) sum+=weights[i]*(input[i]->getY());
-
 	//determine common multiplier
 	double p = (*n)*delta*derativeActivationFunction(sum);
 	//calculate new weights
@@ -108,8 +106,6 @@ double Neuron::derativeActivationFunction(double x)
  */
 double Neuron::getSum()
 {
-	double sum = 0;
-	for(int i=0; i<input.size(); i++) sum += (input[i]->getY())*weights[i];
 	return sum;
 }
 

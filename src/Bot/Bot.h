@@ -68,7 +68,8 @@ private:
 	StateAnalyzer analyzer;
 	QLearning *qLearning;
 
-	std::set<State> discoveredStates;
+	std::map<ReducedState, State> discoveredStates;
+	std::set<State> discoveredStates2;
 	int playsBeforeNNLearning;
 
 	ControlMode controlMode;
@@ -78,9 +79,9 @@ private:
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 80;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 4;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 4;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 10;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 3;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 3;
 };
 
 #endif /* SRC_BOT_H_ */

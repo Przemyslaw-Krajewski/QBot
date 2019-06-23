@@ -110,7 +110,7 @@ NeuralNetwork::~NeuralNetwork()
 /*
  *
  */
-std::vector<double> NeuralNetwork::determineY(std::vector<double> x)
+std::vector<double> NeuralNetwork::determineY(std::vector<double> &x)
 {
 	//Prepare input
 	if(x.size() != inputLayer.size()-1)
@@ -125,6 +125,35 @@ std::vector<double> NeuralNetwork::determineY(std::vector<double> x)
 		i++;
 	}
 
+	return determineY();
+}
+
+/*
+ *
+ */
+std::vector<double> NeuralNetwork::determineY(const std::vector<int> &x)
+{
+	//Prepare input
+	if(x.size() != inputLayer.size()-1)
+	{
+		std::cout << x.size() << "  " << inputLayer.size()-1 << "\n";
+		assert(x.size() == inputLayer.size()-1);
+	}
+	int i = 0;
+	for(std::list<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)
+	{
+		it_input->setY(x[i]);
+		i++;
+	}
+
+	return determineY();
+}
+
+/*
+ *
+ */
+std::vector<double> NeuralNetwork::determineY()
+{
 	//Calculate
 	for(std::list<std::vector<Neuron>>::iterator it_layer=hiddenLayers.begin(); it_layer!=hiddenLayers.end(); it_layer++)
 	{
@@ -163,7 +192,7 @@ std::vector<double> NeuralNetwork::getY()
 /*
  *
  */
-void NeuralNetwork::learnBackPropagation(std::vector<double> z)
+void NeuralNetwork::learnBackPropagation(std::vector<double> &z)
 {
 	assert(z.size() == hiddenLayers.back().size());
 	int i=0;
@@ -185,7 +214,7 @@ void NeuralNetwork::learnBackPropagation(std::vector<double> z)
 /*
  *
  */
-void NeuralNetwork::learnBackPropagation(std::vector<double> x, std::vector<double> z)
+void NeuralNetwork::learnBackPropagation(std::vector<double> &x, std::vector<double> &z)
 {
 	determineY(x);
 	learnBackPropagation(z);

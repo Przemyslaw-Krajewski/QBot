@@ -46,6 +46,8 @@ public:
 	double delta;
 	double *n;
 	double *b;
+
+	double sum;
 };
 
 #endif /* SRC_NEURALNETWORK_NEURON_H_ */

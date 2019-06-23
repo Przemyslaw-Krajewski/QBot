@@ -28,10 +28,15 @@ public:
 	virtual ~NeuralNetwork();
 
 	//basic
-	std::vector<double> determineY(std::vector<double> x);
+	std::vector<double> determineY(std::vector<double> &x);
+	std::vector<double> determineY(const std::vector<int> &x);
 	std::vector<double> getY();
-	void learnBackPropagation(std::vector<double> z);
-	void learnBackPropagation(std::vector<double> x, std::vector<double> z);
+	void learnBackPropagation(std::vector<double>& z);
+	void learnBackPropagation(std::vector<double>& x, std::vector<double>& z);
+
+	//helping
+private:
+	std::vector<double> determineY();
 
 	//getInfo
 protected:
