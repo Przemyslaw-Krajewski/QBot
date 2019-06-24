@@ -69,7 +69,6 @@ private:
 	QLearning *qLearning;
 
 	std::map<ReducedState, State> discoveredStates;
-	std::set<State> discoveredStates2;
 	int playsBeforeNNLearning;
 
 	ControlMode controlMode;

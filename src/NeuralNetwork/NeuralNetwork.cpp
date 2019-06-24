@@ -206,6 +206,15 @@ void NeuralNetwork::learnBackPropagation(std::vector<double> &z)
 		#pragma omp parallel for shared(it_layer) private(i)
 		for(i=0; i<it_layer->size(); i++)
 		{
+			(*it_layer)[i].calculateDerative();
+		}
+	}
+
+	for(std::list<std::vector<Neuron>>::reverse_iterator it_layer=hiddenLayers.rbegin(); it_layer!=hiddenLayers.rend(); it_layer++)
+	{
+		#pragma omp parallel for shared(it_layer) private(i)
+		for(i=0; i<it_layer->size(); i++)
+		{
 			(*it_layer)[i].learnDeltaRule();
 		}
 	}

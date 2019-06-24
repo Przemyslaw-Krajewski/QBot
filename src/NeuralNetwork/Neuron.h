@@ -23,14 +23,19 @@ public:
 	virtual double determineY();
 	virtual double getY() {return output;}
 	virtual void learnDeltaRule();
+
 	//delta
 	void setDelta(double nd) {delta = nd;}
 	void addToDelta(double nd) {delta += nd;}
 	double getDelta() {return delta;}
+
 	//additional
 	std::vector<double> getW() const {return weights;}
 	void setW(std::vector<double> t_w) {weights=t_w;}
 	double getSum();
+	void calculateDerative() {derative = derativeActivationFunction(sum);}
+	double getDerative() {return derative;}
+
 	//activation function
 	double activationFunction(double x);
 	double derativeActivationFunction(double x);
@@ -48,6 +53,7 @@ public:
 	double *b;
 
 	double sum;
+	double derative;
 };
 
 #endif /* SRC_NEURALNETWORK_NEURON_H_ */

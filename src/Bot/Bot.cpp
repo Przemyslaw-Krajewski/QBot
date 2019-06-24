@@ -111,7 +111,6 @@ void Bot::execute()
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
 			discoveredStates[reduceStateResolution(sceneState)] = sceneState;
-			discoveredStates2.insert(sceneState);
 
 			//Determine new controller input
 			action = qLearning->chooseAction(sceneState, controlMode).second;
@@ -166,7 +165,6 @@ void Bot::execute()
 		}
 
 		std::cout << "Added: " << discoveredStates.size() - discoveredStatesSize << "  Discovered: " << discoveredStates.size() << "\n";
-		std::cout << "Not reduced discovered: " << discoveredStates2.size() << "\n";
 
 		if(scenarioResult==ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
 		if(controlMode != ControlMode::NNNoLearn) learnFromScenarioQL(historyScenario);
@@ -375,16 +373,7 @@ void Bot::eraseNotReadyStates()
 		}
 		else it++;
 	}
-	for(std::set<State>::iterator it = discoveredStates2.begin(); it!=discoveredStates2.end();)
-	{
-		double change = qLearning->getQChange(*it);
-		if(change > QLearning::ACTION_LEARN_THRESHOLD)
-		{
-			erased++;
-			it = discoveredStates2.erase(it);
-		}
-		else it++;
-	}
+
 	std::cout << "Erased: " << erased << " states  =>  " << discoveredStates.size() << "\n";
 }
 
