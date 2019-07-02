@@ -21,7 +21,8 @@ public:
 	{
 		enum AdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};
 
-		cv::Mat fieldAndEnemiesLayout;
+		cv::Mat processedImage;
+		cv::Mat processedImagePast;
 		double reward;
 		Point playerCoords;
 		Point playerVelocity;

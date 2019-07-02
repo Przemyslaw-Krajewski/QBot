@@ -9,17 +9,19 @@
 #define SRC_ANALYZERS_IMAGEANALYZER_H_
 
 #include <opencv2/opencv.hpp>
+#include <map>
 
 #include "DesktopHandler.h"
 
-//#define PRINT_ANALYZED_IMAGE
+#define PRINT_ANALYZED_IMAGE
 
 class ImageAnalyzer {
 
 public:
 	struct AnalyzeResult
 	{
-		cv::Mat fieldAndEnemiesLayout;
+		cv::Mat processedImage;
+		cv::Mat processedImagePast;
 		bool playerFound;
 		bool playerIsDead;
 		bool killedByEnemy;
@@ -31,9 +33,20 @@ public:
 public:
 	ImageAnalyzer();
 
-	AnalyzeResult processImage(cv::Mat* image);
+	AnalyzeResult processImage(cv::Mat* rawImage, cv::Mat* colorImage);
+
+	static std::vector<int> toVector(cv::Mat* image);
 
 private:
+	void reduceColors(int mask, cv::Mat* colorImage);
+	void reduceColorsAndBrightness(int reduceLevel, cv::Mat* colorImage);
+	cv::Mat getMostFrequentInBlock(int blockSize, cv::Mat* image);
+	cv::Mat getLeastFrequentInImage(int blockSize, cv::Mat* image);
+	cv::Mat getFirst(int blockSize, cv::Mat* image);
+
+	void viewImage(int blockSize, std::string name, cv::Mat &image);
+	cv::Mat cutFragment(cv::Mat* image, cv::Point leftUp, cv::Point rightDown);
+
 	cv::Point findPlayer(cv::Mat &image);
 	std::vector<cv::Point> findObject(cv::Mat &image, cv::Mat &pattern, cv::Point offset, cv::Scalar sample, cv::Rect searchBounds = cv::Rect(-1,-1,-1,-1));
 	Histogram determineHistogram(cv::Mat &image);
@@ -45,6 +58,8 @@ private:
 
 private:
 	cv::Point imageSize;
+
+	std::list<cv::Mat> oldImages;
 
 	Histogram playerHistogram;
 

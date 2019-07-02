@@ -58,7 +58,7 @@ private:
 	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);
-	State createSceneState(cv::Mat& sceneState, ControllerInput& controllerInput, Point& position, Point& velocity);
+	State createSceneState(cv::Mat& image,cv::Mat& imagePast, ControllerInput& controllerInput, Point& position, Point& velocity);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
 
 	static State reduceStateResolution(const State& t_state);
@@ -80,7 +80,7 @@ private:
 	const int TIME_LIMIT = 80;
 	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 3;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 3;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 15;
 };
 
 #endif /* SRC_BOT_H_ */

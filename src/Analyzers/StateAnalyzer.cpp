@@ -20,9 +20,10 @@ StateAnalyzer::~StateAnalyzer()
 StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 {
 	//Get Desktop Screen
-	cv::Mat image = MemoryAnalyzer::getPtr()->fetchScreenData();
+	cv::Mat image = MemoryAnalyzer::getPtr()->fetchRawScreenData();
+	cv::Mat colorImage = MemoryAnalyzer::getPtr()->fetchScreenData();
 
-	ImageAnalyzer::AnalyzeResult imageAnalyzeResult = imageAnalyzer.processImage(&image);
+	ImageAnalyzer::AnalyzeResult imageAnalyzeResult = imageAnalyzer.processImage(&image, &colorImage);
 	MemoryAnalyzer::AnalyzeResult memoryAnalyzeResult = MemoryAnalyzer::getPtr()->fetchData();
 
 	//Additional info
@@ -37,15 +38,16 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	bool endScenario = false;
 	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = -100;  endScenario = true;}
 	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
-	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD; endScenario = true;}
+	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
+	else if(memoryAnalyzeResult.playerPositionY > 210) 									 		 {reward = DIE_REWARD; endScenario = true;}
 	else if(memoryAnalyzeResult.playerPositionX > 60 && memoryAnalyzeResult.playerVelocityX > 16) {reward = ADVANCE_REWARD;}
 	else if(memoryAnalyzeResult.playerVelocityX > 16) 										 	 {reward = LITTLE_ADVANCE_REWARD;}
-
 	//Preparing output
 	AnalyzeResult analyzeResult;
-	analyzeResult.fieldAndEnemiesLayout = imageAnalyzeResult.fieldAndEnemiesLayout;
+	analyzeResult.processedImage = imageAnalyzeResult.processedImage;
+	analyzeResult.processedImagePast = imageAnalyzeResult.processedImagePast;
 	analyzeResult.additionalInfo = additionalInfo;
-	analyzeResult.playerCoords = Point(0,0);
+	analyzeResult.playerCoords = Point(memoryAnalyzeResult.playerPositionX,memoryAnalyzeResult.playerPositionY);
 	analyzeResult.playerVelocity = Point(memoryAnalyzeResult.playerVelocityX/4,memoryAnalyzeResult.playerVelocityY/2);
 	analyzeResult.reward = reward;
 	analyzeResult.endScenario = endScenario;

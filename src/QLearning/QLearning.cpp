@@ -37,8 +37,8 @@ QLearning::~QLearning()
 void QLearning::resetActionsNN()
 {
 	if(actions != nullptr) delete actions;
-	actions = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({200,180,numberOfActions}),
-				std::initializer_list<double>({0.033,0.1,0.33}),1.2);
+	actions = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({400,380,300,numberOfActions}),
+				std::initializer_list<double>({0.01,0.033,0.1,0.33}),1.2);
 }
 
 /*z

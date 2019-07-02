@@ -23,18 +23,15 @@ Bot::Bot()
 
 	//Initialize scene data
 	StateAnalyzer::AnalyzeResult analyzeResult;
-	for(int i=1; i<11; i++)
-	{
-		analyzeResult = analyzer.analyze();
-		if(analyzeResult.additionalInfo != StateAnalyzer::AnalyzeResult::notFound) break;
-		cv::waitKey(1000);
-		std::cout << "Could not find player, atteption: " << i << "\n";
-	}
+
+	for(int i=1; i<10; i++)	analyzeResult = analyzer.analyze();
+
 	if(analyzeResult.additionalInfo == StateAnalyzer::AnalyzeResult::notFound)
 				throw std::string("Could not initialize, check player visibility");
 
 	ControllerInput controllerInput = determineControllerInput(0);
-	State sceneState = createSceneState(analyzeResult.fieldAndEnemiesLayout,
+	State sceneState = createSceneState(analyzeResult.processedImage,
+								  analyzeResult.processedImagePast,
 								  controllerInput,
 								  analyzeResult.playerCoords,
 								  analyzeResult.playerVelocity);
@@ -81,7 +78,8 @@ void Bot::execute()
 
 		//Get first state
 		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
-		sceneState = createSceneState(analyzeResult.fieldAndEnemiesLayout,
+		sceneState = createSceneState(analyzeResult.processedImage,
+						analyzeResult.processedImagePast,
 						controllerInput,
 						analyzeResult.playerCoords,
 						analyzeResult.playerVelocity);
@@ -100,8 +98,9 @@ void Bot::execute()
 
 			//Analyze situation
 			StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
-			if(analyzeResult.fieldAndEnemiesLayout.cols == 0 || analyzeResult.fieldAndEnemiesLayout.rows == 0) continue;
-			sceneState = createSceneState(analyzeResult.fieldAndEnemiesLayout,
+//			if(analyzeResult.fieldAndEnemiesLayout.cols == 0 || analyzeResult.fieldAndEnemiesLayout.rows == 0) continue;
+			sceneState = createSceneState(analyzeResult.processedImage,
+										  analyzeResult.processedImagePast,
 						 	 	 	 	  controllerInput,
 										  analyzeResult.playerCoords,
 										  analyzeResult.playerVelocity);
@@ -138,7 +137,6 @@ void Bot::execute()
 				}
 			}
 			else time = TIME_LIMIT;
-
 			if(analyzeResult.endScenario)
 			{
 				scenarioResult = analyzeResult.additionalInfo;
@@ -435,41 +433,40 @@ State Bot::reduceStateResolution(const State& t_state)
 /*
  *
  */
-std::vector<int> Bot::createSceneState(cv::Mat& fieldAndEnemiesLayout, ControllerInput& controllerInput, Point& position, Point& velocity)
+std::vector<int> Bot::createSceneState(cv::Mat& image, cv::Mat& imagePast,
+		ControllerInput& controllerInput, Point& position, Point& velocity)
 {
 	State sceneState;
 
-	//Terrain
-	for(int x=0; x<fieldAndEnemiesLayout.cols; x++)
+	for(int x=0; x<image.cols; x++)
 	{
-		for(int y=0; y<fieldAndEnemiesLayout.rows; y++)
+		for(int y=0; y<image.rows; y++)
 		{
-			uchar* ptr = fieldAndEnemiesLayout.ptr(y)+x*3;
-			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(MAX_INPUT_VALUE);
-			else sceneState.push_back(MIN_INPUT_VALUE);
+			uchar* ptrSrc = image.ptr(y)+(3*(x));
+			sceneState.push_back((ptrSrc[0] >> 6) + (ptrSrc[1] >> 4) + (ptrSrc[2] >> 2));
 		}
 	}
-	//Enemies
-	for(int x=0; x<fieldAndEnemiesLayout.cols; x++)
+
+	for(int x=0; x<imagePast.cols; x++)
 	{
-		for(int y=0; y<fieldAndEnemiesLayout.rows; y++)
+		for(int y=0; y<imagePast.rows; y++)
 		{
-			uchar* ptr = fieldAndEnemiesLayout.ptr(y)+x*3;
-			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(MAX_INPUT_VALUE);
-			else sceneState.push_back(MIN_INPUT_VALUE);
+			uchar* ptrSrc = imagePast.ptr(y)+(3*(x));
+			sceneState.push_back((ptrSrc[0] >> 7) + (ptrSrc[1] >> 6) + (ptrSrc[2] >> 5));
 		}
 	}
+
 	//Controller
 	for(bool ci : controllerInput)
 	{
 		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
 		else sceneState.push_back(MIN_INPUT_VALUE);
 	}
-	//AdditionalInfo
-	sceneState.push_back(position.x);
-	sceneState.push_back(position.y);
-	sceneState.push_back(velocity.x);
-	sceneState.push_back(velocity.y);
+//	//AdditionalInfo
+//	sceneState.push_back(position.x);
+//	sceneState.push_back(position.y);
+//	sceneState.push_back(velocity.x);
+//	sceneState.push_back(velocity.y);
 
 	return sceneState;
 }
@@ -516,7 +513,8 @@ std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> Bot::extractSceneState(
 	}
 
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> result ;
-	result.first.fieldAndEnemiesLayout = fieldAndEnemiesLayout;
+//	result.first.fieldAndEnemiesLayout = fieldAndEnemiesLayout;
+	//TODO disabled
 
 	//AdditionalInfo
 	result.first.playerCoords.x = sceneState[sceneState.size()-4];
@@ -539,8 +537,8 @@ void Bot::testStateAnalyzer()
 	{
 		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
 		//Print info
-		DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
+//		DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 		std::cout << ": " << analyzeResult.reward << "   " << time << "\n";
-		std::cout << analyzeResult.playerVelocity.x << "  " << analyzeResult.playerVelocity.y << "\n";
+		std::cout << analyzeResult.playerCoords.x << "  " << analyzeResult.playerCoords.y << "\n";
 	}
 }

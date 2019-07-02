@@ -47,109 +47,249 @@ ImageAnalyzer::ImageAnalyzer()
 /*
  *
  */
-ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* image)
+ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* rawImage, cv::Mat* colorImage)
 {
 	ImageAnalyzer::AnalyzeResult analyzeResult;
 
-	//Find objects
-	cv::Point playerVelocity = cv::Point(0,0);
-	cv::Point playerCoords = findPlayer(*image);
-
-	std::vector<cv::Point> goombas,koopas,floors,walls,blocks1,blocks2,blocks3,pipe;
-	if(image->ptr(1)[3]!=0 && image->ptr(0)[4]!=0 && image->ptr(0)[5]!=0)
-	{
-		//outside
-		blocks1 = findObject(*image,blockImage1,		cv::Point(6,2),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		blocks2	= findObject(*image,blockImage2,		cv::Point(0,0),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		blocks3	= findObject(*image,blockImage3,		cv::Point(0,2),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		goombas	= findObject(*image,enemyImage1,		cv::Point(6,8),	cv::Scalar(0,0,0));
-		koopas	= findObject(*image,enemyImage2,		cv::Point(4,0),	cv::Scalar(0,168,0));
-		floors	= findObject(*image,floorImage1,		cv::Point(0,0),	cv::Scalar(176,188,252),cv::Rect(0,400,496,432));
-		walls	= findObject(*image,wallimage1,		cv::Point(0,0),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		pipe	= findObject(*image,pipeImage,		cv::Point(0,0),	cv::Scalar(16,208,128),	cv::Rect(0,0,496,400));
-	}
-	else
-	{
-		//dungeon
-		blocks1 = findObject(*image,blockImage1v2,	cv::Point(6,2),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		blocks2	= findObject(*image,blockImage2v2,	cv::Point(0,0),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		blocks3	= findObject(*image,blockImage3v2,	cv::Point(0,2),	cv::Scalar(136,128,0),	cv::Rect(0,0,496,400));
-		goombas	= findObject(*image,enemyImage1v2,	cv::Point(6,8),	cv::Scalar(92,60,24));
-		koopas	= findObject(*image,enemyImage2v2,	cv::Point(4,0),	cv::Scalar(136,128,0));
-		floors	= findObject(*image,floorImage1v2,	cv::Point(0,0),	cv::Scalar(240,252,156),cv::Rect(0,400,496,432));
-		walls	= findObject(*image,wallImage1v2,	cv::Point(0,0),	cv::Scalar(136,128,0),	cv::Rect(0,0,496,400));
-		pipe	= findObject(*image,pipeImage,		cv::Point(0,0),	cv::Scalar(16,208,128),	cv::Rect(0,0,496,400));
-	}
-
-	//Player not found
-	if(playerCoords == cv::Point(-1,-1))
-	{
-		analyzeResult.playerFound = false;
-		return analyzeResult;
-	}
-
-	//clear image
-	cv::Mat analyzedImage = cv::Mat(896, 512, CV_8UC3);
-	for(int y = 0 ; y < analyzedImage.rows ; y++)
-	{
-		uchar* ptr = analyzedImage.ptr((int)y);
-		for(int x = 0 ; x < analyzedImage.cols*3 ; x++)
-		{
-			*ptr=0;
-			ptr = ptr+1;
-		}
-	}
-
-	//Mark objects
-	int interval = 16;
-	cv::Point transl = cv::Point(256-playerCoords.x,448-playerCoords.y); // translation
-	cv::Point blockSize = cv::Point(32,32);
-	if(floors.size()>0)	rectangle(analyzedImage, cv::Rect(cv::Point(transl.x+blockSize.x, floors[0].y+transl.y),
-											     	 	  cv::Point(895,                  floors[0].y+transl.y+blockSize.y)),
-														  cv::Scalar(0,0,220), -1);
-	for(cv::Point p : goombas) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 1);
-	for(cv::Point p : koopas)  markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 1);
-	for(cv::Point p : floors)  markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 0);
-	for(cv::Point p : walls)   markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 0);
-	for(cv::Point p : blocks1) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,0), 0);
-	for(cv::Point p : blocks2) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,2), 0);
-	for(cv::Point p : blocks3) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,2), 0);
-	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+64,448)+transl),cv::Scalar(100  ,100  ,100), -1);
-
-	//Writing DATA OUTPUT
-	cv::Mat fael = cv::Mat(imageSize.y*2/interval, imageSize.x/interval, CV_8UC3);
-	for(int y = 0 ; y < fael.rows ; y++)
-	{
-		for(int x = 0 ; x < fael.cols ; x++)
-		{
-			uchar* ptrDst = fael.ptr(y)+x*3;
-			uchar* ptrSrc = analyzedImage.ptr(y*interval+interval/2)+x*3*interval;
-			ptrDst[0]=ptrSrc[0];ptrDst[1]=ptrSrc[1];ptrDst[2]=ptrSrc[2];
-		}
-	}
+	cv::Mat smallerImage = cutFragment(colorImage,cv::Point(0,64),cv::Point(512,448));
 
 	//Player death
-	bool playerIsDead = false;
-	bool killedByEnemy = false;
-	bool playerWon = false;
-	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty()) {playerIsDead = true; killedByEnemy = true;} //Killed by enemy
-	if(playerCoords.y > 388) 																			playerIsDead = true; //pitfall
-	if(playerCoords.x < 20) 																			playerIsDead = true; // left border
-	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())  playerWon = true; //Killed by enemy
+	analyzeResult.playerIsDead = false;
+	analyzeResult.killedByEnemy = false;
+	analyzeResult.playerWon = false;
+	if(!findObject(smallerImage,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
+	{	//Killed by Enemy
+		analyzeResult.playerIsDead = true;
+		analyzeResult.killedByEnemy = true;
+	}
+	if(!findObject(smallerImage,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
+	{	//Win
+		analyzeResult.playerWon = true;
+	}
 
-	#ifdef PRINT_ANALYZED_IMAGE
-		//Print
-		imshow("Objects", analyzedImage);
-		cv::waitKey(10);
-	#endif
+	cv::Mat historyImage;
+	if(oldImages.size() >3)
+	{
+		historyImage = getFirst(2, &(*oldImages.begin()));
+		oldImages.erase(oldImages.begin());
+	}
+	else historyImage = cv::Mat(16, 16, CV_8UC3);
 
-	analyzeResult.fieldAndEnemiesLayout = fael;
-	analyzeResult.playerIsDead = playerIsDead;
-	analyzeResult.killedByEnemy = killedByEnemy;
+
+	reduceColors(0b10000000,&historyImage);
+
+	int blockSize = 16;
+	reduceColors(0b11000000,&smallerImage);
+	cv::Mat firstPhaseImage = getMostFrequentInBlock(8, &smallerImage);
+	cv::Mat processedImage = getLeastFrequentInImage(2, &firstPhaseImage);
+	oldImages.push_back(processedImage.clone());
+
+	viewImage(16,"proc2", processedImage);
+	viewImage(32,"proc3", historyImage);
+
 	analyzeResult.playerFound = true;
-	analyzeResult.playerWon = playerWon;
-
+	analyzeResult.processedImagePast = historyImage;
+	analyzeResult.processedImage = processedImage;
 	return analyzeResult;
+}
+
+cv::Mat ImageAnalyzer::getMostFrequentInBlock(int blockSize, cv::Mat* image)
+{
+	cv::Mat processedImage = cv::Mat((image->rows)/blockSize, (image->cols)/blockSize, CV_8UC3);
+
+	long long colors[64];
+
+	for(int x=0,xb=0; x<image->cols-blockSize+1; xb++,x+=blockSize)
+	{
+		for(int y=0,yb=0; y<image->rows-blockSize+1; yb++,y+=blockSize)
+		{
+			for(int i=0; i<64; i++) colors[i] = -1;
+			for(int xx=0; xx<blockSize; xx++)
+			{
+				for(int yy=0; yy<blockSize; yy++)
+				{
+					uchar* ptrSrc = image->ptr(y+yy)+(3*(x+xx));
+					int index = 0;
+					index += ptrSrc[0] >> 6;
+					index += ptrSrc[1] >> 4;
+					index += ptrSrc[2] >> 2;
+					colors[index] = colors[index] + 1;
+				}
+			}
+
+			int pickedColor = 7;
+			long long highestCount = -1;
+			for(int i=0; i<64; i++)
+			{
+				if((highestCount < colors[i] || highestCount == -1))
+				{
+					highestCount = colors[i];
+					pickedColor = i;
+				}
+			}
+
+			uchar* ptrDst = processedImage.ptr(yb)+((xb+xb+xb));
+
+			ptrDst[0] = (pickedColor & 3 ) << 6;
+			ptrDst[1] = (pickedColor & 12) << 4;
+			ptrDst[2] = (pickedColor & 48) << 2;
+		}
+	}
+	return processedImage;
+}
+cv::Mat ImageAnalyzer::getLeastFrequentInImage(int blockSize, cv::Mat* image)
+{
+	cv::Mat processedImage = cv::Mat((image->rows)/blockSize, (image->cols)/blockSize, CV_8UC3);
+
+	long long colors[64];
+
+	for(int i=0; i<64; i++) colors[i] = -1;
+	for(int x=0; x<image->cols; x++)
+	{
+		for(int y=0; y<image->rows; y++)
+		{
+			uchar* ptrSrc = image->ptr(y)+(3*(x));
+			int index = 0;
+			index += ptrSrc[0] >> 6;
+			index += ptrSrc[1] >> 4;
+			index += ptrSrc[2] >> 2;
+			colors[index] = colors[index] + 1;
+		}
+	}
+
+	for(int x=0,xb=0; x<image->cols-blockSize+1; xb++,x+=blockSize)
+	{
+		for(int y=0,yb=0; y<image->rows-blockSize+1; yb++,y+=blockSize)
+		{
+			int pickedColor = 7;
+			long long lowestCount = -1;
+
+			for(int xx=0; xx<blockSize; xx++)
+			{
+				for(int yy=0; yy<blockSize; yy++)
+				{
+					uchar* ptrSrc = image->ptr(y+yy)+(3*(x+xx));
+					int index = 0;
+					index += ptrSrc[0] >> 6;
+					index += ptrSrc[1] >> 4;
+					index += ptrSrc[2] >> 2;
+
+					if((lowestCount > colors[index] || lowestCount == -1))
+					{
+						lowestCount = colors[index];
+						pickedColor = index;
+					}
+				}
+			}
+
+			uchar* ptrDst = processedImage.ptr(yb)+((xb+xb+xb));
+			ptrDst[0] = (pickedColor & 3 ) << 6;
+			ptrDst[1] = (pickedColor & 12) << 4;
+			ptrDst[2] = (pickedColor & 48) << 2;
+		}
+	}
+
+	return processedImage;
+}
+
+void ImageAnalyzer::reduceColors(int mask, cv::Mat* colorImage)
+{
+	for(int x=0; x<colorImage->cols; x++)
+	{
+		for(int y=0; y<colorImage->rows; y++)
+		{
+			uchar* ptr = colorImage->ptr(y)+((x+x+x));
+			ptr[0] = ptr[0] & mask;
+			ptr[1] = ptr[1] & mask;
+			ptr[2] = ptr[2] & mask;
+		}
+	}
+}
+
+cv::Mat ImageAnalyzer::getFirst(int blockSize, cv::Mat* image)
+{
+	cv::Mat processedImage = cv::Mat((image->rows)/blockSize, (image->cols)/blockSize, CV_8UC3);
+
+	for(int x=0,xb=0; x<image->cols-blockSize+1; xb++,x+=blockSize)
+	{
+		for(int y=0,yb=0; y<image->rows-blockSize+1; yb++,y+=blockSize)
+		{
+			uchar* ptrSrc = image->ptr(y)+(3*(x));
+			uchar* ptrDst = processedImage.ptr(yb)+((xb+xb+xb));
+			ptrDst[0] = ptrSrc[0];
+			ptrDst[1] = ptrSrc[1];
+			ptrDst[2] = ptrSrc[2];
+		}
+	}
+
+	return processedImage;
+}
+
+std::vector<int> ImageAnalyzer::toVector(cv::Mat *image)
+{
+	std::vector<int> result;
+	for(int x=0; x<image->cols; x++)
+	{
+		for(int y=0; y<image->rows; y++)
+		{
+			uchar* ptrSrc = image->ptr(y)+(3*(x));
+			result.push_back((ptrSrc[0] >> 6) + (ptrSrc[1] >> 4) + (ptrSrc[2] >> 2));
+		}
+	}
+
+	return result;
+}
+
+cv::Mat ImageAnalyzer::cutFragment(cv::Mat* image, cv::Point leftUp, cv::Point rightDown)
+{
+	cv::Point size = rightDown - leftUp;
+	cv::Mat result = cv::Mat(size.y, size.x, CV_8UC3);
+
+	for(int x=0; x<size.x; x++)
+	{
+		for(int y=0; y<size.y; y++)
+		{
+			uchar* ptrSrc = image->ptr(y+leftUp.y)+(3*(x+leftUp.x));
+			uchar* ptrDst = result.ptr(y)+((x+x+x));
+			ptrDst[0] = ptrSrc[0];
+			ptrDst[1] = ptrSrc[1];
+			ptrDst[2] = ptrSrc[2];
+		}
+	}
+
+	return result;
+}
+
+void ImageAnalyzer::viewImage(int blockSize, std::string name, cv::Mat &image)
+{
+#ifdef PRINT_ANALYZED_IMAGE
+	//View
+	int xScreenSize = image.cols;
+	int yScreenSize = image.rows;
+	cv::Mat viewImage = cv::Mat((image.rows)*blockSize, (image.cols)*blockSize, CV_8UC3);
+	for(int x=0; x<xScreenSize; x++)
+	{
+		for(int y=0; y<yScreenSize; y++)
+		{
+			cv::Scalar color;
+			uchar* ptrSrc = image.ptr(y)+(x+x+x);
+			for(int xx=0; xx<blockSize; xx++)
+			{
+				for(int yy=0; yy<blockSize; yy++)
+				{
+					uchar* ptr = viewImage.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
+					int v = (ptrSrc[0]+ptrSrc[1]+ptrSrc[2])/3;
+					ptr[0] = 64*((int)ptrSrc[0]/64);
+					ptr[1] = 64*((int)ptrSrc[1]/64);
+					ptr[2] = 64*((int)ptrSrc[2]/64);
+				}
+			}
+		}
+	}
+	//Print
+	imshow(name, viewImage);
+	cv::waitKey(10);
+#endif
 }
 
 /*
