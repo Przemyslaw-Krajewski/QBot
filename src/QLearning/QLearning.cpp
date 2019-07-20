@@ -62,6 +62,8 @@ std::pair<bool,int> QLearning::chooseAction(State& t_state, ControlMode mode)
 
 	int action = getIndexOfMaxValue(values);
 
+	std::cout << action << "  " << qValues.getValue(t_state, action) << "\n";
+
 	return std::pair<bool,int>(true,action);
 }
 

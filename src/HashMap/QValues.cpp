@@ -32,7 +32,7 @@ double QValues::getValue(State t_state, int t_action)
 {
 	double result;
 	if(cache[t_action].count(t_state) > 0) result = cache[t_action].find(t_state)->second;
-	else result = 200-40*t_action;
+	else result = 2400;
 
 	return result;
 }

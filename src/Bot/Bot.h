@@ -8,7 +8,7 @@
 #ifndef SRC_BOT_H_
 #define SRC_BOT_H_
 
-//#define PRINT_PROCESSING_TIME
+#define PRINT_PROCESSING_TIME
 
 #include <vector>
 #include <list>
@@ -54,7 +54,6 @@ private:
 	void learnFromScenarioQL(std::list<SARS> &historyScenario);
 	void learnFromScenario(std::list<SARS> &historyScenario);
 	void learnFromMemory();
-	void eraseInvalidLastStates(std::list<SARS> &history);
 	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);

@@ -126,12 +126,10 @@ MemoryAnalyzer::AnalyzeResult MemoryAnalyzer::fetchData()
  */
 cv::Mat MemoryAnalyzer::fetchScreenData()
 {
-	int blockSize = 2;
-
 	int xScreenSize = 256;
 	int yScreenSize = 256;
 
-	cv::Mat screenResult = cv::Mat(blockSize*(yScreenSize+1), blockSize*(xScreenSize), CV_8UC3);
+	cv::Mat screenResult = cv::Mat((yScreenSize+1), (xScreenSize), CV_8UC3);
 	char imageData[256*256];
 	char paletteData[256*4];
 
@@ -149,25 +147,16 @@ cv::Mat MemoryAnalyzer::fetchScreenData()
 	ptrace(PTRACE_DETACH, pid, 0, 0);
 	close(fd);
 
-	for(int x=0; x<xScreenSize; x++)
+	for(int y=0, ys=0; y<yScreenSize; ys+=xScreenSize, y++)
 	{
-		for(int y=0; y<yScreenSize; y++)
+		for(int x=0; x<xScreenSize; x++)
 		{
-			int value = imageData[y*xScreenSize+x];
-			if(value < 0) value = 256+value;
-			int r = paletteData[value*4+0]; if(r < 0) r = 256+r;
-			int g = paletteData[value*4+1]; if(g < 0) g = 256+g;
-			int b = paletteData[value*4+2]; if(b < 0) b = 256+b;
-			for(int xx=0; xx<blockSize; xx++)
-			{
-				for(int yy=0; yy<blockSize; yy++)
-				{
-					uchar* ptr = screenResult.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
-					ptr[0] = b;
-					ptr[1] = g;
-					ptr[2] = r;
-				}
-			}
+			unsigned char value = imageData[ys+x];
+
+			uchar* ptr = screenResult.ptr(y)+(x)*3;
+			ptr[0] = paletteData[value*4+2]; // blue
+			ptr[1] = paletteData[value*4+1]; // green
+			ptr[2] = paletteData[value*4+0]; // red
 		}
 	}
 

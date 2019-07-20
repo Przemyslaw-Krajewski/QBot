@@ -35,15 +35,16 @@ public:
 	virtual ~StateAnalyzer();
 
 	AnalyzeResult analyze();
+	AnalyzeResult analyzeBT();
 
 private:
 	ImageAnalyzer imageAnalyzer;
 
 public:
-	static const int WIN_REWARD     = 1000;
-	static const int ADVANCE_REWARD = 50;
-	static const int LITTLE_ADVANCE_REWARD = 10;
-	static const int DIE_REWARD 	= -1000;
+	static const int WIN_REWARD     = 100;
+	static const int ADVANCE_REWARD = 5;
+	static const int LITTLE_ADVANCE_REWARD = 1;
+	static const int DIE_REWARD 	= -100;
 };
 
 #endif /* SRC_ANALYZERS_STATEANALYZER_H_ */

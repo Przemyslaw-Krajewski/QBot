@@ -120,7 +120,7 @@ void DesktopHandler::holdControllerButton(std::vector<bool> b)
 		const char buttons[] = {'L','e','f','t',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);
 	}
-	if(b[3] && 0)
+	if(b[3])
 	{
 		const char buttons[] = {'D','o','w','n',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);
@@ -130,7 +130,7 @@ void DesktopHandler::holdControllerButton(std::vector<bool> b)
 		const char buttons[] = {'R','i','g','h','t',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);
 	}
-	if(b[5] && 0)
+	if(b[5])
 	{
 		const char buttons[] = {'U','p',0};
 		xdo_send_keysequence_window_down(xdo,window,buttons, 20);

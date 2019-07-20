@@ -33,16 +33,19 @@ public:
 public:
 	ImageAnalyzer();
 
-	AnalyzeResult processImage(cv::Mat* rawImage, cv::Mat* colorImage);
+	void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result);
 
 	static std::vector<int> toVector(cv::Mat* image);
 
 private:
 	void reduceColors(int mask, cv::Mat* colorImage);
 	void reduceColorsAndBrightness(int reduceLevel, cv::Mat* colorImage);
-	cv::Mat getMostFrequentInBlock(int blockSize, cv::Mat* image);
-	cv::Mat getLeastFrequentInImage(int blockSize, cv::Mat* image);
+	void getMostFrequentInBlock(int blockSize, cv::Mat& srcImage, cv::Mat& dstImage);
+	void getLeastFrequentInImage(int blockSize, cv::Mat& srcIimage, cv::Mat& dstImage);
 	cv::Mat getFirst(int blockSize, cv::Mat* image);
+
+	void calculateSituationSMB(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult);
+	void calculateSituationBT(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult);
 
 	void viewImage(int blockSize, std::string name, cv::Mat &image);
 	cv::Mat cutFragment(cv::Mat* image, cv::Point leftUp, cv::Point rightDown);
@@ -63,6 +66,7 @@ private:
 
 	Histogram playerHistogram;
 
+	//SMB
 	cv::Mat enemyImage1,enemyImage1v2;
 	cv::Mat enemyImage2,enemyImage2v2;
 	cv::Mat floorImage1,floorImage1v2;
@@ -75,6 +79,10 @@ private:
 	cv::Mat winImage;
 	cv::Mat mushroomImage;
 	cv::Mat cloudImage;
+
+	//BT
+	cv::Mat emptyHealth;
+	cv::Mat hair;
 
 	cv::Point playerSize;
 };

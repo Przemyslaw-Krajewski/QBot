@@ -42,73 +42,90 @@ ImageAnalyzer::ImageAnalyzer()
 	mushroomImage = cv::imread("graphics/mushroom.bmp", cv::IMREAD_COLOR);
 	cloudImage = cv::imread("graphics/cloud.bmp", cv::IMREAD_COLOR);
 	winImage = cv::imread("graphics/win.bmp", cv::IMREAD_COLOR);
+
+	emptyHealth = cv::imread("graphics/EmptyHealth.bmp", cv::IMREAD_COLOR);
+	hair = cv::imread("graphics/Hair.bmp", cv::IMREAD_COLOR);
 }
 
 /*
  *
  */
-ImageAnalyzer::AnalyzeResult ImageAnalyzer::processImage(cv::Mat* rawImage, cv::Mat* colorImage)
+void ImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result)
 {
-	ImageAnalyzer::AnalyzeResult analyzeResult;
 
-	cv::Mat smallerImage = cutFragment(colorImage,cv::Point(0,64),cv::Point(512,448));
+	cv::Mat smallerImage = cutFragment(colorImage,cv::Point(0,64),cv::Point(256,224));
 
-	//Player death
-	analyzeResult.playerIsDead = false;
-	analyzeResult.killedByEnemy = false;
-	analyzeResult.playerWon = false;
-	if(!findObject(smallerImage,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
-	{	//Killed by Enemy
-		analyzeResult.playerIsDead = true;
-		analyzeResult.killedByEnemy = true;
-	}
-	if(!findObject(smallerImage,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
-	{	//Win
-		analyzeResult.playerWon = true;
-	}
+	calculateSituationBT(colorImage,result);
 
-	cv::Mat historyImage;
-	if(oldImages.size() >3)
+	if(oldImages.size() >1)
 	{
-		historyImage = getFirst(2, &(*oldImages.begin()));
+		result->processedImagePast = *oldImages.begin();
 		oldImages.erase(oldImages.begin());
 	}
-	else historyImage = cv::Mat(16, 16, CV_8UC3);
+	else result->processedImagePast = cv::Mat(16, 16, CV_8UC3);
 
-
-	reduceColors(0b10000000,&historyImage);
+	reduceColors(0b10000000,&(result->processedImagePast));
 
 	int blockSize = 16;
 	reduceColors(0b11000000,&smallerImage);
-	cv::Mat firstPhaseImage = getMostFrequentInBlock(8, &smallerImage);
-	cv::Mat processedImage = getLeastFrequentInImage(2, &firstPhaseImage);
-	oldImages.push_back(processedImage.clone());
+	cv::Mat firstPhaseImage;
+	getMostFrequentInBlock(2, smallerImage, firstPhaseImage);
+	getLeastFrequentInImage(4, firstPhaseImage, result->processedImage);
+	oldImages.push_back(getFirst(2, &(result->processedImage)));
 
-	viewImage(16,"proc2", processedImage);
-	viewImage(32,"proc3", historyImage);
-
-	analyzeResult.playerFound = true;
-	analyzeResult.processedImagePast = historyImage;
-	analyzeResult.processedImage = processedImage;
-	return analyzeResult;
+	viewImage(4,"proc2", result->processedImage);
+	viewImage(4,"proc3", result->processedImagePast);
+	result->playerFound = true;
 }
 
-cv::Mat ImageAnalyzer::getMostFrequentInBlock(int blockSize, cv::Mat* image)
+void ImageAnalyzer::calculateSituationSMB(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult)
 {
-	cv::Mat processedImage = cv::Mat((image->rows)/blockSize, (image->cols)/blockSize, CV_8UC3);
+	//Player death
+	analyzeResult->playerIsDead = false;
+	analyzeResult->killedByEnemy = false;
+	analyzeResult->playerWon = false;
+	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
+	{	//Killed by Enemy
+		analyzeResult->playerIsDead = true;
+		analyzeResult->killedByEnemy = true;
+	}
+	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
+	{	//Win
+		analyzeResult->playerWon = true;
+	}
+}
+
+void ImageAnalyzer::calculateSituationBT(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult)
+{
+	//Player death
+	analyzeResult->playerIsDead = false;
+	analyzeResult->playerWon = false;
+	if(!findObject(*image,emptyHealth,cv::Point(0,0),cv::Scalar(96,116,252),cv::Rect(15,15,25,25)).empty())
+	{
+		analyzeResult->playerIsDead = true;
+	}
+	if(!findObject(*image,hair,cv::Point(0,0),cv::Scalar(168,0,0),cv::Rect(95,50,100,55)).empty())
+	{
+		analyzeResult->playerWon = true;
+	}
+}
+
+void ImageAnalyzer::getMostFrequentInBlock(int blockSize, cv::Mat& srcImage, cv::Mat& dstImage)
+{
+	dstImage = cv::Mat((srcImage.rows)/blockSize, (srcImage.cols)/blockSize, CV_8UC3);
 
 	long long colors[64];
 
-	for(int x=0,xb=0; x<image->cols-blockSize+1; xb++,x+=blockSize)
+	for(int y=0,yb=0; y<srcImage.rows-blockSize+1; yb++,y+=blockSize)
 	{
-		for(int y=0,yb=0; y<image->rows-blockSize+1; yb++,y+=blockSize)
+		for(int x=0,xb=0; x<srcImage.cols-blockSize+1; xb++,x+=blockSize)
 		{
 			for(int i=0; i<64; i++) colors[i] = -1;
 			for(int xx=0; xx<blockSize; xx++)
 			{
 				for(int yy=0; yy<blockSize; yy++)
 				{
-					uchar* ptrSrc = image->ptr(y+yy)+(3*(x+xx));
+					uchar* ptrSrc = srcImage.ptr(y+yy)+(3*(x+xx));
 					int index = 0;
 					index += ptrSrc[0] >> 6;
 					index += ptrSrc[1] >> 4;
@@ -128,27 +145,26 @@ cv::Mat ImageAnalyzer::getMostFrequentInBlock(int blockSize, cv::Mat* image)
 				}
 			}
 
-			uchar* ptrDst = processedImage.ptr(yb)+((xb+xb+xb));
+			uchar* ptrDst = dstImage.ptr(yb)+((xb+xb+xb));
 
 			ptrDst[0] = (pickedColor & 3 ) << 6;
 			ptrDst[1] = (pickedColor & 12) << 4;
 			ptrDst[2] = (pickedColor & 48) << 2;
 		}
 	}
-	return processedImage;
 }
-cv::Mat ImageAnalyzer::getLeastFrequentInImage(int blockSize, cv::Mat* image)
+void ImageAnalyzer::getLeastFrequentInImage(int blockSize, cv::Mat& srcImage, cv::Mat& dstImage)
 {
-	cv::Mat processedImage = cv::Mat((image->rows)/blockSize, (image->cols)/blockSize, CV_8UC3);
+	dstImage = cv::Mat((srcImage.rows)/blockSize, (srcImage.cols)/blockSize, CV_8UC3);
 
 	long long colors[64];
 
 	for(int i=0; i<64; i++) colors[i] = -1;
-	for(int x=0; x<image->cols; x++)
+	for(int y=0; y<srcImage.rows; y++)
 	{
-		for(int y=0; y<image->rows; y++)
+		for(int x=0; x<srcImage.cols; x++)
 		{
-			uchar* ptrSrc = image->ptr(y)+(3*(x));
+			uchar* ptrSrc = srcImage.ptr(y)+(3*(x));
 			int index = 0;
 			index += ptrSrc[0] >> 6;
 			index += ptrSrc[1] >> 4;
@@ -157,9 +173,9 @@ cv::Mat ImageAnalyzer::getLeastFrequentInImage(int blockSize, cv::Mat* image)
 		}
 	}
 
-	for(int x=0,xb=0; x<image->cols-blockSize+1; xb++,x+=blockSize)
+	for(int y=0,yb=0; y<srcImage.rows-blockSize+1; yb++,y+=blockSize)
 	{
-		for(int y=0,yb=0; y<image->rows-blockSize+1; yb++,y+=blockSize)
+		for(int x=0,xb=0; x<srcImage.cols-blockSize+1; xb++,x+=blockSize)
 		{
 			int pickedColor = 7;
 			long long lowestCount = -1;
@@ -168,7 +184,7 @@ cv::Mat ImageAnalyzer::getLeastFrequentInImage(int blockSize, cv::Mat* image)
 			{
 				for(int yy=0; yy<blockSize; yy++)
 				{
-					uchar* ptrSrc = image->ptr(y+yy)+(3*(x+xx));
+					uchar* ptrSrc = srcImage.ptr(y+yy)+(3*(x+xx));
 					int index = 0;
 					index += ptrSrc[0] >> 6;
 					index += ptrSrc[1] >> 4;
@@ -182,21 +198,19 @@ cv::Mat ImageAnalyzer::getLeastFrequentInImage(int blockSize, cv::Mat* image)
 				}
 			}
 
-			uchar* ptrDst = processedImage.ptr(yb)+((xb+xb+xb));
+			uchar* ptrDst = dstImage.ptr(yb)+((xb+xb+xb));
 			ptrDst[0] = (pickedColor & 3 ) << 6;
 			ptrDst[1] = (pickedColor & 12) << 4;
 			ptrDst[2] = (pickedColor & 48) << 2;
 		}
 	}
-
-	return processedImage;
 }
 
 void ImageAnalyzer::reduceColors(int mask, cv::Mat* colorImage)
 {
-	for(int x=0; x<colorImage->cols; x++)
+	for(int y=0; y<colorImage->rows; y++)
 	{
-		for(int y=0; y<colorImage->rows; y++)
+		for(int x=0; x<colorImage->cols; x++)
 		{
 			uchar* ptr = colorImage->ptr(y)+((x+x+x));
 			ptr[0] = ptr[0] & mask;
@@ -210,9 +224,9 @@ cv::Mat ImageAnalyzer::getFirst(int blockSize, cv::Mat* image)
 {
 	cv::Mat processedImage = cv::Mat((image->rows)/blockSize, (image->cols)/blockSize, CV_8UC3);
 
-	for(int x=0,xb=0; x<image->cols-blockSize+1; xb++,x+=blockSize)
+	for(int y=0,yb=0; y<image->rows-blockSize+1; yb++,y+=blockSize)
 	{
-		for(int y=0,yb=0; y<image->rows-blockSize+1; yb++,y+=blockSize)
+		for(int x=0,xb=0; x<image->cols-blockSize+1; xb++,x+=blockSize)
 		{
 			uchar* ptrSrc = image->ptr(y)+(3*(x));
 			uchar* ptrDst = processedImage.ptr(yb)+((xb+xb+xb));
@@ -245,9 +259,9 @@ cv::Mat ImageAnalyzer::cutFragment(cv::Mat* image, cv::Point leftUp, cv::Point r
 	cv::Point size = rightDown - leftUp;
 	cv::Mat result = cv::Mat(size.y, size.x, CV_8UC3);
 
-	for(int x=0; x<size.x; x++)
+	for(int y=0; y<size.y; y++)
 	{
-		for(int y=0; y<size.y; y++)
+		for(int x=0; x<size.x; x++)
 		{
 			uchar* ptrSrc = image->ptr(y+leftUp.y)+(3*(x+leftUp.x));
 			uchar* ptrDst = result.ptr(y)+((x+x+x));
@@ -263,6 +277,7 @@ cv::Mat ImageAnalyzer::cutFragment(cv::Mat* image, cv::Point leftUp, cv::Point r
 void ImageAnalyzer::viewImage(int blockSize, std::string name, cv::Mat &image)
 {
 #ifdef PRINT_ANALYZED_IMAGE
+	int mask = 0b11000000;
 	//View
 	int xScreenSize = image.cols;
 	int yScreenSize = image.rows;
@@ -273,22 +288,21 @@ void ImageAnalyzer::viewImage(int blockSize, std::string name, cv::Mat &image)
 		{
 			cv::Scalar color;
 			uchar* ptrSrc = image.ptr(y)+(x+x+x);
-			for(int xx=0; xx<blockSize; xx++)
+			for(int yy=0; yy<blockSize; yy++)
 			{
-				for(int yy=0; yy<blockSize; yy++)
+				for(int xx=0; xx<blockSize; xx++)
 				{
 					uchar* ptr = viewImage.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
-					int v = (ptrSrc[0]+ptrSrc[1]+ptrSrc[2])/3;
-					ptr[0] = 64*((int)ptrSrc[0]/64);
-					ptr[1] = 64*((int)ptrSrc[1]/64);
-					ptr[2] = 64*((int)ptrSrc[2]/64);
+					ptr[0] = ptrSrc[0];
+					ptr[1] = ptrSrc[1];
+					ptr[2] = ptrSrc[2];
 				}
 			}
 		}
 	}
 	//Print
 	imshow(name, viewImage);
-	cv::waitKey(10);
+	cv::waitKey(1);
 #endif
 }
 
