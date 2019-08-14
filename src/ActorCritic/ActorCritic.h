@@ -5,8 +5,8 @@
  *      Author: przemo
  */
 
-#ifndef SRC_QLEARNING_QLEARNING_H_
-#define SRC_QLEARNING_QLEARNING_H_
+#ifndef SRC_ACTORCRITIC_ACTORCRITIC_H_
+#define SRC_ACTORCRITIC_ACTORCRITIC_H_
 
 #include <vector>
 #include <string>
@@ -15,18 +15,19 @@
 #include "../HashMap/QValues.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
 
-class QLearning {
+class ActorCritic {
 
 public:
-	QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize);
-	virtual ~QLearning();
+	ActorCritic(int t_nActions, std::vector<int> t_dimensionStatesSize);
+	virtual ~ActorCritic();
 
 	//Basic methods
 	std::pair<bool,int> chooseAction(State& t_state, ControlMode mode);
-	double learnQL(State t_prevState, State t_state, int t_action, double t_reward);
-	std::pair<double,int> learnAction(const State *state, bool skipNotReady = true);
+	double learn(State t_prevState, State t_state, int t_action, double t_reward);
 
 	void resetActionsNN();
+
+	double getCriticValue(State t_state) {return criticValues->determineY(t_state)[0];}
 
 
 private:
@@ -36,18 +37,17 @@ private:
 
 public:
 	//Debug methods
-	void setQValue(State t_state, int t_action, double t_value) {qValues.setValue(t_state, t_action, t_value);}
-	double getQValue(State t_state, int t_action) { return qValues.getValue(t_state,t_action);}
-	double getQChange(State t_state) { return qValues.getChange(t_state);}
+//	void setQValue(State t_state, int t_action, double t_value) {qValues.setValue(t_state, t_action, t_value);}
+//	double getQValue(State t_state, int t_action) { return qValues.getValue(t_state,t_action);}
+//	double getQChange(State t_state) { return qValues.getChange(t_state);}
 
 
 private:
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	QValues qValues;
-	NeuralNetwork *nnQValues;
-	NeuralNetwork *actions;
+	NeuralNetwork *criticValues;
+	NeuralNetwork *actorValues;
 
 public:
 	static constexpr double ACTION_LEARN_THRESHOLD = 40;
@@ -59,4 +59,4 @@ public:
 
 };
 
-#endif /* SRC_QLEARNING_QLEARNING_H_ */
+#endif /* SRC_ACTORCRITIC_ACTORCRITIC_H */

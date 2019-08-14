@@ -8,7 +8,7 @@
 #ifndef SRC_BOT_H_
 #define SRC_BOT_H_
 
-#define PRINT_PROCESSING_TIME
+//#define PRINT_PROCESSING_TIME
 
 #include <vector>
 #include <list>
@@ -16,9 +16,9 @@
 #include <iostream>
 #include <fstream>
 
+#include "../ActorCritic/ActorCritic.h"
 #include "Common.h"
 #include "../Analyzers/StateAnalyzer.h"
-#include "../QLearning/QLearning.h"
 #include "../Loggers/DataDrawer.h"
 
 class Bot {
@@ -51,13 +51,14 @@ public:
 private:
 	void loadParameters();
 
-	void learnFromScenarioQL(std::list<SARS> &historyScenario);
+	void learnFromScenarioAC(std::list<SARS> &historyScenario);
 	void learnFromScenario(std::list<SARS> &historyScenario);
 	void learnFromMemory();
 	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);
-	State createSceneState(cv::Mat& image,cv::Mat& imagePast, ControllerInput& controllerInput, Point& position, Point& velocity);
+	State createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
+						   ControllerInput& controllerInput, Point& position, Point& velocity);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
 
 	static State reduceStateResolution(const State& t_state);
@@ -65,7 +66,7 @@ private:
 private:
 	//
 	StateAnalyzer analyzer;
-	QLearning *qLearning;
+	ActorCritic *actorCritic;
 
 	std::map<ReducedState, State> discoveredStates;
 	int playsBeforeNNLearning;

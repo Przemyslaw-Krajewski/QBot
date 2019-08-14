@@ -22,6 +22,7 @@ public:
 	{
 		cv::Mat processedImage;
 		cv::Mat processedImagePast;
+		cv::Mat processedImagePast2;
 		bool playerFound;
 		bool playerIsDead;
 		bool killedByEnemy;
@@ -63,6 +64,7 @@ private:
 	cv::Point imageSize;
 
 	std::list<cv::Mat> oldImages;
+	std::list<cv::Mat> oldImages2;
 
 	Histogram playerHistogram;
 

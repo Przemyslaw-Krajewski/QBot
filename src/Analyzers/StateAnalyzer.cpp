@@ -81,13 +81,14 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeBT()
 	//reward
 	double reward = ADVANCE_REWARD;
 	bool endScenario = false;
-	if(imageAnalyzeResult.playerWon)			     										 	 {reward = WIN_REWARD; endScenario = true;}
-	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
+	if(imageAnalyzeResult.playerWon)		 {reward = WIN_REWARD; endScenario = true;}
+	else if(imageAnalyzeResult.playerIsDead) {reward = DIE_REWARD; endScenario = true;}
 
 	//Preparing output
 	AnalyzeResult analyzeResult;
 	analyzeResult.processedImage = imageAnalyzeResult.processedImage;
 	analyzeResult.processedImagePast = imageAnalyzeResult.processedImagePast;
+	analyzeResult.processedImagePast2 = imageAnalyzeResult.processedImagePast2;
 	analyzeResult.additionalInfo = additionalInfo;
 	analyzeResult.reward = reward;
 	analyzeResult.endScenario = endScenario;

@@ -115,8 +115,8 @@ std::vector<double> NeuralNetwork::determineY(std::vector<double> &x)
 	//Prepare input
 	if(x.size() != inputLayer.size()-1)
 	{
-		std::cout << x.size() << "  " << inputLayer.size()-1 << "\n";
-		assert(x.size() == inputLayer.size()-1);
+		std::cout << "Layer size: " << x.size() << "  " << inputLayer.size()-1 << "\n";
+		assert(x.size() != inputLayer.size()-1);
 	}
 	int i = 0;
 	for(std::list<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)
@@ -136,8 +136,8 @@ std::vector<double> NeuralNetwork::determineY(const std::vector<int> &x)
 	//Prepare input
 	if(x.size() != inputLayer.size()-1)
 	{
-		std::cout << x.size() << "  " << inputLayer.size()-1 << "\n";
-		assert(x.size() == inputLayer.size()-1);
+		std::cout << "Layer size: " << x.size() << "  " << inputLayer.size()-1 << "\n";
+		assert(x.size() != inputLayer.size()-1);
 	}
 	int i = 0;
 	for(std::list<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)

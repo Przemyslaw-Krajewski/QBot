@@ -57,14 +57,21 @@ void ImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResu
 
 	calculateSituationBT(colorImage,result);
 
-	if(oldImages.size() >1)
+	if(oldImages.size() >6)
 	{
 		result->processedImagePast = *oldImages.begin();
+		oldImages2.push_back(result->processedImagePast.clone());
 		oldImages.erase(oldImages.begin());
 	}
-	else result->processedImagePast = cv::Mat(16, 16, CV_8UC3);
+	else result->processedImagePast = cv::Mat(10, 16, CV_8UC3);
 
-	reduceColors(0b10000000,&(result->processedImagePast));
+	if(oldImages2.size() >6)
+	{
+		result->processedImagePast2 = *oldImages2.begin();
+		oldImages2.erase(oldImages2.begin());
+	}
+	else result->processedImagePast2 = cv::Mat(10, 16, CV_8UC3);
+//	reduceColors(0b10000000,&(result->processedImagePast));
 
 	int blockSize = 16;
 	reduceColors(0b11000000,&smallerImage);
@@ -73,8 +80,9 @@ void ImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResu
 	getLeastFrequentInImage(4, firstPhaseImage, result->processedImage);
 	oldImages.push_back(getFirst(2, &(result->processedImage)));
 
-	viewImage(4,"proc2", result->processedImage);
-	viewImage(4,"proc3", result->processedImagePast);
+	viewImage(16,"proc", result->processedImage);
+	viewImage(32,"past1", result->processedImagePast);
+	viewImage(32,"past2", result->processedImagePast2);
 	result->playerFound = true;
 }
 

@@ -23,6 +23,7 @@ public:
 
 		cv::Mat processedImage;
 		cv::Mat processedImagePast;
+		cv::Mat processedImagePast2;
 		double reward;
 		Point playerCoords;
 		Point playerVelocity;
@@ -41,10 +42,10 @@ private:
 	ImageAnalyzer imageAnalyzer;
 
 public:
-	static const int WIN_REWARD     = 100;
-	static const int ADVANCE_REWARD = 5;
-	static const int LITTLE_ADVANCE_REWARD = 1;
-	static const int DIE_REWARD 	= -100;
+	const double WIN_REWARD     = 0.05;
+	const double ADVANCE_REWARD = 0.02;
+	const double LITTLE_ADVANCE_REWARD = 0.00001;
+	const double DIE_REWARD 	=  0.00001;
 };
 
 #endif /* SRC_ANALYZERS_STATEANALYZER_H_ */
