@@ -18,7 +18,9 @@
 
 #include "Common.h"
 #include "../Analyzers/StateAnalyzer.h"
+#include "../Analyzers/MemoryAnalyzer.h"
 #include "../QLearning/QLearning.h"
+#include "../ActorCritic/ActorCritic.h"
 #include "../Loggers/DataDrawer.h"
 
 class Bot {
@@ -27,6 +29,13 @@ class Bot {
 
 	struct SARS
 	{
+		SARS()
+		{
+			state = State();
+			oldState = State();
+			reward = 0;
+			action = 0;
+		}
 		SARS(State t_oldState, State t_state, int t_action, double t_reward)
 		{
 			state = t_state;
@@ -52,23 +61,26 @@ private:
 	void loadParameters();
 
 	void learnFromScenarioQL(std::list<SARS> &historyScenario);
+	void learnFromScenarioAC(std::list<SARS> &historyScenario);
 	void learnFromScenario(std::list<SARS> &historyScenario);
 	void learnFromMemory();
+	void learnFromMemoryAC();
 	void eraseInvalidLastStates(std::list<SARS> &history);
 	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);
+	int determineControllerInputInt(int t_action);
 	State createSceneState(cv::Mat& sceneState, ControllerInput& controllerInput, Point& position, Point& velocity);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
 
-	static State reduceStateResolution(const State& t_state);
+	static State reduceStateResolution(const State& t_state, double action);
 
 private:
 	//
 	StateAnalyzer analyzer;
-	QLearning *qLearning;
+	ActorCritic *qLearning;
 
-	std::map<ReducedState, State> discoveredStates;
+	std::map<ReducedState, SARS> memorizedSARS;
 	int playsBeforeNNLearning;
 
 	ControlMode controlMode;
@@ -77,9 +89,9 @@ private:
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
-	const int TIME_LIMIT = 80;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 3;
+	const int TIME_LIMIT = 60;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
 	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 3;
 };
 

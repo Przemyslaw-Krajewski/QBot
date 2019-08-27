@@ -33,12 +33,12 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	else if(imageAnalyzeResult.playerWon) additionalInfo = AnalyzeResult::AdditionalInfo::won;
 
 	//reward
-	double reward = 0;
+	double reward = 0.1;
 	bool endScenario = false;
-	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = -100;  endScenario = true;}
+	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = 0.0001;  endScenario = true;}
 	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
 	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD; endScenario = true;}
-	else if(memoryAnalyzeResult.playerPositionX > 60 && memoryAnalyzeResult.playerVelocityX > 16) {reward = ADVANCE_REWARD;}
+	else if(memoryAnalyzeResult.playerPositionX > 60 && memoryAnalyzeResult.playerVelocityX > 16){reward = ADVANCE_REWARD;}
 	else if(memoryAnalyzeResult.playerVelocityX > 16) 										 	 {reward = LITTLE_ADVANCE_REWARD;}
 
 	//Preparing output

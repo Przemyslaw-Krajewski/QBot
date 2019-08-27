@@ -178,3 +178,14 @@ cv::Mat MemoryAnalyzer::fetchScreenData()
 
 	return screenResult;
 }
+
+
+void MemoryAnalyzer::setController(int c)
+{
+	setMemValue(CONTROL_ADDR,c);
+}
+
+void MemoryAnalyzer::loadState()
+{
+	setMemValue(LOADSTATE_ADDR,1);
+}
