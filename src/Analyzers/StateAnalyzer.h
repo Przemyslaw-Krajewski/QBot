@@ -39,10 +39,10 @@ private:
 	ImageAnalyzer imageAnalyzer;
 
 public:
-	static constexpr double WIN_REWARD     = 0.4;
-	static constexpr double ADVANCE_REWARD = 0.15;
-	static constexpr double LITTLE_ADVANCE_REWARD = 0.12;
-	static constexpr double DIE_REWARD 	= 0.0001;
+	static const int WIN_REWARD     = 1000;
+	static const int ADVANCE_REWARD = 50;
+	static const int LITTLE_ADVANCE_REWARD = 10;
+	static const int DIE_REWARD 	= -1000;
 };
 
 #endif /* SRC_ANALYZERS_STATEANALYZER_H_ */
