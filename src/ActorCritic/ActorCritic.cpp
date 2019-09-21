@@ -48,11 +48,21 @@ void ActorCritic::resetActionsNN()
 std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 {
 	std::vector<double> values = actorValues->determineY(t_state);
-//		for(int i=0 ;i<values.size() ;i++) std::cout << values[i] << " ";
-//		std::cout << "\n";
-	int action = getIndexOfMaxValue(values);
+	double sum = 0;
+	for(int i=0; i<values.size(); i++)
+	{
+		if(values[i] < 0.3) continue;
+		sum += values[i];
+	}
+	double randomValue = ((double)(rand()%((int)sum*10000)))/10000;
+	for(int i=0; i<values.size(); i++)
+	{
+		if(values[i] < 0.3) continue;
+		randomValue -= values[i];
+		if(randomValue < 0) return std::pair<bool,int>(true,i);
+	}
 
-	return std::pair<bool,int>(true,action);
+	return std::pair<bool,int>(true,values.size()-1);
 }
 
 /*
@@ -69,15 +79,16 @@ double ActorCritic::learn(State t_prevState, State t_state, int t_action, double
 	//Actor
 	std::vector<double> stateValue = criticValues->determineY(t_state);
 	std::vector<double> actorZ = actorValues->determineY(t_prevState);
-	double chosenAction = getIndexOfMaxValue(actorZ);
 
-	if(prevStateValue[0] >= 0.6 || prevStateValue[0] < stateValue[0]) actorZ[t_action] = 0.9;
-	else actorZ[t_action] = 0.1;
+	actorZ[t_action] = 0.5*t_reward/actorZ[t_action];
 
-	for(int i=0 ; i<numberOfActions ; i++)
-	{
-		if(actorZ[i] < 0.1) actorZ[i] = 0.10;
-	}
+//	if(prevStateValue[0] >= 0.6 || prevStateValue[0] < stateValue[0]) actorZ[t_action] = 0.9;
+//	else actorZ[t_action] = 0.1;
+//
+//	for(int i=0 ; i<numberOfActions ; i++)
+//	{
+//		if(actorZ[i] < 0.1) actorZ[i] = 0.10;
+//	}
 
 //	if((chosenAction!=t_action && prevStateValue[0] >= 0.5) ||
 //			(chosenAction==t_action && prevStateValue[0] < 0.5))

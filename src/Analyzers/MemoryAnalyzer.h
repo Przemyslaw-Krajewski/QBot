@@ -57,8 +57,8 @@ private:
 	const off_t RAM_VEL_X_OFFSET{0x57};
 	const off_t RAM_VEL_Y_OFFSET{0x9f};
 	const off_t RAM_POS_X_OFFSET{0x4ac};
-	const off_t RAM_ADDR{0x555555b92690}; // RAM
-	const off_t XBUFF_ADDR{0x555555b62630}; //XBackBuf
+	const off_t RAM_ADDR{0x555555b926a0}; // RAM
+	const off_t XBUFF_ADDR{0x555555b62640}; //XBackBuf
 	const off_t PALETTE_ADDR{0x555555acab40}; //s_psdl
 	const off_t CONTROL_ADDR{0x555555913267}; //sterowanie
 	const off_t LOADSTATE_ADDR{0x555555913266}; //wczytaj

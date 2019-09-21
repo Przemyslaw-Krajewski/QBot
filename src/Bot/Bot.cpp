@@ -125,7 +125,7 @@ void Bot::execute()
 #endif
 
 			//Stop game?
-			if(analyzeResult.reward<StateAnalyzer::LITTLE_ADVANCE_REWARD)
+			if(analyzeResult.reward<StateAnalyzer::ADVANCE_REWARD)
 			{
 				time--;
 				if(time<0)
