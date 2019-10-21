@@ -64,6 +64,8 @@ void Bot::execute()
 
 	while(1)
 	{
+		double score = 0;
+
 		//State variables
 		std::list<SARS> historyScenario;
 		State sceneState;
@@ -76,14 +78,19 @@ void Bot::execute()
 //		DesktopHandler::getPtr()->releaseControllerButton();
 		MemoryAnalyzer::getPtr()->setController(0);
 		MemoryAnalyzer::getPtr()->loadState();
-		cv::waitKey(3000);
+		cv::waitKey(100);
 
 		//Get first state
-		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
-		sceneState = createSceneState(analyzeResult.fieldAndEnemiesLayout,
-						controllerInput,
-						analyzeResult.playerCoords,
-						analyzeResult.playerVelocity);
+		while(1)
+		{
+			StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
+			sceneState = createSceneState(analyzeResult.fieldAndEnemiesLayout,
+							controllerInput,
+							analyzeResult.playerCoords,
+							analyzeResult.playerVelocity);
+			if(sceneState.size() > 15) break;
+			std::cout << "Problem with getting first image\n";
+		}
 
 		while(1)
 		{
@@ -91,7 +98,7 @@ void Bot::execute()
 #ifdef PRINT_PROCESSING_TIME
 			int64 timeBefore = cv::getTickCount();
 #endif
-
+			cv::waitKey(80);
 			std::vector<int> oldSceneState = sceneState;
 			int oldAction = action;
 
@@ -103,7 +110,8 @@ void Bot::execute()
 										  analyzeResult.playerCoords,
 										  analyzeResult.playerVelocity);
 
-			if(controllerInput[0] && analyzeResult.playerVelocity.y == 0)analyzeResult.reward -= 0.01;
+			if(controllerInput[0] && analyzeResult.playerVelocity.y == 0 && analyzeResult.reward > 0.01) analyzeResult.reward -= 0.01;
+			if(analyzeResult.reward > StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
@@ -155,7 +163,9 @@ void Bot::execute()
 			reset = false;
 		}
 
-		std::cout << "\n";
+		std::cout << score << "\n";
+
+		if(scenarioResult == ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
 		learnFromScenarioAC(historyScenario);
 		learnFromMemoryAC();
 
@@ -261,14 +271,13 @@ void Bot::learnFromScenarioQL(std::list<SARS> &historyScenario)
  */
 void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 {
-
 	std::vector<SARS*> sarsPointers;
 	sarsPointers.clear();
 	double cumulatedReward = 0;
 	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 	{
 		cumulatedReward = ActorCritic::LAMBDA_PARAMETER*(sarsIterator->reward + cumulatedReward);
-		sarsIterator->reward += cumulatedReward;
+		sarsIterator->reward = cumulatedReward;
 		sarsPointers.push_back(&(*sarsIterator));
 		memorizedSARS[reduceStateResolution(sarsIterator->oldState, sarsIterator->action)] = SARS(sarsIterator->oldState,
 																								  sarsIterator->state,
@@ -288,15 +297,9 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 									   (*sarsIterator)->reward));
 	}
 
-//	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
-//	{
-//		double nnValue = qLearning->getCriticValue(sarsIterator->oldState);
-//		std::cout << nnValue << "  ->  " << sarsIterator->reward << "\n";
-//	}
-
-	std::cout << "Cumulated reward: " << cumulatedReward << "\n";
-	std::cout << "History size: " << historyScenario.size() << " sumErr: " << sumErr << "\n";
-	std::cout << "Sum Error: " << sumErr/historyScenario.size() << "\n";
+//	std::cout << "Cumulated reward: " << cumulatedReward << "\n";
+//	std::cout << "History size: " << historyScenario.size() << " sumErr: " << sumErr << "\n";
+//	std::cout << "Sum Error: " << sumErr/historyScenario.size() << "\n";
 }
 
 /*
@@ -304,7 +307,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
  */
 void Bot::learnFromMemoryAC()
 {
-	int skipStep = sqrt(memorizedSARS.size())/4;
+	int skipStep = sqrt(memorizedSARS.size())/8;
 	if(skipStep < 1) skipStep = 1;
 
 	double sumErr = 0;
@@ -327,13 +330,15 @@ void Bot::learnFromMemoryAC()
 										   (shuffledSARS[j])->reward));
 		}
 
+//		sumErr = 0;
 //		for(std::map<ReducedState, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++)
 //		{
 //			double nnValue = qLearning->getCriticValue(i->second.oldState);
+//			sumErr += abs(nnValue - i->second.reward);
 //			std::cout << nnValue << "  ->  " << i->second.reward << "\n";
 //		}
 
-		std::cout << "Error mem: " << sumErr / ((double) shuffledSARS.size()) << "\n";
+//		std::cout << "Error mem: " << sumErr / ((double) shuffledSARS.size()) << "\n";
 	}
 }
 
@@ -423,7 +428,7 @@ void Bot::eraseInvalidLastStates(std::list<SARS> &t_history)
 		else break;
 	}
 	t_history.front().reward=lastReward;
-	std::cout << "Invaled states: " << counter << "\n";
+//	std::cout << "Invaled states: " << counter << "\n";
 
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractedSceneState = extractSceneState(state);
 	DataDrawer::drawAnalyzedData(extractedSceneState.first,extractedSceneState.second,

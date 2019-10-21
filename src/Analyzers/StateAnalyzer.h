@@ -39,9 +39,10 @@ private:
 	ImageAnalyzer imageAnalyzer;
 
 public:
-	static constexpr double WIN_REWARD     = 0.4;
-	static constexpr double ADVANCE_REWARD = 0.15;
-	static constexpr double LITTLE_ADVANCE_REWARD = 0.12;
+	static constexpr double WIN_REWARD     = 0.3;
+	static constexpr double ADVANCE_REWARD = 0.10;
+	static constexpr double LITTLE_ADVANCE_REWARD = 0.08;
+	static constexpr double NOTHING_REWARD = 0.04;
 	static constexpr double DIE_REWARD 	= 0.0001;
 };
 

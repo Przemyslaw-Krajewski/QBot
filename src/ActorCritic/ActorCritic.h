@@ -54,7 +54,7 @@ public:
 
 	static constexpr double GAMMA_PARAMETER = 0;		//reward for advancing to next promising state
 	static constexpr double ALPHA_PARAMETER = 1;		//speed of learning QLearning
-	static constexpr double LAMBDA_PARAMETER = 0.8;	//reward cumulation factor
+	static constexpr double LAMBDA_PARAMETER = 0.9;	//reward cumulation factor
 
 
 };

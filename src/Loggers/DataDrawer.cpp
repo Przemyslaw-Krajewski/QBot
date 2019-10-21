@@ -12,7 +12,7 @@
  */
 void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, ControllerInput t_keys, double reward, double change)
 {
-	int blockSize = 15;
+	int blockSize = 10;
 
 	int xScreenSize = sceneData.fieldAndEnemiesLayout.cols;
 	int yScreenSize = sceneData.fieldAndEnemiesLayout.rows;
@@ -81,15 +81,13 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 				cv::Scalar(value,value,value));
 	}
 
-	reward = reward > 255 ? 255 : reward;
-	reward = reward < -255 ? -255 : reward;
 	//reward
 	drawBorderedBlock(&map,blockSize,
 			Point(20*blockSize,yScreenSize*blockSize),
 			cv::Scalar(
 					0,
-					reward > 0 ? 5*reward : 0,
-					reward < 0 ?   -reward : 0));
+					reward > 0.06 ? reward*2500 : 0,
+					reward < 0.06 ?   (0.6-reward)*4000 : 0));
 	//change
 	change = abs(change);
 	drawBorderedBlock(&map,blockSize,
