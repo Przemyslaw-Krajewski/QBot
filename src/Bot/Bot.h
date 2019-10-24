@@ -60,20 +60,15 @@ public:
 private:
 	void loadParameters();
 
-	void learnFromScenarioQL(std::list<SARS> &historyScenario);
 	void learnFromScenarioAC(std::list<SARS> &historyScenario);
-	void learnFromScenario(std::list<SARS> &historyScenario);
-	void learnFromMemory();
 	void learnFromMemoryAC();
 	void eraseInvalidLastStates(std::list<SARS> &history);
-	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);
 	int determineControllerInputInt(int t_action);
 	State createSceneState(cv::Mat& sceneState, ControllerInput& controllerInput, Point& position, Point& velocity);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
-
-	static State reduceStateResolution(const State& t_state, double action);
+	static State reduceSceneState(const State& t_state, double action);
 
 private:
 	//
