@@ -35,11 +35,11 @@ ActorCritic::~ActorCritic()
 void ActorCritic::resetActionsNN()
 {
 	if(actorValues != nullptr) delete actorValues;
-	actorValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({500,400,300,numberOfActions}),
-				std::initializer_list<double>({0.01,0.033,0.1,0.33}),0.8);
+	actorValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({400,200,numberOfActions}),
+					std::initializer_list<double>({0.066,0.2,0.66}),0.8);
 	if(criticValues != nullptr) delete criticValues;
-	criticValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({500,400,300,1}),
-				std::initializer_list<double>({0.01,0.033,0.1,0.33}),0.8);
+	criticValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({400,200,1}),
+					std::initializer_list<double>({0.02,0.066,0.2}),0.8);
 }
 
 /*
@@ -48,11 +48,26 @@ void ActorCritic::resetActionsNN()
 std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 {
 	std::vector<double> values = actorValues->determineY(t_state);
-//		for(int i=0 ;i<values.size() ;i++) std::cout << values[i] << " ";
-//		std::cout << "\n";
-	int action = getIndexOfMaxValue(values);
+	std::vector<double> critic = criticValues->determineY(t_state);
 
-	return std::pair<bool,int>(true,action);
+	std::cout << critic[0] << "   :    ";
+	double sum = 0;
+	for(int i=0; i<values.size(); i++)
+	{
+		std::cout << values[i] << "  ";
+		sum += values[i];
+	}
+	std::cout << "\n";
+
+	if(sum == 0) return std::pair<bool,int>(true,rand()%numberOfActions);
+	double randomValue = ((double)(rand()%((int)10000)))/10000;
+	for(int i=0; i<values.size(); i++)
+	{
+		randomValue -= values[i]/sum;
+		if(values[i] > 0.80 || randomValue < 0)	return std::pair<bool,int>(true,i);
+	}
+
+	return std::pair<bool,int>(true,values.size()-1);
 }
 
 /*
@@ -60,25 +75,33 @@ std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
  */
 double ActorCritic::learn(State t_prevState, State t_state, int t_action, double t_reward)
 {
+	if(t_prevState.size() == 0 || t_reward == 0)
+	{
+		std::cout << "INVALID STATE!\n";
+		return 0;
+	}
+
 	//Critic
 	std::vector<double> prevStateValue = criticValues->determineY(t_prevState);
-	std::vector<double> criticZ = std::vector<double>({t_reward});
+	std::vector<double> criticZ = std::vector<double>();
+	criticZ.push_back(t_reward);
 	criticValues->learnBackPropagation(criticZ);
+//	std::cout << prevStateValue[0] << "   ->   " << t_reward << "\n";
 
 	//Actor
 	std::vector<double> stateValue = criticValues->determineY(t_state);
-	actorValues->determineY(t_prevState);
-	std::vector<double> actorZ;
-	if(stateValue[0] > prevStateValue[0])
+	std::vector<double> actorZ = actorValues->determineY(t_prevState);
+
+	double sum = 0;
+	for(int i=0 ; i<numberOfActions ; i++) sum += actorZ[i];
+	actorZ[t_action] = (t_reward-stateValue[0])/actorZ[t_action] + actorZ[t_action];
+
+	for(int i=0 ; i<numberOfActions ; i++)
 	{
-		for(int i=0 ; i<numberOfActions ; i++) actorZ.push_back(0.1);
-		actorZ[t_action] = 0.9;
+		if(actorZ[i] < 0.01) actorZ[i] = 0.01;
+		if(actorZ[i] > 0.99) actorZ[i] = 0.99;
 	}
-	else
-	{
-		for(int i=0 ; i<numberOfActions ; i++) actorZ.push_back(0.9);
-		actorZ[t_action] = 0.1;
-	}
+
 	actorValues->learnBackPropagation(actorZ);
 
 	return prevStateValue[0] - t_reward;

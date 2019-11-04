@@ -65,12 +65,12 @@ void ImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResu
 	}
 	else result->processedImagePast = cv::Mat(10, 16, CV_8UC3);
 
-	if(oldImages2.size() >6)
-	{
-		result->processedImagePast2 = *oldImages2.begin();
-		oldImages2.erase(oldImages2.begin());
-	}
-	else result->processedImagePast2 = cv::Mat(10, 16, CV_8UC3);
+//	if(oldImages2.size() >6)
+//	{
+//		result->processedImagePast2 = *oldImages2.begin();
+//		oldImages2.erase(oldImages2.begin());
+//	}
+//	else result->processedImagePast2 = cv::Mat(10, 16, CV_8UC3);
 //	reduceColors(0b10000000,&(result->processedImagePast));
 
 	int blockSize = 16;
@@ -82,7 +82,7 @@ void ImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResu
 
 	viewImage(16,"proc", result->processedImage);
 	viewImage(32,"past1", result->processedImagePast);
-	viewImage(32,"past2", result->processedImagePast2);
+//	viewImage(32,"past2", result->processedImagePast2);
 	result->playerFound = true;
 }
 
@@ -108,7 +108,7 @@ void ImageAnalyzer::calculateSituationBT(cv::Mat *image, ImageAnalyzer::AnalyzeR
 	//Player death
 	analyzeResult->playerIsDead = false;
 	analyzeResult->playerWon = false;
-	if(!findObject(*image,emptyHealth,cv::Point(0,0),cv::Scalar(96,116,252),cv::Rect(15,15,25,25)).empty())
+	if(!findObject(*image,emptyHealth,cv::Point(0,0),cv::Scalar(96,116,252),cv::Rect(128,15,256,25)).empty())
 	{
 		analyzeResult->playerIsDead = true;
 	}

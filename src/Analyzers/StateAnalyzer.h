@@ -42,10 +42,11 @@ private:
 	ImageAnalyzer imageAnalyzer;
 
 public:
-	const double WIN_REWARD     = 0.05;
-	const double ADVANCE_REWARD = 0.02;
-	const double LITTLE_ADVANCE_REWARD = 0.00001;
-	const double DIE_REWARD 	=  0.00001;
+	static constexpr double WIN_REWARD     = 0.3;
+	static constexpr double ADVANCE_REWARD = 0.10;
+	static constexpr double LITTLE_ADVANCE_REWARD = 0.08;
+	static constexpr double NOTHING_REWARD = 0.04;
+	static constexpr double DIE_REWARD 	= 0.0001;
 };
 
 #endif /* SRC_ANALYZERS_STATEANALYZER_H_ */

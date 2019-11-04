@@ -116,7 +116,6 @@ MemoryAnalyzer::AnalyzeResult MemoryAnalyzer::fetchData()
 	result.playerVelocityX = (unsigned int) getMemValue(RAM_ADDR+RAM_VEL_X_OFFSET);
 	result.playerVelocityY = (unsigned int) getMemValue(RAM_ADDR+RAM_VEL_Y_OFFSET);
 	result.playerPositionX = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_X_OFFSET);
-	result.playerPositionY = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_Y_OFFSET);
 
 	return result;
 }
@@ -220,4 +219,15 @@ cv::Mat MemoryAnalyzer::fetchRawScreenData()
 #endif
 
 	return screenResult;
+}
+
+
+void MemoryAnalyzer::setController(int c)
+{
+	setMemValue(CONTROL_ADDR,c);
+}
+
+void MemoryAnalyzer::loadState()
+{
+	setMemValue(LOADSTATE_ADDR,1);
 }

@@ -47,6 +47,8 @@ public:
 
 	cv::Mat fetchScreenData();
 	cv::Mat fetchRawScreenData();
+	void setController(int c);
+	void loadState();
 
 private:
 	static MemoryAnalyzer* ptr;
@@ -57,10 +59,11 @@ private:
 	const off_t RAM_VEL_X_OFFSET{0x57};
 	const off_t RAM_VEL_Y_OFFSET{0x9f};
 	const off_t RAM_POS_X_OFFSET{0x4ac};
-	const off_t RAM_POS_Y_OFFSET{0x4ad};
-	const off_t RAM_ADDR{0x555555b8c630}; // RAM
-	const off_t XBUFF_ADDR{0x555555b5c5d0}; //XBackBuf
-	const off_t PALETTE_ADDR{0x555555ac59c0}; //s_psdl
+	const off_t RAM_ADDR{0x55555598e450}; // RAM
+	const off_t XBUFF_ADDR{0x55555595e3f0}; //XBackBuf
+	const off_t PALETTE_ADDR{0x5555558c5a80}; //s_psdl
+	const off_t CONTROL_ADDR{0x55555583c747}; //sterowanie
+	const off_t LOADSTATE_ADDR{0x55555583c746}; //wczytaj
 };
 
 #endif /* SRC_ANALYZERS_MEMORYANALYZER_H_ */

@@ -19,6 +19,10 @@
 #include "../ActorCritic/ActorCritic.h"
 #include "Common.h"
 #include "../Analyzers/StateAnalyzer.h"
+
+#include "../Analyzers/MemoryAnalyzer.h"
+#include "../QLearning/QLearning.h"
+#include "../ActorCritic/ActorCritic.h"
 #include "../Loggers/DataDrawer.h"
 
 class Bot {
@@ -27,6 +31,13 @@ class Bot {
 
 	struct SARS
 	{
+		SARS()
+		{
+			state = State();
+			oldState = State();
+			reward = 0;
+			action = 0;
+		}
 		SARS(State t_oldState, State t_state, int t_action, double t_reward)
 		{
 			state = t_state;
@@ -52,23 +63,23 @@ private:
 	void loadParameters();
 
 	void learnFromScenarioAC(std::list<SARS> &historyScenario);
-	void learnFromScenario(std::list<SARS> &historyScenario);
-	void learnFromMemory();
-	void eraseNotReadyStates();
 
-	ControllerInput determineControllerInput(int t_action);
 	State createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
 						   ControllerInput& controllerInput, Point& position, Point& velocity);
-	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
+	void learnFromMemoryAC();
+	void eraseInvalidLastStates(std::list<SARS> &history);
 
-	static State reduceStateResolution(const State& t_state);
+	ControllerInput determineControllerInput(int t_action);
+	int determineControllerInputInt(int t_action);
+	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
+	static State reduceSceneState(const State& t_state, double action);
 
 private:
 	//
 	StateAnalyzer analyzer;
 	ActorCritic *actorCritic;
 
-	std::map<ReducedState, State> discoveredStates;
+	std::map<ReducedState, SARS> memorizedSARS;
 	int playsBeforeNNLearning;
 
 	ControlMode controlMode;
@@ -77,10 +88,11 @@ private:
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
-	const int TIME_LIMIT = 80;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 3;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 15;
+
+	const int TIME_LIMIT = 60;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 3;
 };
 
 #endif /* SRC_BOT_H_ */

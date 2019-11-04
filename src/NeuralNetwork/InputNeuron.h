@@ -21,7 +21,7 @@ public:
 	virtual double getY();
 	virtual void learnBackPropagation();
 
-	double setY(double t_y) {x = t_y;}
+	double setY(double t_y) {x = t_y; return x;}
 
 private:
 	double x;
