@@ -21,6 +21,7 @@ add_executable(QBot
                             src/Analyzers/DesktopHandler.cpp
                             src/Analyzers/ImageAnalyzer.cpp
                             src/Analyzers/MemoryAnalyzer.cpp
+                            src/NeuralNetwork/ConvolutionalNeuralNetwork.cpp
                             src/NeuralNetwork/NeuralNetwork.cpp
                             src/NeuralNetwork/Neuron.cpp
                             src/NeuralNetwork/InputNeuron.cpp

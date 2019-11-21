@@ -36,7 +36,11 @@ Bot::Bot()
 	cv::waitKey(1000);
 
 	//Initialize qLearning
-	actorCritic = new ActorCritic(numberOfActions, std::vector<int>(sceneState.size(),255));
+	std::vector<int> inputSize;
+	inputSize.push_back(analyzeResult.processedImage.cols);
+	inputSize.push_back(analyzeResult.processedImage.rows);
+	inputSize.push_back(2*3);
+	actorCritic = new ActorCritic(numberOfActions, inputSize);
 
 	playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 }
@@ -54,7 +58,6 @@ Bot::~Bot()
  */
 void Bot::execute()
 {
-
 	while(1)
 	{
 		double score = 0;
@@ -218,8 +221,11 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 																								  sarsIterator->reward);
 	}
 
+
+//	long counter=0;
 //	while(1)
 //	{
+
 	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
 
 	//QLearning
@@ -231,12 +237,17 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 										 (*sarsIterator)->action,
 										 (*sarsIterator)->reward));
 	}
+	std::cout << sumErr/sarsPointers.size() << "\n";
+
 //	sumErr = 0;
+//	counter++;
 //	for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
 //	{
-//		sumErr += abs(actorCritic->getCriticValue((*sarsIterator)->oldState)-(*sarsIterator)->reward);
+//		double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
+//		sumErr += abs(value-(*sarsIterator)->reward);
+////		std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
 //	}
-//	std::cout << sumErr << "  " << sarsPointers.size() << "\n";
+//	std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
 //	}
 }
 
@@ -245,7 +256,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
  */
 void Bot::learnFromMemoryAC()
 {
-	int skipStep = sqrt(memorizedSARS.size())/3;
+	int skipStep = memorizedSARS.size()/150;
 	if(skipStep < 1) skipStep = 1;
 
 	double sumErr = 0;
@@ -328,10 +339,13 @@ std::vector<int> Bot::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::M
 		for(int y=0; y<image.rows; y++)
 		{
 			uchar* ptrSrc = image.ptr(y)+(3*(x));
-			int c1 = (ptrSrc[0] >> 6);
-			int c2 = (ptrSrc[1] >> 4);
-			int c3 = (ptrSrc[2] >> 2);
-			sceneState.push_back(c1 + c2 + c3);
+//			int c1 = (ptrSrc[0] >> 6);
+//			int c2 = (ptrSrc[1] >> 4);
+//			int c3 = (ptrSrc[2] >> 2);
+//			sceneState.push_back(c1 + c2 + c3);
+			sceneState.push_back(ptrSrc[0]);
+			sceneState.push_back(ptrSrc[1]);
+			sceneState.push_back(ptrSrc[2]);
 		}
 	}
 
@@ -340,10 +354,13 @@ std::vector<int> Bot::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::M
 		for(int y=0; y<imagePast.rows; y++)
 		{
 			uchar* ptrSrc = imagePast.ptr(y)+(3*(x));
-			int c1 = (ptrSrc[0] >> 6);
-			int c2 = (ptrSrc[1] >> 4);
-			int c3 = (ptrSrc[2] >> 2);
-			sceneState.push_back(c1 + c2 + c3);
+//			int c1 = (ptrSrc[0] >> 6);
+//			int c2 = (ptrSrc[1] >> 4);
+//			int c3 = (ptrSrc[2] >> 2);
+//			sceneState.push_back(c1 + c2 + c3);
+			sceneState.push_back(ptrSrc[0]);
+			sceneState.push_back(ptrSrc[1]);
+			sceneState.push_back(ptrSrc[2]);
 		}
 	}
 
@@ -357,11 +374,11 @@ std::vector<int> Bot::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::M
 //	}
 
 	//Controller
-	for(bool ci : controllerInput)
-	{
-		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
-		else sceneState.push_back(MIN_INPUT_VALUE);
-	}
+//	for(bool ci : controllerInput)
+//	{
+//		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+//		else sceneState.push_back(MIN_INPUT_VALUE);
+//	}
 	return sceneState;
 }
 

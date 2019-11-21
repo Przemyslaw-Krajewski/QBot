@@ -26,7 +26,7 @@ NeuralNetwork::NeuralNetwork(int t_inputSize, std::vector<int> t_layers,std::vec
 
 	//Creating first hidden layer
 	std::vector<Neuron*> prevLayerReference;
-	for(std::list<InputNeuron>::iterator it=inputLayer.begin(); it!=inputLayer.end(); it++)
+	for(std::vector<InputNeuron>::iterator it=inputLayer.begin(); it!=inputLayer.end(); it++)
 	{
 		prevLayerReference.push_back(&(*it));
 	}
@@ -113,13 +113,13 @@ NeuralNetwork::~NeuralNetwork()
 std::vector<double> NeuralNetwork::determineY(std::vector<double> &x)
 {
 	//Prepare input
-	if(x.size() != inputLayer.size()-1)
+	if(x.size() != inputLayer.size())
 	{
-		std::cout << "Layer size: " << x.size() << "  " << inputLayer.size()-1 << "\n";
+		std::cout << "Layer size: " << x.size() << "  " << inputLayer.size() << "\n";
 		assert(x.size() != inputLayer.size()-1);
 	}
 	int i = 0;
-	for(std::list<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)
+	for(std::vector<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)
 	{
 		it_input->setY(x[i]);
 		i++;
@@ -134,13 +134,13 @@ std::vector<double> NeuralNetwork::determineY(std::vector<double> &x)
 std::vector<double> NeuralNetwork::determineY(const std::vector<int> &x)
 {
 	//Prepare input
-	if(x.size() != inputLayer.size()-1)
+	if(x.size() != inputLayer.size())
 	{
-		std::cout << "Layer size: " << x.size() << "  " << inputLayer.size()-1 << "\n";
+		std::cout << "Layer size: " << x.size() << "  " << inputLayer.size() << "\n";
 		assert(x.size() != inputLayer.size()-1);
 	}
 	int i = 0;
-	for(std::list<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)
+	for(std::vector<InputNeuron>::iterator it_input=++inputLayer.begin(); it_input!=inputLayer.end(); it_input++)
 	{
 		it_input->setY(x[i]);
 		i++;

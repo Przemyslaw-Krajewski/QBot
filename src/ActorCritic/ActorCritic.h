@@ -14,6 +14,7 @@
 #include "../Bot/Common.h"
 #include "../HashMap/QValues.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
+#include "../NeuralNetwork/ConvolutionalNeuralNetwork.h"
 
 class ActorCritic {
 

@@ -22,6 +22,8 @@
 using NNInput = std::vector<double>;
 
 class NeuralNetwork {
+protected:
+	NeuralNetwork() {b=0;}
 public:
 	NeuralNetwork(int t_inputSize, std::vector<int> t_layers,std::vector<double> t_n, double t_b);
 	NeuralNetwork(const NeuralNetwork& t_neuralNetwork);
@@ -35,7 +37,7 @@ public:
 	void learnBackPropagation(std::vector<double>& x, std::vector<double>& z);
 
 	//helping
-private:
+protected:
 	std::vector<double> determineY();
 
 	//getInfo
@@ -52,8 +54,8 @@ public:
 	void writeNeuronsToFile();
 	void printNeuralNetworkInfo();
 
-private:
-	std::list<InputNeuron> inputLayer;
+protected:
+	std::vector<InputNeuron> inputLayer;
 	std::list<std::vector<Neuron>> hiddenLayers;
 	std::vector<double> n;
 	double b;
