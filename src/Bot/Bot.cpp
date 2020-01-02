@@ -35,12 +35,9 @@ Bot::Bot()
 	DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 	cv::waitKey(1000);
 
-	//Initialize qLearning
-	std::vector<int> inputSize;
-	inputSize.push_back(analyzeResult.processedImage.cols);
-	inputSize.push_back(analyzeResult.processedImage.rows);
-	inputSize.push_back(2*3);
-	actorCritic = new ActorCritic(numberOfActions, inputSize);
+	//Initialize acLearning
+	actorCritic = new ActorCritic(numberOfActions,
+	        std::vector<int>(analyzeResult.processedImage.cols*analyzeResult.processedImage.rows*2*3,255));
 
 	playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 }
@@ -139,7 +136,7 @@ void Bot::execute()
 		if(reset)
 		{
 			std::cout << "RESET NN\n";
-			actorCritic->resetActionsNN();
+            actorCritic->resetNN();
 			reset = false;
 		}
 

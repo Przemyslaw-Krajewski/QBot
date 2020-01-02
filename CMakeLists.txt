@@ -13,21 +13,21 @@ if (OPENMP_FOUND)
 endif()
 
 add_executable(QBot
-                            src/main.cpp
-                            src/Bot/Bot.cpp
-							src/QLearning/QLearning.cpp
-							src/ActorCritic/ActorCritic.cpp
-                            src/Analyzers/StateAnalyzer.cpp
-                            src/Analyzers/DesktopHandler.cpp
-                            src/Analyzers/ImageAnalyzer.cpp
-                            src/Analyzers/MemoryAnalyzer.cpp
-                            src/NeuralNetwork/ConvolutionalNeuralNetwork.cpp
-                            src/NeuralNetwork/NeuralNetwork.cpp
-                            src/NeuralNetwork/Neuron.cpp
-                            src/NeuralNetwork/InputNeuron.cpp
-							src/HashMap/QValues.cpp
-							src/Loggers/DataDrawer.cpp
-              )
+		    src/main.cpp
+			src/Bot/Bot.cpp
+			src/QLearning/QLearning.cpp
+			src/ActorCritic/ActorCritic.cpp
+			src/Analyzers/StateAnalyzer.cpp
+			src/Analyzers/DesktopHandler.cpp
+			src/Analyzers/ImageAnalyzer.cpp
+			src/Analyzers/MemoryAnalyzer.cpp
+			src/NeuralNetwork/NeuralNetwork.cpp
+			src/NeuralNetwork/Neuron/AdaptiveNeuron.cpp
+			src/NeuralNetwork/Neuron/InputNeuron.cpp
+			src/HashMap/QValues.cpp
+			src/Loggers/DataDrawer.cpp
+			src/NeuralNetwork/Layer/InputLayer.cpp
+			src/NeuralNetwork/Layer/SigmoidLayer.cpp)
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
 target_link_libraries( QBot ${OpenCV_LIBRARIES} ${X11_LIBRARIES} xdo pthread)

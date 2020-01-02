@@ -15,40 +15,25 @@ ActorCritic::ActorCritic(int t_nActions, std::vector<int> t_dimensionStatesSize)
 	dimensionStatesSize = t_dimensionStatesSize;
 	numberOfActions = t_nActions;
 
-	actorValues = nullptr;
-	criticValues = nullptr;
-	resetActionsNN();
+    resetNN();
 }
 
 /*
  *
  */
-ActorCritic::~ActorCritic()
+void ActorCritic::resetNN()
 {
-	if(actorValues != nullptr) delete actorValues;
-	if(criticValues != nullptr) delete criticValues;
-}
 
-/*
- *
- */
-void ActorCritic::resetActionsNN()
-{
-//	if(actorValues != nullptr) delete actorValues;
-//	actorValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({200,numberOfActions}),
-//					{0.033,0.1},0.15);
-//	if(criticValues != nullptr) delete criticValues;
-//	criticValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({200,1}),
-//					{0.033,0.1},0.15);
+    SigmoidLayer::configure(0.15);
+    actorValues = NeuralNetwork();
+    actorValues.addLayer(new InputLayer(dimensionStatesSize.size()));
+    actorValues.addLayer(new SigmoidLayer(0.033,200,actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new SigmoidLayer(0.01, numberOfActions  ,actorValues.getLastLayerNeuronRef()));
 
-	if(actorValues != nullptr) delete actorValues;
-	actorValues = new ConvolutionalNeuralNetwork(LayerInfo(dimensionStatesSize[0],dimensionStatesSize[1],dimensionStatesSize[2]),
-			std::initializer_list<LayerInfo>({{18,12,4},{numberOfActions,1,1}}),
-			{7,10},{0.033,0.1},0.18);
-	if(criticValues != nullptr) delete criticValues;
-	criticValues = new ConvolutionalNeuralNetwork(LayerInfo(dimensionStatesSize[0],dimensionStatesSize[1],dimensionStatesSize[2]),
-			std::initializer_list<LayerInfo>({{18,12,4},{1,1,1}}),
-			{7,10},{0.033,0.1},0.18);
+    criticValues = NeuralNetwork();
+    criticValues.addLayer(new InputLayer(dimensionStatesSize.size()));
+    criticValues.addLayer(new SigmoidLayer(0.033, 200,actorValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new SigmoidLayer(0.01 , 1 ,actorValues.getLastLayerNeuronRef()));
 }
 
 /*
@@ -56,8 +41,8 @@ void ActorCritic::resetActionsNN()
  */
 std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 {
-	std::vector<double> values = actorValues->determineY(t_state);
-	std::vector<double> critic = criticValues->determineY(t_state);
+	std::vector<double> values = actorValues.determineOutput(t_state);
+	std::vector<double> critic = criticValues.determineOutput(t_state);
 
 	std::cout << critic[0] << "   :    ";
 	double sum = 0;
@@ -93,15 +78,15 @@ double ActorCritic::learn(State t_prevState, State t_state, int t_action, double
 	}
 
 	//Critic
-	std::vector<double> prevStateValue = criticValues->determineY(t_prevState);
+	std::vector<double> prevStateValue = criticValues.determineOutput(t_prevState);
 	std::vector<double> criticZ = std::vector<double>();
 	criticZ.push_back(t_reward);
-	criticValues->learnBackPropagation(criticZ);
+	criticValues.learnBackPropagation(criticZ);
 //	std::cout << prevStateValue[0] << "   ->   " << t_reward << "\n";
 
 	//Actor
-	std::vector<double> stateValue = criticValues->determineY(t_state);
-	std::vector<double> actorZ = actorValues->determineY(t_prevState);
+	std::vector<double> stateValue = criticValues.determineOutput(t_state);
+	std::vector<double> actorZ = actorValues.determineOutput(t_prevState);
 
 	double sum = 0;
 	for(int i=0 ; i<numberOfActions ; i++) sum += actorZ[i];
@@ -113,7 +98,7 @@ double ActorCritic::learn(State t_prevState, State t_state, int t_action, double
 		if(actorZ[i] > 0.99) actorZ[i] = 0.99;
 	}
 
-	actorValues->learnBackPropagation(actorZ);
+	actorValues.learnBackPropagation(actorZ);
 
 	return prevStateValue[0] - t_reward;
 }

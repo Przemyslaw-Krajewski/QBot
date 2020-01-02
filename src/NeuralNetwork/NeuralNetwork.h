@@ -16,49 +16,34 @@
 #include <opencv2/opencv.hpp>
 #include <fstream>
 
-#include "InputNeuron.h"
-#include "Neuron.h"
+#include "Layer/NNLayer.h"
+#include "Layer/InputLayer.h"
+#include "Layer/SigmoidLayer.h"
 
 using NNInput = std::vector<double>;
 
-class NeuralNetwork {
-protected:
-	NeuralNetwork() {b=0;}
+class NeuralNetwork
+{
 public:
-	NeuralNetwork(int t_inputSize, std::vector<int> t_layers,std::vector<double> t_n, double t_b);
-	NeuralNetwork(const NeuralNetwork& t_neuralNetwork);
+    NeuralNetwork();
 	virtual ~NeuralNetwork();
 
+	//Configuration
+	void addLayer(NNLayer *t_newLayer);
+	std::vector<Neuron*> getLastLayerNeuronRef();
+
 	//basic
-	std::vector<double> determineY(std::vector<double> &x);
-	std::vector<double> determineY(const std::vector<int> &x);
-	std::vector<double> getY();
+	std::vector<double> determineOutput(std::vector<double> &x);
+	std::vector<double> determineOutput(const std::vector<int> &x);
+	std::vector<double> getOutput();
 	void learnBackPropagation(std::vector<double>& z);
-	void learnBackPropagation(std::vector<double>& x, std::vector<double>& z);
 
 	//helping
 protected:
 	std::vector<double> determineY();
 
-	//getInfo
 protected:
-	int getInputSize() const {return inputLayer.size()-1;}
-	double getActivationFunctionParameter() const {return b;}
-	std::vector<double> getLearningRates() const {return n;}
-	std::vector<int> getLayersLayout() const;
-	const std::list<std::vector<Neuron>>* getHiddenLayers() const { return &hiddenLayers;}
-
-public:
-	//display
-	void displayNeuralNetwork();
-	void writeNeuronsToFile();
-	void printNeuralNetworkInfo();
-
-protected:
-	std::vector<InputNeuron> inputLayer;
-	std::list<std::vector<Neuron>> hiddenLayers;
-	std::vector<double> n;
-	double b;
+	std::list<NNLayer*> layers;
 };
 
 #endif /* SRC_NEURALNETWORK_NEURALNETWORK_H_ */

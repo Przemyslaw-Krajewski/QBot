@@ -14,21 +14,20 @@
 #include "../Bot/Common.h"
 #include "../HashMap/QValues.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
-#include "../NeuralNetwork/ConvolutionalNeuralNetwork.h"
 
 class ActorCritic {
 
 public:
 	ActorCritic(int t_nActions, std::vector<int> t_dimensionStatesSize);
-	virtual ~ActorCritic();
+	virtual ~ActorCritic() = default;
 
 	//Basic methods
 	std::pair<bool,int> chooseAction(State& t_state, ControlMode mode);
 	double learn(State t_prevState, State t_state, int t_action, double t_reward);
 
-	void resetActionsNN();
+	void resetNN();
 
-	double getCriticValue(State t_state) {return criticValues->determineY(t_state)[0];}
+	double getCriticValue(State t_state) {return criticValues.determineOutput(t_state)[0];}
 
 
 private:
@@ -47,8 +46,8 @@ private:
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	NeuralNetwork *criticValues;
-	NeuralNetwork *actorValues;
+	NeuralNetwork criticValues;
+	NeuralNetwork actorValues;
 
 public:
 	static constexpr double ACTION_LEARN_THRESHOLD = 40;
