@@ -43,8 +43,8 @@ private:
 
 public:
 	static constexpr double WIN_REWARD     = 0.3;
-	static constexpr double ADVANCE_REWARD = 0.10;
-	static constexpr double LITTLE_ADVANCE_REWARD = 0.08;
+	static constexpr double ADVANCE_REWARD = 0.07;
+	static constexpr double LITTLE_ADVANCE_REWARD = 0.06;
 	static constexpr double NOTHING_REWARD = 0.04;
 	static constexpr double DIE_REWARD 	= 0.0001;
 };

@@ -16,7 +16,8 @@ AdaptiveNeuron::AdaptiveNeuron()
 	output = 0;
 	delta = 0;
 	input.clear();
-	weights.clear();
+	weights = nullptr;
+	commonWeights = true;
 
 	sum = 0;
     derivative = 0;
@@ -28,16 +29,62 @@ AdaptiveNeuron::AdaptiveNeuron()
 AdaptiveNeuron::AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n,
                                ActivationFunction t_af,DerivativeActivationFunction t_daf) : AdaptiveNeuron()
 {
-	n = t_n;
+    n = t_n;
     activationFunction = t_af;
     derivativeActivationFunction = t_daf;
 
-	//create neurons
-	for(int i=0; i<t_x.size(); i++)
-	{
-		weights.push_back(getRandomWeight());
-		input.push_back(t_x[i]);
-	}
+    weights = new std::vector<double>;
+    commonWeights = false;
+    //create neurons
+    for(int i=0; i<t_x.size(); i++)
+    {
+        weights->push_back(getRandomWeight());
+        input.push_back(t_x[i]);
+    }
+}
+
+/*
+ *
+ */
+AdaptiveNeuron::AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n, std::vector<double>* t_weights,
+                               ActivationFunction t_af,DerivativeActivationFunction t_daf) : AdaptiveNeuron()
+{
+    n = t_n;
+    activationFunction = t_af;
+    derivativeActivationFunction = t_daf;
+
+    weights = t_weights;
+    commonWeights = true;
+    //create neurons
+    for(int i=0; i<t_x.size(); i++)
+    {
+        input.push_back(t_x[i]);
+    }
+}
+
+/*
+ *
+ */
+AdaptiveNeuron::AdaptiveNeuron(const AdaptiveNeuron& t_an)
+{
+    output = 0;
+    delta = 0;
+    sum = 0;
+    derivative = 0;
+
+    n = t_an.getLearnRate();
+    input = t_an.getInput();
+
+    activationFunction = t_an.getActivationFunction();
+    derivativeActivationFunction = t_an.getDerivativeActivationFunction();
+
+    commonWeights = t_an.getCommonWeights();
+    if(!commonWeights)
+    {
+        weights = new std::vector<double>();
+        for(int i=0; i< t_an.getWeights()->size(); i++) weights->push_back(getRandomWeight());
+    }
+    else  weights = t_an.getWeights();
 }
 
 /*
@@ -45,7 +92,7 @@ AdaptiveNeuron::AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n,
  */
 AdaptiveNeuron::~AdaptiveNeuron()
 {
-
+    if(!commonWeights) delete weights;
 }
 
 /*
@@ -55,7 +102,10 @@ double AdaptiveNeuron::determineOutput()
 {
 	//sum inputs*weights
 	sum = 0;
-	for(int i=0; i<input.size(); i++) sum += (input[i]->getOutput()) * weights[i];
+	for(int i=0; i<input.size(); i++)
+	{
+		sum += (input[i]->getOutput()) * (*weights)[i];
+	}
 
 	//calculate result
 	output = activationFunction(sum);
@@ -74,14 +124,14 @@ void AdaptiveNeuron::learnDeltaRule()
 	//calculate new weights
 	for(int i=0; i<input.size(); i++)
 	{
-		weights[i] -= p*(input[i]->getOutput());
+        (*weights)[i] -= p*(input[i]->getOutput());
 	}
 
 	//set delta to deeper neurons
 	int i = 0;
 	for(std::vector<Neuron*>::iterator it=input.begin(); it!=input.end(); it++,i++)
 	{
-		(*it)->addToDelta(-delta * derivative * weights[i]);
+		(*it)->addToDelta(-delta * derivative * (*weights)[i]);
 	}
 	delta = 0;
 }

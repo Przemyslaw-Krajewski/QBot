@@ -18,28 +18,12 @@ SigmoidLayer::SigmoidLayer(double t_learnRate, int t_size, std::vector<Neuron *>
 
     for(int i=0; i < t_size; i++)
     {
-        neurons.emplace_back(t_prevLayerReference, &learnRate,
+        neurons.push_back(AdaptiveNeuron(t_prevLayerReference, &learnRate,
                  [](double x) -> double { return 1 / ( 1 + exp(-b* x) ); },
                 [](double x) -> double { double e = exp(-b*x);
                       double m = 1 + e;
-                      return -(b*e/(m*m));});
+                      return -(b*e/(m*m));}));
     }
-}
-
-/*
- *
- */
-void SigmoidLayer::setInput(std::vector<int> t_input)
-{
-    //Do nothing
-}
-
-/*
- *
- */
-void SigmoidLayer::setInput(std::vector<double> t_input)
-{
-    //Do nothing
 }
 
 /*
@@ -75,24 +59,18 @@ void SigmoidLayer::setDelta(std::vector<double> t_z)
     }
 }
 
-void SigmoidLayer::calculateDerivative()
-{
-    int i;
-    #pragma omp parallel for shared(neurons) private(i) default(none)
-    for(i=0; i<neurons.size(); i++)
-    {
-        neurons[i].calculateDerative();
-    }
-}
-
 void SigmoidLayer::learnBackPropagation()
 {
+
+//	int64 timeBefore = cv::getTickCount();
     int i;
     #pragma omp parallel for shared(neurons) private(i) default(none)
     for(i=0; i<neurons.size(); i++)
     {
         neurons[i].learnDeltaRule();
     }
+//	int64 afterBefore = cv::getTickCount();
+//	std::cout << "Sigm: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 }
 
 /*

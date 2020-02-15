@@ -23,11 +23,12 @@ public:
 
 	//Basic methods
 	std::pair<bool,int> chooseAction(State& t_state, ControlMode mode);
-	double learn(State t_prevState, State t_state, int t_action, double t_reward);
+	double learn(State &t_prevState, State &t_state, int t_action, double t_reward);
 
 	void resetNN();
 
 	double getCriticValue(State t_state) {return criticValues.determineOutput(t_state)[0];}
+	void drawCriticValues() {criticValues.drawNeuralNetwork();}
 
 
 private:
@@ -54,7 +55,7 @@ public:
 
 	static constexpr double GAMMA_PARAMETER = 0;		//reward for advancing to next promising state
 	static constexpr double ALPHA_PARAMETER = 1;		//speed of learning QLearning
-	static constexpr double LAMBDA_PARAMETER = 0.9;		//reward cumulation factor
+	static constexpr double LAMBDA_PARAMETER = 0.92;		//reward cumulation factor
 
 
 };

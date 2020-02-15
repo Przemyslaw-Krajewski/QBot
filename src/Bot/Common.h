@@ -15,7 +15,8 @@
 const int numberOfActions = 8;
 const int numberOfControllerInputs = 6;
 
-using State = std::vector<int>;
+typedef std::vector<int> State;
+//using State = std::vector<int>;
 using ControllerInput = std::vector<bool>;
 
 struct Point

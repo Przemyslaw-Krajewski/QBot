@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 PROJECT(QBot)
 
+set(CMAKE_CXX_STANDARD 14)
 
 find_package( OpenCV REQUIRED )
 find_package( X11 REQUIRED )
@@ -24,10 +25,13 @@ add_executable(QBot
 			src/NeuralNetwork/NeuralNetwork.cpp
 			src/NeuralNetwork/Neuron/AdaptiveNeuron.cpp
 			src/NeuralNetwork/Neuron/InputNeuron.cpp
+			src/NeuralNetwork/Neuron/PoolingNeuron.cpp
 			src/HashMap/QValues.cpp
 			src/Loggers/DataDrawer.cpp
 			src/NeuralNetwork/Layer/InputLayer.cpp
-			src/NeuralNetwork/Layer/SigmoidLayer.cpp)
+			src/NeuralNetwork/Layer/SigmoidLayer.cpp
+			src/NeuralNetwork/Layer/ConvolutionalLayer.cpp
+			src/NeuralNetwork/Layer/PoolingLayer.cpp)
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
 target_link_libraries( QBot ${OpenCV_LIBRARIES} ${X11_LIBRARIES} xdo pthread)

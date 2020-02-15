@@ -78,6 +78,37 @@ namespace Test
     /*
      *
      */
+    long testNeuralNetworkConsole(std::vector<std::vector<double>> t_x, std::vector<double> t_z, NeuralNetwork *nn)
+    {
+        std::vector<std::vector<double>> x;
+        for (std::vector<double> &i : t_x) x.push_back(i);
+        std::vector<std::vector<double>> z;
+        for (double &i : t_z) z.push_back({i});
+
+        unsigned long long iteration = 0;
+
+        while (1)
+        {
+            double missSum = 0;
+            iteration++;
+            std::cout << iteration << "\n";
+            for (int i = 0; i < x.size(); i++)
+            {
+                nn->determineOutput(x[i]);
+                nn->learnBackPropagation(z[i]);
+                double miss = nn->determineOutput(x[i])[0] - z[i][0];
+                missSum += fabs(miss);
+                std::cout << miss << "\n";
+            }
+
+            if (missSum / x.size() < 0.05) break;
+        }
+        return iteration;
+    }
+
+    /*
+     *
+     */
     void testSimpleSigmoid1Layer()
     {
         SigmoidLayer::configure(13.2);
@@ -119,6 +150,22 @@ namespace Test
 
         long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
                                            {0.4, 0.9, 0.4}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+    }
+
+    /*
+     *
+     */
+    void testSimpleConvLayer()
+    {
+        SigmoidLayer::configure(13.2);
+        NeuralNetwork nn;
+        nn.addLayer(new InputLayer(4));
+        nn.addLayer(new ConvolutionalLayer(0.033, MatrixSize(2,2),1,TensorSize(2,2,1),nn.getLastLayerNeuronRef()));
+        nn.addLayer(new PoolingLayer(MatrixSize(1,1),nn.getLastLayerTensorSize(),nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetworkConsole({{-1, 1, 1, -1},{1, -1, -1, 1},{1, 1, -1, -1},{-1, -1, 1, 1}},
+                                                  {0.1, 0.7,0.3,0.6}, &nn);
         std::cout << "Done: " << iteration << "\n";
     }
 

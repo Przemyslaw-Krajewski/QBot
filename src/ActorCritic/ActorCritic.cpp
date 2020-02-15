@@ -23,17 +23,25 @@ ActorCritic::ActorCritic(int t_nActions, std::vector<int> t_dimensionStatesSize)
  */
 void ActorCritic::resetNN()
 {
-
-    SigmoidLayer::configure(0.15);
+    SigmoidLayer::configure(0.20);
     actorValues = NeuralNetwork();
     actorValues.addLayer(new InputLayer(dimensionStatesSize.size()));
-    actorValues.addLayer(new SigmoidLayer(0.033,200,actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new SigmoidLayer(0.01, numberOfActions  ,actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new ConvolutionalLayer(0.0331, MatrixSize(2,2),96,TensorSize(32,20,6),actorValues.getLastLayerNeuronRef()));
+    //actorValues.addLayer(new PoolingLayer(MatrixSize(16,10),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+    //actorValues.addLayer(new ConvolutionalLayer(0.0033, MatrixSize(4,4),15,actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new PoolingLayer(MatrixSize(8,5),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new SigmoidLayer(0.01, 100,actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new SigmoidLayer(0.033 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
 
+    std::cout << dimensionStatesSize.size() << "\n";
     criticValues = NeuralNetwork();
     criticValues.addLayer(new InputLayer(dimensionStatesSize.size()));
-    criticValues.addLayer(new SigmoidLayer(0.033, 200,actorValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new SigmoidLayer(0.01 , 1 ,actorValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new ConvolutionalLayer(0.001, MatrixSize(2,2),90,TensorSize(32,20,6),criticValues.getLastLayerNeuronRef()));
+    //criticValues.addLayer(new PoolingLayer(MatrixSize(16,10),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+    //criticValues.addLayer(new ConvolutionalLayer(0.0033, MatrixSize(2,2),30,criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new PoolingLayer(MatrixSize(8,5),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new SigmoidLayer(0.01, 100,criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new SigmoidLayer(0.033 , 1 ,criticValues.getLastLayerNeuronRef()));
 }
 
 /*
@@ -69,7 +77,7 @@ std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 /*
  *
  */
-double ActorCritic::learn(State t_prevState, State t_state, int t_action, double t_reward)
+double ActorCritic::learn(State &t_prevState, State &t_state, int t_action, double t_reward)
 {
 	if(t_prevState.size() == 0 || t_reward == 0)
 	{

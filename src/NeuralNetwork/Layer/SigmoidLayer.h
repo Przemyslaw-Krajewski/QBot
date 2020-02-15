@@ -16,10 +16,6 @@ public:
     virtual ~SigmoidLayer() = default;
 
 public:
-    //input
-    void setInput(std::vector<int> t_input) override;
-    void setInput(std::vector<double> t_input) override;
-
     //output
     std::vector<double> getOutput() override;
     void determineOutput() override;
@@ -27,7 +23,6 @@ public:
     //learn
     void setDelta(std::vector<double> t_z) override;
     void learnBackPropagation() override;
-    void calculateDerivative() override;
 
     //configuration
     std::vector<Neuron*> getNeuronPtr() override;

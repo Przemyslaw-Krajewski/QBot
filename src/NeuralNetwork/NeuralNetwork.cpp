@@ -45,6 +45,14 @@ std::vector<Neuron*> NeuralNetwork::getLastLayerNeuronRef()
 /*
  *
  */
+TensorSize NeuralNetwork::getLastLayerTensorSize()
+{
+	return (*layers.rbegin())->getTensorOutputSize();
+}
+
+/*
+ *
+ */
 std::vector<double> NeuralNetwork::determineOutput(std::vector<double> &x)
 {
     //Prepare input

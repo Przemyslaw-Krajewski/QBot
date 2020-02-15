@@ -15,10 +15,14 @@ using DerivativeActivationFunction = double (*)(double);
 
 class AdaptiveNeuron : public Neuron
 {
-public:
+private:
     AdaptiveNeuron();
+public:
     AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n,
                    ActivationFunction t_af,DerivativeActivationFunction t_daf);
+    AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n, std::vector<double> * t_weights,
+                   ActivationFunction t_af,DerivativeActivationFunction t_daf);
+    AdaptiveNeuron(const AdaptiveNeuron& t_an);
     virtual ~AdaptiveNeuron();
 
 	//basic
@@ -34,9 +38,19 @@ public:
     ActivationFunction activationFunction;
     DerivativeActivationFunction derivativeActivationFunction;
 
+    //getters
+    std::vector<Neuron*> getInput() const {return input;}
+    std::vector<double>* getWeights() const {return weights;}
+    bool getCommonWeights() const {return commonWeights;}
+    double* getLearnRate() const {return n;}
+    ActivationFunction getActivationFunction() const {return activationFunction;}
+    DerivativeActivationFunction getDerivativeActivationFunction() const {return derivativeActivationFunction;}
+
 protected:
 	std::vector<Neuron*> input;
-    std::vector<double> weights;
+    std::vector<double> *weights;
+    bool commonWeights;
+
     double output;
     double *n;
 

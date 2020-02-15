@@ -28,8 +28,8 @@ public:
 
     virtual double getDerivative() {return 0;}
 
-protected:
-    double getRandomWeight() { return ((double)((rand()%1000))/1000-0.5)*0.5; }
+public:
+    static double getRandomWeight() { return ((double)((rand()%1000))/1000-0.5)*0.5; }
 
 protected:
     double delta;

@@ -32,7 +32,7 @@ Bot::Bot()
 								  controllerInput,
 								  analyzeResult.playerCoords,
 								  analyzeResult.playerVelocity);
-	DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
+//	DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 	cv::waitKey(1000);
 
 	//Initialize acLearning
@@ -143,7 +143,7 @@ void Bot::execute()
 		std::cout << score << "\n";
 
 		learnFromScenarioAC(historyScenario);
-		learnFromMemoryAC();
+//		learnFromMemoryAC();
 	}
 }
 
@@ -210,6 +210,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 	{
 		cumulatedReward = ActorCritic::LAMBDA_PARAMETER*(sarsIterator->reward + cumulatedReward);
+		//std::cout << cumulatedReward << "\n"; 
 		sarsIterator->reward = cumulatedReward;
 		sarsPointers.push_back(&(*sarsIterator));
 		memorizedSARS[reduceSceneState(sarsIterator->oldState, sarsIterator->action)] = SARS(sarsIterator->oldState,
@@ -218,10 +219,9 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 																								  sarsIterator->reward);
 	}
 
-
-//	long counter=0;
-//	while(1)
-//	{
+	long counter=0;
+	//while(1)
+	//{
 
 	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
 
@@ -236,16 +236,17 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 	}
 	std::cout << sumErr/sarsPointers.size() << "\n";
 
-//	sumErr = 0;
-//	counter++;
-//	for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-//	{
-//		double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
-//		sumErr += abs(value-(*sarsIterator)->reward);
-////		std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
-//	}
-//	std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
-//	}
+	//sumErr = 0;
+	//counter++;
+	//for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+	//{
+	//	double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
+	//	sumErr += abs(value-(*sarsIterator)->reward);
+	//	std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
+	//}
+	//std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
+//	if(counter%20==0) actorCritic->drawCriticValues();
+	//	}
 }
 
 /*
@@ -261,7 +262,7 @@ void Bot::learnFromMemoryAC()
 	if(memorizedSARS.size() <= 0) return;
 
 	//Prepare states
-	std::vector<const SARS*> shuffledSARS;
+	std::vector<SARS*> shuffledSARS;
 	for(std::map<ReducedState, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++) shuffledSARS.push_back(&(i->second));
 
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
