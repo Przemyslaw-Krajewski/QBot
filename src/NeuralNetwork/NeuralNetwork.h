@@ -20,6 +20,7 @@
 #include "Layer/InputLayer.h"
 #include "Layer/SigmoidLayer.h"
 #include "Layer/ConvolutionalLayer.h"
+#include "Layer/ModifiedConvolutionalLayer.h"
 #include "Layer/PoolingLayer.h"
 
 

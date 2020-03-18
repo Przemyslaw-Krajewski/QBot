@@ -143,7 +143,7 @@ void Bot::execute()
 		std::cout << score << "\n";
 
 		learnFromScenarioAC(historyScenario);
-//		learnFromMemoryAC();
+		learnFromMemoryAC();
 	}
 }
 
@@ -210,22 +210,20 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
 	{
 		cumulatedReward = ActorCritic::LAMBDA_PARAMETER*(sarsIterator->reward + cumulatedReward);
-		//std::cout << cumulatedReward << "\n"; 
 		sarsIterator->reward = cumulatedReward;
 		sarsPointers.push_back(&(*sarsIterator));
 		memorizedSARS[reduceSceneState(sarsIterator->oldState, sarsIterator->action)] = SARS(sarsIterator->oldState,
 																								  sarsIterator->state,
 																								  sarsIterator->action,
 																								  sarsIterator->reward);
+//		double value = actorCritic->getCriticValue((sarsIterator)->oldState);
+//		std::cout << value << " = "<< (sarsIterator)->reward << "\n";
 	}
 
 	long counter=0;
-	//while(1)
-	//{
-
 	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
 
-	//QLearning
+	//Learning
 	double sumErr = 0;
 	for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
 	{
@@ -235,18 +233,36 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 										 (*sarsIterator)->reward));
 	}
 	std::cout << sumErr/sarsPointers.size() << "\n";
+//	actorCritic->drawCriticValues();
 
-	//sumErr = 0;
-	//counter++;
-	//for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-	//{
-	//	double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
-	//	sumErr += abs(value-(*sarsIterator)->reward);
-	//	std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
-	//}
-	//std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
-//	if(counter%20==0) actorCritic->drawCriticValues();
-	//	}
+	while(1)
+	{
+
+		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
+
+		//Learning
+		double sumErr = 0;
+		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+		{
+			sumErr += abs(actorCritic->learn((*sarsIterator)->oldState,
+											 (*sarsIterator)->state,
+											 (*sarsIterator)->action,
+											 (*sarsIterator)->reward));
+		}
+		std::cout << sumErr/sarsPointers.size() << "\n";
+
+		sumErr = 0;
+		counter++;
+		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+		{
+			double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
+			sumErr += abs(value-(*sarsIterator)->reward);
+			//std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
+		}
+		std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
+		if(counter >100) { int p=0;p=3/p;}
+//		if(counter%10==0) actorCritic->drawCriticValues();
+	}
 }
 
 /*
@@ -337,10 +353,6 @@ std::vector<int> Bot::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::M
 		for(int y=0; y<image.rows; y++)
 		{
 			uchar* ptrSrc = image.ptr(y)+(3*(x));
-//			int c1 = (ptrSrc[0] >> 6);
-//			int c2 = (ptrSrc[1] >> 4);
-//			int c3 = (ptrSrc[2] >> 2);
-//			sceneState.push_back(c1 + c2 + c3);
 			sceneState.push_back(ptrSrc[0]);
 			sceneState.push_back(ptrSrc[1]);
 			sceneState.push_back(ptrSrc[2]);
@@ -352,10 +364,6 @@ std::vector<int> Bot::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::M
 		for(int y=0; y<imagePast.rows; y++)
 		{
 			uchar* ptrSrc = imagePast.ptr(y)+(3*(x));
-//			int c1 = (ptrSrc[0] >> 6);
-//			int c2 = (ptrSrc[1] >> 4);
-//			int c3 = (ptrSrc[2] >> 2);
-//			sceneState.push_back(c1 + c2 + c3);
 			sceneState.push_back(ptrSrc[0]);
 			sceneState.push_back(ptrSrc[1]);
 			sceneState.push_back(ptrSrc[2]);

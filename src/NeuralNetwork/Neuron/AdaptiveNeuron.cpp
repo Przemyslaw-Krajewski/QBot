@@ -21,6 +21,9 @@ AdaptiveNeuron::AdaptiveNeuron()
 
 	sum = 0;
     derivative = 0;
+
+    activationFunction = nullptr;
+    derivativeActivationFunction = nullptr;
 }
 
 /*

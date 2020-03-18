@@ -27,8 +27,8 @@ ConvolutionalLayer::ConvolutionalLayer(double t_learnRate, MatrixSize t_filterSi
 		filters.push_back(filter);
     }
 
-    t_filterSize.x = t_filterSize.x / 2;
-    t_filterSize.y = t_filterSize.y / 2;
+    t_filterSize.x = (t_filterSize.x-1) / 2;
+    t_filterSize.y = (t_filterSize.y-1) / 2;
     for(int z=0; z<t_numberOfLayers; z++)
     {
         for(int y=0; y<t_inputSize.y; y+=1)
@@ -54,10 +54,10 @@ ConvolutionalLayer::ConvolutionalLayer(double t_learnRate, MatrixSize t_filterSi
                                      [](double x) -> double { return x > 0 ? x : 0.01*x; },
                                      [](double x) -> double { return x > 0 ? 1 : 0.01; });
 
-//                [](double x) -> double { return 1 / ( 1 + exp(-0.15* x) ); },
-//                                [](double x) -> double { double e = exp(-0.15*x);
+//                [](double x) -> double { return 1 / ( 1 + exp(-0.03* x) ); },
+//                                [](double x) -> double { double e = exp(-0.03*x);
 //                                      double m = 1 + e;
-//                                      return -(0.25*e/(m*m));});
+//                                      return -(0.03*e/(m*m));});
             }
         }
     }
@@ -135,33 +135,32 @@ std::vector<Neuron *> ConvolutionalLayer::getNeuronPtr()
  */
 void ConvolutionalLayer::drawLayer()
 {
-//	int blockSize = 8;
-//	std::vector<double> result = getOutput();
-//	for(int z = 0; z< outputSize.z ;z++)
-//	{
-//		//View
-//		cv::Mat viewImage = cv::Mat((outputSize.y)*blockSize, (outputSize.x)*blockSize, CV_8UC3);
-//		for(int x=0; x<outputSize.x; x++)
-//		{
-//			for(int y=0; y<outputSize.y; y++)
-//			{
-//				cv::Scalar color;
-//				int value = result[getIndex(x,y,z,outputSize.x,outputSize.y)];
-//				for(int yy=0; yy<blockSize; yy++)
-//				{
-//					for(int xx=0; xx<blockSize; xx++)
-//					{
-//						uchar* ptr = viewImage.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
-//						ptr[0] = value;
-//						ptr[1] = value;
-//						ptr[2] = value;
-//					}
-//				}
-//			}
-//		}
-//		//Print
-//		std::string a = std::to_string(z);
-//		imshow(a, viewImage);
-//		cv::waitKey(10);
-//	}
+	int blockSize = 4;
+	std::vector<double> result = getOutput();
+	for(int z = 0; z< outputSize.z ;z++)
+	{
+		//View
+		cv::Mat viewImage = cv::Mat((outputSize.y)*blockSize, (outputSize.x)*blockSize, CV_8UC3);
+		for(int x=0; x<outputSize.x; x++)
+		{
+			for(int y=0; y<outputSize.y; y++)
+			{
+				cv::Scalar color;
+				int value = result[getIndex(x,y,z,outputSize.x,outputSize.y)];
+				for(int yy=0; yy<blockSize; yy++)
+				{
+					for(int xx=0; xx<blockSize; xx++)
+					{
+						uchar* ptr = viewImage.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
+						if(value > 0) {ptr[0] = 0;ptr[1] = value;ptr[2] = 0;}
+						else {ptr[0] = 0;ptr[1] = 0;ptr[2] = abs(value);}
+					}
+				}
+			}
+		}
+		//Print
+		std::string a = std::to_string(z);
+		imshow(a, viewImage);
+		cv::waitKey(10);
+	}
 }

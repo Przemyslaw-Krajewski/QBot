@@ -57,7 +57,7 @@ void ImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResu
 
 	calculateSituationBT(colorImage,result);
 
-	if(oldImages.size() >6)
+	if(oldImages.size() >3)
 	{
 		result->processedImagePast = *oldImages.begin();
 		oldImages2.push_back(result->processedImagePast.clone());

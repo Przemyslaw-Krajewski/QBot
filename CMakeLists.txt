@@ -31,6 +31,7 @@ add_executable(QBot
 			src/NeuralNetwork/Layer/InputLayer.cpp
 			src/NeuralNetwork/Layer/SigmoidLayer.cpp
 			src/NeuralNetwork/Layer/ConvolutionalLayer.cpp
+			src/NeuralNetwork/Layer/ModifiedConvolutionalLayer.cpp
 			src/NeuralNetwork/Layer/PoolingLayer.cpp)
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
