@@ -11,7 +11,7 @@
  *
  */
 QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
-	qValues(QValues(t_nActions,t_dimensionStatesSize))
+	qValues(HashMap(t_nActions,t_dimensionStatesSize))
 {
 	alpha = 0.75;
 	gamma = 0.80;
@@ -36,9 +36,16 @@ QLearning::~QLearning()
  */
 void QLearning::resetActionsNN()
 {
+//	long size = qValues.getSize();
+//	std::cout << "NN size: "<< 5+size/5 << "\n";
+
 	if(actions != nullptr) delete actions;
-	actions = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({200,180,numberOfActions}),
-				std::initializer_list<double>({0.033,0.1,0.33}),1.2);
+
+    SigmoidLayer::configure(0.7);
+    actions = new NeuralNetwork();
+    actions->addLayer(new InputLayer(dimensionStatesSize.size()));
+    actions->addLayer(new SigmoidLayer(0.0033, 600, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new SigmoidLayer(0.01, numberOfActions, actions->getLastLayerNeuronRef()));
 }
 
 /*z
@@ -47,18 +54,27 @@ void QLearning::resetActionsNN()
 std::pair<bool,int> QLearning::chooseAction(State& t_state, ControlMode mode)
 {
 	std::vector<double> values;
-	if(mode == ControlMode::NN)	values = actions->determineY(t_state);
-	else if (mode == ControlMode::QL) values = qValues.getValues(t_state);
+	if(mode == ControlMode::NN)
+	{
+		values = actions->determineOutput(t_state);
+	}
+	else if (mode == ControlMode::QL)
+	{
+		values = qValues.getValues(t_state);
+	}
 	else if (mode == ControlMode::Hybrid || mode == ControlMode::NNNoLearn)
 	{
 		if(qValues.getChange(t_state) > ACTION_LEARN_THRESHOLD)
 		{
 			std::vector<double> nnInput = convertState2NNInput(t_state);
-			values = actions->determineY(nnInput);
+			values = actions->determineOutput(nnInput);
 		}
 		else values = qValues.getValues(t_state);
 	}
 	else assert("no such control mode" && 0);
+
+//	for (int i=0; i< values.size() ;i++) std::cout << values[i] << "   ";
+//	std::cout << "\n";
 
 	int action = getIndexOfMaxValue(values);
 
@@ -93,7 +109,7 @@ std::pair<double,int> QLearning::learnAction(const State *state, bool skipNotRea
 	if(qValues.getChange(*state) > ACTION_LEARN_THRESHOLD && skipNotReady) return std::pair<double,int>(0,2);
 
 	std::vector<double> qlValues = qValues.getValues(*state);
-	std::vector<double> nnValues = actions->determineY(*state);
+	std::vector<double> nnValues = actions->determineOutput(*state);
 	int qlAction = getIndexOfMaxValue(qlValues);
 	int nnAction = getIndexOfMaxValue(nnValues);
 

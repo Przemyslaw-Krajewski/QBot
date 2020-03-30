@@ -10,8 +10,6 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "DesktopHandler.h"
-
 //#define PRINT_ANALYZED_IMAGE
 
 class ImageAnalyzer {

@@ -16,19 +16,22 @@
 
 using CacheMemory = std::map<std::vector<int>,double>;
 
-class QValues
+class HashMap
 {
 public:
-	QValues(int t_nActions, std::vector<int> t_dimensionsSize);
-	~QValues();
+	HashMap(int t_nActions, std::vector<int> t_dimensionsSize);
+	~HashMap();
 
 	double getValue(State t_state, int t_action);
-	double getChange(State t_state);
 	std::vector<double> getValues(State t_state);
-
 	void setValue(State t_state, int t_action, double t_value);
+	double getChange(State t_state);
 
 	long getSize() {long sum = 0; for(int i=0;i<cache.size();i++) sum+=cache[i].size(); return sum;}
+
+	void saveToFile();
+	void loadFromFile();
+	std::vector<State> getStateList();
 
 private:
 	std::vector<CacheMemory> cache;

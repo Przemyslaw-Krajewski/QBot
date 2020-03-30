@@ -12,19 +12,25 @@ if (OPENMP_FOUND)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
-add_executable(QBot
-                            src/main.cpp
-                            src/Bot/Bot.cpp
-							src/QLearning/QLearning.cpp
-                            src/Analyzers/StateAnalyzer.cpp
-                            src/Analyzers/DesktopHandler.cpp
-                            src/Analyzers/ImageAnalyzer.cpp
-                            src/Analyzers/MemoryAnalyzer.cpp
-                            src/NeuralNetwork/NeuralNetwork.cpp
-                            src/NeuralNetwork/Neuron.cpp
-                            src/NeuralNetwork/InputNeuron.cpp
-							src/HashMap/QValues.cpp
-							src/Loggers/DataDrawer.cpp
+add_executable( QBot
+	            src/main.cpp
+	            src/Bot/Bot.cpp
+				src/QLearning/QLearning.cpp
+	            src/Analyzers/StateAnalyzer.cpp
+	            src/Analyzers/DesktopHandler.cpp
+	            src/Analyzers/ImageAnalyzer.cpp
+	            src/Analyzers/MemoryAnalyzer.cpp
+				src/HashMap/HashMap.cpp
+				src/Loggers/DataDrawer.cpp
+				src/NeuralNetwork/NeuralNetwork.cpp
+				src/NeuralNetwork/Neuron/AdaptiveNeuron.cpp
+				src/NeuralNetwork/Neuron/InputNeuron.cpp
+				src/NeuralNetwork/Neuron/PoolingNeuron.cpp
+				src/NeuralNetwork/Layer/InputLayer.cpp
+				src/NeuralNetwork/Layer/SigmoidLayer.cpp
+				src/NeuralNetwork/Layer/ConvolutionalLayer.cpp
+				src/NeuralNetwork/Layer/ModifiedConvolutionalLayer.cpp
+				src/NeuralNetwork/Layer/PoolingLayer.cpp
               )
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})

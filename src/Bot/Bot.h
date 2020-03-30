@@ -58,6 +58,7 @@ private:
 	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);
+	int determineControllerInputInt(int t_action);
 	State createSceneState(cv::Mat& sceneState, ControllerInput& controllerInput, Point& position, Point& velocity);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
 
@@ -78,9 +79,9 @@ private:
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 80;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 3;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 3;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 3;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 2;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 1;
 };
 
 #endif /* SRC_BOT_H_ */

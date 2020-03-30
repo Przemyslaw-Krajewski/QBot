@@ -75,7 +75,7 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 	//pressed keys
 	for(int i=0; i<t_keys.size(); i++)
 	{
-		int value = t_keys[i] ? 255 : 0;
+		int value = t_keys[i]>0 ? 255 : 0;
 		drawBorderedBlock(&map,blockSize,
 				Point((8+i)*blockSize,yScreenSize*blockSize),
 				cv::Scalar(value,value,value));

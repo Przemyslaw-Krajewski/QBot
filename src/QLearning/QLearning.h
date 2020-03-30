@@ -12,7 +12,7 @@
 #include <string>
 
 #include "../Bot/Common.h"
-#include "../HashMap/QValues.h"
+#include "../HashMap/HashMap.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
 
 class QLearning {
@@ -26,10 +26,16 @@ public:
 	double learnQL(State t_prevState, State t_state, int t_action, double t_reward);
 	std::pair<double,int> learnAction(const State *state, bool skipNotReady = true);
 
+	//NeuralNetwork methods
 	void resetActionsNN();
 
+	//File operation
+	void saveQValues() {qValues.saveToFile();}
+	void loadQValues() {qValues.loadFromFile();}
+	std::vector<State> getStateList() {return qValues.getStateList();}
 
 private:
+	//Helping
 	NNInput convertState2NNInput(const State &t_state);
 	int getIndexOfMaxValue(std::vector<double> t_array);
 
@@ -41,12 +47,12 @@ public:
 
 
 private:
-	double gamma;
-	double alpha;
+	double gamma;				//+% of next state reward
+	double alpha;				//How fast is learning QL
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	QValues qValues;
+	HashMap qValues;
 	NeuralNetwork *actions;
 
 public:
