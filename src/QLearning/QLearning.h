@@ -32,6 +32,8 @@ public:
 	//File operation
 	void saveQValues() {qValues.saveToFile();}
 	void loadQValues() {qValues.loadFromFile();}
+	void saveNeuralNetwork() {actions->saveToFile();}
+	void loadNeuralNetwork() {actions->loadFromFile();}
 	std::vector<State> getStateList() {return qValues.getStateList();}
 
 private:

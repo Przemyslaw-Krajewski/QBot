@@ -13,7 +13,7 @@
 Bot::Bot()
 {
 	reset = false;
-	controlMode = ControlMode::QL;
+	controlMode = ControlMode::Hybrid;
 
 	//Load game in order to avoid not finding player during initializing
 	MemoryAnalyzer::getPtr()->setController(0);
@@ -106,7 +106,7 @@ void Bot::execute()
 						 	 	 	 	  controllerInput,
 										  analyzeResult.playerCoords,
 										  analyzeResult.playerVelocity);
-			if(sceneState.size() < 200)
+			if(sceneState.size() != 3594)
 			{
 				std::cout << "PROBLEM\n";
 				continue;
@@ -143,7 +143,11 @@ void Bot::execute()
 					break;
 				}
 			}
-			else time = TIME_LIMIT;
+			else
+			{
+				time++;
+				if(time > TIME_LIMIT) time = TIME_LIMIT;
+			}
 
 			if(analyzeResult.endScenario)
 			{
@@ -245,20 +249,22 @@ void Bot::loadParameters()
 		std::cout << "Reset has been ordered\n";
 	}
 
-	std::ifstream saveFile ("save.param");
-	if (saveFile.is_open())
+	std::ifstream qvSaveFile ("qvsave.param");
+	if (qvSaveFile.is_open())
 	{
-		saveFile.close();
-		std::remove("save.param");
+		qvSaveFile.close();
+		std::remove("qvsave.param");
+		std::cout << "Saving QValues ...\n";
 		qLearning->saveQValues();
 		std::cout << "QValues saved\n";
 	}
 
-	std::ifstream loadFile ("load.param");
-	if (loadFile.is_open())
+	std::ifstream qvLoadFile ("qvload.param");
+	if (qvLoadFile.is_open())
 	{
-		loadFile.close();
-		std::remove("load.param");
+		qvLoadFile.close();
+		std::remove("qvload.param");
+		std::cout << "Loading QValues ...\n";
 		qLearning->loadQValues();
 		std::vector<State> stateList = qLearning->getStateList();
 		for(auto it : stateList)
@@ -266,6 +272,25 @@ void Bot::loadParameters()
 			discoveredStates[reduceStateResolution(it)] = it;
 		}
 		std::cout << "QValues loaded\n";
+	}
+
+	std::ifstream nnLoadFile ("nnload.param");
+	if (nnLoadFile.is_open())
+	{
+		nnLoadFile.close();
+		std::remove("nnload.param");
+		std::cout << "Loading NeuralNetwork ...\n";
+		qLearning->loadNeuralNetwork();
+		std::cout << "NeuralNetwork loaded\n";
+	}
+
+	std::ifstream nnSaveFile ("nnsave.param");
+	if (nnSaveFile.is_open())
+	{
+		nnSaveFile.close();
+		std::remove("nnsave.param");
+		qLearning->saveNeuralNetwork();
+		std::cout << "Saving NeuralNetwork ...\n";
 	}
 }
 
@@ -337,7 +362,7 @@ void Bot::learnFromMemory()
 	for(std::map<ReducedState, State>::iterator i=discoveredStates.begin(); i!=discoveredStates.end(); i++) shuffledStates.push_back(&(i->second));
 
 	//Learn NN
-	int skipStep = shuffledStates.size()/600;
+	int skipStep = 3;
 	if(skipStep < 1) skipStep = 1;
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
 	{

@@ -105,6 +105,63 @@ void NeuralNetwork::learnBackPropagation(std::vector<double> &z)
     }
 }
 
+/*
+ *
+ */
+void NeuralNetwork::saveToFile()
+{
+	std::remove("NeuralNetwork.dat");
+	std::ofstream file("NeuralNetwork.dat");
+
+	file << layers.size() << ' ';
+	for(auto it : layers)
+	{
+		it->saveToFile(file);
+	}
+
+	file.close();
+}
+
+/*
+ *
+ */
+void NeuralNetwork::loadFromFile()
+{
+	std::ifstream file("NeuralNetwork.dat");
+
+    for(auto it = layers.begin(); it != layers.end(); it++)
+    {
+        delete (*it);
+    }
+    layers.clear();
+
+	int numberOfLayers,layerId;
+	file >> numberOfLayers;
+
+	while(file >> layerId)
+	{
+		if(layerId == 0) // InputLayer
+		{
+			int size;
+			file >> size;
+			addLayer(new InputLayer(size));
+		}
+		else if (layerId == 1) //Sigmoid Layer
+		{
+			int size;
+			double learnRate, b;
+			file >> size;
+			file >> learnRate;
+			file >> b;
+
+			SigmoidLayer::configure(b);
+			addLayer(new SigmoidLayer(learnRate, size, getLastLayerNeuronRef()));
+		}
+	}
+
+	file.close();
+}
+
 /*####################################################################################*/
 
 /*

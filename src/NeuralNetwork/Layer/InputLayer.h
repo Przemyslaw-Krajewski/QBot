@@ -29,6 +29,9 @@ public:
     //configuration
     std::vector<Neuron*> getNeuronPtr() override;
 
+    //save load
+    void saveToFile(std::ofstream &t_file) override;
+
 protected:
     std::vector<InputNeuron> neurons;
 };

@@ -44,8 +44,8 @@ void QLearning::resetActionsNN()
     SigmoidLayer::configure(0.7);
     actions = new NeuralNetwork();
     actions->addLayer(new InputLayer(dimensionStatesSize.size()));
-    actions->addLayer(new SigmoidLayer(0.0033, 600, actions->getLastLayerNeuronRef()));
-    actions->addLayer(new SigmoidLayer(0.01, numberOfActions, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new SigmoidLayer(0.01, 600, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new SigmoidLayer(0.033, numberOfActions, actions->getLastLayerNeuronRef()));
 }
 
 /*z

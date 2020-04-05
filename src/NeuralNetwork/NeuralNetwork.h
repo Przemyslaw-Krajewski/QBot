@@ -43,6 +43,10 @@ public:
 	std::vector<double> getOutput();
 	void learnBackPropagation(std::vector<double>& z);
 
+	//save load
+	void saveToFile();
+	void loadFromFile();
+
 	//helping
 protected:
 	std::vector<double> determineY();

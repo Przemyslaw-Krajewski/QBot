@@ -81,3 +81,12 @@ std::vector<Neuron *> InputLayer::getNeuronPtr()
 
     return result;
 }
+
+/*
+ *
+ */
+void InputLayer::saveToFile(std::ofstream &t_file)
+{
+	t_file << (double) 0 << ' '; //Signature of InputLayer
+	t_file << (double) neurons.size() << ' ';
+}

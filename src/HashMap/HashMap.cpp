@@ -111,7 +111,7 @@ void HashMap::saveToFile()
 			file << i << " ";
 			file << map_it->second << " ";
 
-			if(map_it->first.size() != stateSize) std::cout << "STAN ZAPISU MAPY: UPSIK!!!";
+			if(map_it->first.size() != stateSize) assert("HashMap SaveToFile: declared and actual state size are different");
 			for(int j=0; j<map_it->first.size(); j++)
 			{
 				file << (map_it->first)[j] << " ";
@@ -144,12 +144,12 @@ void HashMap::loadFromFile()
 	while(file >> doubleBuff)
 	{
 		int cacheIndex = doubleBuff;
-		if(file.eof()) {std::cout << "KONIEC PLIKU\n"; return;}
+		if(file.eof()) {assert("HashMap LoadFromFile: unexpected end of file");}
 		double value; file >> value;
 		std::vector<int> state;
 		for(int i=0; i<stateSize; i++)
 		{
-			if(file.eof()) {std::cout << "KONIEC PLIKU\n"; return;}
+			if(file.eof()) {assert("HashMap LoadFromFile: unexpected end of file");}
 			file >> doubleBuff;
 			state.push_back(doubleBuff);
 		}

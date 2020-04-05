@@ -45,10 +45,14 @@ public:
 
     //configuration
     virtual std::vector<Neuron*> getNeuronPtr() = 0;
-    virtual TensorSize getTensorOutputSize() {assert("Not implemented" && 0);}
+    virtual TensorSize getTensorOutputSize() {assert("getTensorOutputSize() Not implemented" && 0);}
 
     //visualization
     virtual void drawLayer() {};
+
+    //save load
+    virtual void saveToFile(std::ofstream &t_file) {assert("saveToFile() Not implemented" && 0);}
+    virtual void loadFromFile(std::ifstream &t_file) {assert("loadFromFile() Not implemented" && 0);}
 
 };
 

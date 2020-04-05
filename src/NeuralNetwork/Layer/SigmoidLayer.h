@@ -28,6 +28,10 @@ public:
     std::vector<Neuron*> getNeuronPtr() override;
     static void configure(double t_activationFunctionParameter) {b = t_activationFunctionParameter;}
 
+    //save load
+    void saveToFile(std::ofstream &t_file) override;
+    void loadFromFile(std::ifstream &t_file) override;
+
 protected:
     std::vector<AdaptiveNeuron> neurons;
     InputNeuron biasValue;

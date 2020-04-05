@@ -86,3 +86,41 @@ std::vector<Neuron *> SigmoidLayer::getNeuronPtr()
 
     return result;
 }
+
+/*
+ *
+ */
+void SigmoidLayer::saveToFile(std::ofstream & t_file)
+{
+	t_file << (double) 1 << ' '; //Signature of SigmoidLayer
+	t_file << (double) neurons.size() << ' ';
+	t_file << learnRate << ' ';
+	t_file << b << ' ';
+
+    for( auto it = neurons.begin(); it != neurons.end(); it++)
+    {
+        std::vector<double> *weights = it->getWeights();
+        for(int i=0; i<weights->size(); i++)
+        {
+        	t_file << (*weights)[i] << ' ';
+        }
+    }
+}
+
+/*
+ *
+ */
+void SigmoidLayer::loadFromFile(std::ifstream & t_file)
+{
+    for( auto it = neurons.begin(); it != neurons.end(); it++)
+    {
+    	double buff;
+        std::vector<double> *weights = it->getWeights();
+        for(int i=0; i<weights->size(); i++)
+        {
+        	if(t_file.eof()) {assert("SigmoidLayer LoadFromFile: unexpected end of file");}
+        	t_file >> buff;
+        	(*weights)[i] = buff;
+        }
+    }
+}
