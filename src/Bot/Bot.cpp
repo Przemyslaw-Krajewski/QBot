@@ -188,10 +188,13 @@ void Bot::execute()
 		}
 		else playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 
+		if(controlMode == ControlMode::Hybrid || controlMode == ControlMode::NN)
+		{
+			learnFromScenario(historyScenario);
+		}
 		if( playsBeforeNNLearning < 1 && (controlMode == ControlMode::Hybrid || controlMode == ControlMode::NN) )
 		{
 			//Learning
-			learnFromScenario(historyScenario);
 			learnFromMemory();
 			playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 		}
