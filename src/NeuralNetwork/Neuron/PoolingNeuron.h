@@ -10,26 +10,28 @@
 
 #include "Neuron.h"
 
-class PoolingNeuron : public Neuron
+namespace CPUNeuralNetwork
 {
-private:
-	PoolingNeuron();
-public:
-	PoolingNeuron(std::vector<Neuron*> t_x);
-    virtual ~PoolingNeuron();
+	class PoolingNeuron : public Neuron
+	{
+	private:
+		PoolingNeuron();
+	public:
+		PoolingNeuron(std::vector<Neuron*> t_x);
+		virtual ~PoolingNeuron();
 
-	//basic
-    virtual double getOutput() {return output;}
-	virtual double determineOutput();
-	virtual void learnDeltaRule();
+		//basic
+		virtual double getOutput() {return output;}
+		virtual double determineOutput();
+		virtual void learnDeltaRule();
 
-    //getters
-    std::vector<Neuron*> getInput() const {return input;}
+		//getters
+		std::vector<Neuron*> getInput() const {return input;}
 
-protected:
-	std::vector<Neuron*> input;
+	protected:
+		std::vector<Neuron*> input;
 
-    double output;
-};
-
+		double output;
+	};
+}
 #endif /* SRC_NEURALNETWORK_POOLINGNEURON_H_ */

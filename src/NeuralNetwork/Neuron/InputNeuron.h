@@ -10,17 +10,19 @@
 
 #include "Neuron.h"
 
-class InputNeuron : public Neuron
+namespace CPUNeuralNetwork
 {
-public:
-	InputNeuron();
-	InputNeuron(double t_output);
-	virtual ~InputNeuron();
+	class InputNeuron : public Neuron
+	{
+	public:
+		InputNeuron();
+		InputNeuron(double t_output);
+		virtual ~InputNeuron();
 
-	virtual double determineOutput();
-	virtual void learnDeltaRule();
+		virtual double determineOutput();
+		virtual void learnDeltaRule();
 
-	double setValue(double t_output);
-};
-
+		double setValue(double t_output);
+	};
+}
 #endif /* SRC_NEURALNETWORK_INPUTNEURON_H_ */

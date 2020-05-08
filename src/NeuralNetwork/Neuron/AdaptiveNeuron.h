@@ -13,55 +13,54 @@
 using ActivationFunction = double (*)(double);
 using DerivativeActivationFunction = double (*)(double);
 
-class AdaptiveNeuron : public Neuron
+namespace CPUNeuralNetwork
 {
-private:
-    AdaptiveNeuron();
-public:
-    AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n,
-                   ActivationFunction t_af,DerivativeActivationFunction t_daf);
-    AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n, std::vector<double> * t_weights,
-                   ActivationFunction t_af,DerivativeActivationFunction t_daf);
-    AdaptiveNeuron(const AdaptiveNeuron& t_an);
-    virtual ~AdaptiveNeuron();
+	class AdaptiveNeuron : public Neuron
+	{
 
-	//basic
-    virtual double getOutput() {return output;}
-	virtual double determineOutput();
-	virtual void learnDeltaRule();
+	private:
+		AdaptiveNeuron();
+	public:
+		AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n,
+					   ActivationFunction t_af,DerivativeActivationFunction t_daf);
+		AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n, std::vector<double> * t_weights,
+					   ActivationFunction t_af,DerivativeActivationFunction t_daf);
+		AdaptiveNeuron(const AdaptiveNeuron& t_an);
+		virtual ~AdaptiveNeuron();
 
-	//cumulative
-	void cumulativeLearnDeltaRule();
-	void cumulationReset() {for (int i=0; i<cumulativeChange.size();i++) cumulativeChange[i] = 0;}
-	void cumulationApply() {for (int i=0; i<cumulativeChange.size();i++) (*weights)[i] += cumulativeChange[i];}
+		//basic
+		virtual double getOutput() {return output;}
+		virtual double determineOutput();
+		virtual void learnDeltaRule();
 
-    //deriative
-    void calculateDerative() { derivative = derivativeActivationFunction(sum);}
-    virtual double getDerivative() {return derivative;}
+		//cumulative
+		void cumulativeLearnDeltaRule();
+		void cumulationReset() {for (int i=0; i<cumulativeChange.size();i++) cumulativeChange[i] = 0;}
+		void cumulationApply() {for (int i=0; i<cumulativeChange.size();i++) (*weights)[i] += cumulativeChange[i];}
 
-    //activation function
-    ActivationFunction activationFunction;
-    DerivativeActivationFunction derivativeActivationFunction;
+		//activation function
+		ActivationFunction activationFunction;
+		DerivativeActivationFunction derivativeActivationFunction;
 
-    //getters
-    std::vector<Neuron*> getInput() const {return input;}
-    std::vector<double>* getWeights() const {return weights;}
-    bool getCommonWeights() const {return commonWeights;}
-    double* getLearnRate() const {return n;}
-    ActivationFunction getActivationFunction() const {return activationFunction;}
-    DerivativeActivationFunction getDerivativeActivationFunction() const {return derivativeActivationFunction;}
+		//getters
+		std::vector<Neuron*> getInput() const {return input;}
+		std::vector<double>* getWeights() const {return weights;}
+		bool getCommonWeights() const {return commonWeights;}
+		double* getLearnRate() const {return n;}
+		ActivationFunction getActivationFunction() const {return activationFunction;}
+		DerivativeActivationFunction getDerivativeActivationFunction() const {return derivativeActivationFunction;}
 
-protected:
-	std::vector<Neuron*> input;
-    std::vector<double> *weights;
-    std::vector<double> cumulativeChange;
-    bool commonWeights;
+	protected:
+		std::vector<Neuron*> input;
+		std::vector<double> *weights;
+		std::vector<double> cumulativeChange;
+		bool commonWeights;
 
-    double output;
-    double *n;
+		double output;
+		double *n;
 
-    double sum;
-    double derivative;
-};
-
+		double sum;
+		double derivative;
+	};
+}
 #endif /* SRC_NEURALNETWORK_ADAPTIVENEURON_H_ */

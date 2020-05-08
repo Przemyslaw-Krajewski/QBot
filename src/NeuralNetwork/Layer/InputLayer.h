@@ -8,33 +8,36 @@
 #include "NNLayer.h"
 #include "../Neuron/InputNeuron.h"
 
-class InputLayer : public NNLayer
+namespace CPUNeuralNetwork
 {
-public:
-    InputLayer(int t_size);
-    virtual ~InputLayer() = default;
+	class InputLayer : public NNLayer
+	{
+	public:
+		InputLayer(int t_size);
+		virtual ~InputLayer() = default;
 
-public:
-    //input
-    void setInput(std::vector<int> t_input) override;
-    void setInput(std::vector<double> t_input) override;
+	public:
+		//input
+		void setInput(std::vector<int> t_input) override;
+		void setInput(std::vector<double> t_input) override;
 
-    //output
-    std::vector<double> getOutput() override;
-    void determineOutput() override;
+		//output
+		std::vector<double> getOutput() override;
+		void determineOutput() override;
 
-    //learn
-    void learnBackPropagation() override ;
+		//learn
+		void learnBackPropagation() override ;
 
-    //configuration
-    std::vector<Neuron*> getNeuronPtr() override;
+		//configuration
+		std::vector<Neuron*> getNeuronPtr() override;
 
-    //save load
-    void saveToFile(std::ofstream &t_file) override;
+		//save load
+		void saveToFile(std::ofstream &t_file) override;
 
-protected:
-    std::vector<InputNeuron> neurons;
-};
+	protected:
+		std::vector<InputNeuron> neurons;
+	};
+}
 
 
 #endif //QBOT_INPUTLAYER_H

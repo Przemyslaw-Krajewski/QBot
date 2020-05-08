@@ -9,43 +9,46 @@
 #include "../Neuron/AdaptiveNeuron.h"
 #include "../Neuron/InputNeuron.h"
 
-class ConvolutionalLayer : public NNLayer
+namespace CPUNeuralNetwork
 {
+	class ConvolutionalLayer : public NNLayer
+	{
 
-public:
-    ConvolutionalLayer(double t_learnRate, MatrixSize t_filterSize, int t_numberOfLayers, TensorSize t_inputSize,
-                       std::vector<Neuron*> t_prevLayerReference);
-    ~ConvolutionalLayer() override = default;
+	public:
+		ConvolutionalLayer(double t_learnRate, MatrixSize t_filterSize, int t_numberOfLayers, TensorSize t_inputSize,
+						   std::vector<Neuron*> t_prevLayerReference);
+		~ConvolutionalLayer() override = default;
 
-public:
-    //output
-    std::vector<double> getOutput() override;
-    void determineOutput() override;
+	public:
+		//output
+		std::vector<double> getOutput() override;
+		void determineOutput() override;
 
-    //learn
-    void setDelta(std::vector<double> t_z) override;
-    void learnBackPropagation() override;
+		//learn
+		void setDelta(std::vector<double> t_z) override;
+		void learnBackPropagation() override;
 
-    //configuration
-    std::vector<Neuron*> getNeuronPtr() override;
-    TensorSize getTensorOutputSize() override {return outputSize;}
-    static void configure() {/*Do nothing*/}
+		//configuration
+		std::vector<Neuron*> getNeuronPtr() override;
+		TensorSize getTensorOutputSize() override {return outputSize;}
+		static void configure() {/*Do nothing*/}
 
-    //visualization
-    void drawLayer() override;
+		//visualization
+		void drawLayer() override;
 
-protected:
-    static long getIndex(int x, int y, int z, int maxX, int maxY) {return x + y*maxX + z*maxY*maxX; }
+	protected:
+		static long getIndex(int x, int y, int z, int maxX, int maxY) {return x + y*maxX + z*maxY*maxX; }
 
-protected:
-    std::vector<AdaptiveNeuron> neurons;
-    InputNeuron emptyValue;
-    std::vector<std::vector<double>> filters;
-    TensorSize filterSize;
-    TensorSize outputSize;
+	protected:
+		std::vector<AdaptiveNeuron> neurons;
+		InputNeuron emptyValue;
+		std::vector<std::vector<double>> filters;
+		TensorSize filterSize;
+		TensorSize outputSize;
 
-    double learnRate;
-};
+		double learnRate;
+	};
+}
 
 
 #endif //QBOT_CONVOLUTIONALLAYER_H

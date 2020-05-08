@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-PROJECT(QBot)
-
+PROJECT(QBot LANGUAGES CXX CUDA)
 
 find_package( OpenCV REQUIRED )
 find_package( X11 REQUIRED )

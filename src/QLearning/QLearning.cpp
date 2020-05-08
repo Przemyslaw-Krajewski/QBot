@@ -41,11 +41,11 @@ void QLearning::resetActionsNN()
 
 	if(actions != nullptr) delete actions;
 
-    SigmoidLayer::configure(0.7);
-    actions = new NeuralNetwork();
-    actions->addLayer(new InputLayer(dimensionStatesSize.size()));
-    actions->addLayer(new SigmoidLayer(0.0033, 500, actions->getLastLayerNeuronRef()));
-    actions->addLayer(new SigmoidLayer(0.01, numberOfActions, actions->getLastLayerNeuronRef()));
+	CPUNeuralNetwork::SigmoidLayer::configure(0.7);
+    actions = new CPUNeuralNetwork::NeuralNetwork();
+    actions->addLayer(new CPUNeuralNetwork::InputLayer(dimensionStatesSize.size()));
+    actions->addLayer(new CPUNeuralNetwork::SigmoidLayer(0.0033, 700, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new CPUNeuralNetwork::SigmoidLayer(0.01, numberOfActions, actions->getLastLayerNeuronRef()));
 }
 
 /*z
@@ -132,9 +132,9 @@ std::pair<double,int> QLearning::learnAction(const State *state, bool skipNotRea
 /*
  *
  */
-NNInput QLearning::convertState2NNInput(const State &t_state)
+CPUNeuralNetwork::NNInput QLearning::convertState2NNInput(const State &t_state)
 {
-	NNInput result;
+	CPUNeuralNetwork::NNInput result;
 	for(int i=0; i<t_state.size(); i++) result.push_back((double) t_state[i]);
 	return result;
 }
