@@ -7,7 +7,7 @@
 
 #include "InputNeuron.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	InputNeuron::InputNeuron()
 	{

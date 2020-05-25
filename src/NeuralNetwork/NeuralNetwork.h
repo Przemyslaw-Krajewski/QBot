@@ -23,7 +23,7 @@
 #include "Layer/ModifiedConvolutionalLayer.h"
 #include "Layer/PoolingLayer.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	using NNInput = std::vector<double>;
 

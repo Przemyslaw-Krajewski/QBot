@@ -4,6 +4,7 @@ PROJECT(QBot LANGUAGES CXX CUDA)
 find_package( OpenCV REQUIRED )
 find_package( X11 REQUIRED )
 find_package(OpenMP)
+find_package(CUDA)
 
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -30,9 +31,12 @@ add_executable( QBot
 				src/NeuralNetwork/Layer/ConvolutionalLayer.cpp
 				src/NeuralNetwork/Layer/ModifiedConvolutionalLayer.cpp
 				src/NeuralNetwork/Layer/PoolingLayer.cpp
+				src/NeuralNetworkGPU/NeuralNetwork.cpp
+				src/NeuralNetworkGPU/Layer/InputLayer.cu
+				src/NeuralNetworkGPU/Layer/SigmoidLayer.cu
               )
 
-include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
+include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
 target_link_libraries( QBot ${OpenCV_LIBRARIES} ${X11_LIBRARIES} xdo pthread)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/graphics DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

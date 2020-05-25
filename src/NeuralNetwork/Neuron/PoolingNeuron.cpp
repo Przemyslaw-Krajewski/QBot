@@ -7,7 +7,7 @@
 
 #include "PoolingNeuron.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	/*
 	 *

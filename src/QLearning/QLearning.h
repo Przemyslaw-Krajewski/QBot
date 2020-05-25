@@ -38,7 +38,7 @@ public:
 
 private:
 	//Helping
-	CPUNeuralNetwork::NNInput convertState2NNInput(const State &t_state);
+	NeuralNetworkCPU::NNInput convertState2NNInput(const State &t_state);
 	int getIndexOfMaxValue(std::vector<double> t_array);
 
 public:
@@ -55,7 +55,7 @@ private:
 	std::vector<int> dimensionStatesSize;
 
 	HashMap qValues;
-	CPUNeuralNetwork::NeuralNetwork *actions;
+	NeuralNetworkCPU::NeuralNetwork *actions;
 
 public:
 	static constexpr double ACTION_LEARN_THRESHOLD = 40;

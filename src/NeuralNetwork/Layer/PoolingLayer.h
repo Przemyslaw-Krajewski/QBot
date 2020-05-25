@@ -9,7 +9,7 @@
 #include "../Neuron/PoolingNeuron.h"
 #include "../Neuron/InputNeuron.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	class PoolingLayer : public NNLayer
 	{

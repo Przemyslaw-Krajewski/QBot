@@ -10,7 +10,7 @@
 
 #include "Neuron.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	class InputNeuron : public Neuron
 	{

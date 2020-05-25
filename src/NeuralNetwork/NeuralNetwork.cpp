@@ -7,14 +7,14 @@
 
 #include "NeuralNetwork.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	/*
 	 *
 	 */
 	NeuralNetwork::NeuralNetwork()
 	{
-
+		srand (time(NULL));
 	}
 
 	/*

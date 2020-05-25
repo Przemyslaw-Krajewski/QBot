@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <math.h>
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	class Neuron
 	{

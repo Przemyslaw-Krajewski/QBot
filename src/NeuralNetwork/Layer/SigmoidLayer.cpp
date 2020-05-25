@@ -4,7 +4,7 @@
 
 #include "SigmoidLayer.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 
 	double SigmoidLayer::b = 0;
@@ -25,7 +25,7 @@ namespace CPUNeuralNetwork
 					 [](double x) -> double { return 1 / ( 1 + exp(-b* x) ); },
 					[](double x) -> double { double e = exp(-b*x);
 						  double m = 1 + e;
-						  return -(b*e/(m*m));}));
+						  return (b*e/(m*m));}));
 		}
 	}
 
@@ -58,7 +58,7 @@ namespace CPUNeuralNetwork
 		int i=0;
 		for( auto it = neurons.begin(); it != neurons.end(); it++,i++)
 		{
-			it->setDelta(t_z[i]-it->getOutput());
+			it->setDelta(-t_z[i]+it->getOutput());
 		}
 	}
 

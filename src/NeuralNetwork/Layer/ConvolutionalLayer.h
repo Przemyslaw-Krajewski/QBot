@@ -9,7 +9,7 @@
 #include "../Neuron/AdaptiveNeuron.h"
 #include "../Neuron/InputNeuron.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	class ConvolutionalLayer : public NNLayer
 	{

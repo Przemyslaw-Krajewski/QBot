@@ -4,7 +4,7 @@
 
 #include "ConvolutionalLayer.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	/*
 	 *

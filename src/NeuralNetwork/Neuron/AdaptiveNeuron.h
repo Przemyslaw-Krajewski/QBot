@@ -13,7 +13,7 @@
 using ActivationFunction = double (*)(double);
 using DerivativeActivationFunction = double (*)(double);
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	class AdaptiveNeuron : public Neuron
 	{

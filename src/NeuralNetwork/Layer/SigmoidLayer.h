@@ -9,7 +9,7 @@
 #include "../Neuron/InputNeuron.h"
 #include "../Neuron/AdaptiveNeuron.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	class SigmoidLayer : public NNLayer
 	{

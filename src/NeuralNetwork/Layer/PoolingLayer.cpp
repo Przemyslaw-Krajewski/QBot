@@ -4,7 +4,7 @@
 
 #include "PoolingLayer.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	/*
 	 *

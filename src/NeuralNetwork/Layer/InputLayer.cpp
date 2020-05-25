@@ -4,7 +4,7 @@
 
 #include "InputLayer.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	/*
 	 *

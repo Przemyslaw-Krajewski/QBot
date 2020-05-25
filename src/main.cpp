@@ -4,8 +4,7 @@
 #include "Analyzers/StateAnalyzer.h"
 #include "QLearning/QLearning.h"
 #include "Bot/Bot.h"
-
-void testNN();
+#include "Test/TestGPUNN.h"
 
 /*
  *
@@ -16,7 +15,6 @@ int main()
 	try
 	{
 		bot.execute();
-//		bot.testStateAnalyzer();
 	}
 	catch(std::string& e)
 	{

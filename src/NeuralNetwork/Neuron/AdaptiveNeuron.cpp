@@ -7,7 +7,7 @@
 
 #include "AdaptiveNeuron.h"
 
-namespace CPUNeuralNetwork
+namespace NeuralNetworkCPU
 {
 	/*
 	 *
@@ -138,7 +138,7 @@ namespace CPUNeuralNetwork
 		int i = 0;
 		for(std::vector<Neuron*>::iterator it=input.begin(); it!=input.end(); it++,i++)
 		{
-			(*it)->addToDelta(-delta * derivative * (*weights)[i]);
+			(*it)->addToDelta(delta * derivative * (*weights)[i]);
 		}
 		delta = 0;
 	}
@@ -161,7 +161,7 @@ namespace CPUNeuralNetwork
 		int i = 0;
 		for(std::vector<Neuron*>::iterator it=input.begin(); it!=input.end(); it++,i++)
 		{
-			(*it)->addToDelta(-delta * derivative * (*weights)[i]);
+			(*it)->addToDelta(delta * derivative * (*weights)[i]);
 		}
 		delta = 0;
 	}
