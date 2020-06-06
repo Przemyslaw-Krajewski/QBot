@@ -79,9 +79,9 @@ private:
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 150;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 1;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 4;
 };
 
 #endif /* SRC_BOT_H_ */

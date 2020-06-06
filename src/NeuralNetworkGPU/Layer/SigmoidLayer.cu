@@ -16,9 +16,7 @@ namespace NeuralNetworkGPU
 			double *t_deltas,
 			double *d_b)
 	{
-
 		int inputSize = (*t_inputSize);
-
 		//copy input to common buffer
 		__shared__ double inputBuff[INPUT_BUFFER_SIZE];
 		if(inputSize == blockDim.x)
@@ -31,8 +29,8 @@ namespace NeuralNetworkGPU
 		}
 		else if(inputSize > blockDim.x)
 		{
-			int index = inputSize-blockDim.x-1;
-			while(index > 0)
+			int index = inputSize-threadIdx.x-1;
+			while(index >= 0)
 			{
 				inputBuff[index] = t_input[index];
 				index -= blockDim.x;
@@ -78,8 +76,8 @@ namespace NeuralNetworkGPU
 		}
 		else if(inputSize > blockDim.x)
 		{
-			int index = inputSize-blockDim.x-1;
-			while(index > 0)
+			int index = inputSize-threadIdx.x-1;
+			while(index >= 0)
 			{
 				inputBuff[index] = t_input[index];
 				index -= blockDim.x;
@@ -111,12 +109,6 @@ namespace NeuralNetworkGPU
 				t_prevDeltas[i] += delta * derivative * t_weights[index] ;
 			}
 		}
-
-//		int i = 0;
-//		for(std::vector<Neuron*>::iterator it=input.begin(); it!=input.end(); it++,i++)
-//		{
-//			(*it)->addToDelta(-delta * derivative * (*weights)[i]);
-//		}
 
 		//reset delta
 		t_deltas[threadIdx.x] = 0;
@@ -181,12 +173,17 @@ namespace NeuralNetworkGPU
 	 */
 	void SigmoidLayer::initWeights()
 	{
+		double *randomValues = (double*) malloc(sizeof(double)*size*(inputSize+1));
+
 		for(int i=0; i<(inputSize+1)*size; i++)
 		{
+//			std::cout << (int) (100*i/((inputSize+1)*size)) << "%\n";
 			double randomValue = getRandomWeight();
-//			double randomValue = i+0.576;
-			int code = cudaMemcpy(&(d_weights[i]), &randomValue, sizeof(double), cudaMemcpyHostToDevice);
+			randomValues[i] = randomValue;
+
 		}
+		cudaMemcpy(d_weights, randomValues, sizeof(double)*size*(inputSize+1), cudaMemcpyHostToDevice);
+		free(randomValues);
 	}
 
 	/*

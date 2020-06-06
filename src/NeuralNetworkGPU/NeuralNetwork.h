@@ -24,6 +24,7 @@
 
 namespace NeuralNetworkGPU {
 
+	using NNInput = std::vector<double>;
 
 	class NeuralNetwork {
 		public:

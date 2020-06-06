@@ -41,11 +41,10 @@ void QLearning::resetActionsNN()
 
 	if(actions != nullptr) delete actions;
 
-	NeuralNetworkCPU::SigmoidLayer::configure(0.7);
-    actions = new NeuralNetworkCPU::NeuralNetwork();
-    actions->addLayer(new NeuralNetworkCPU::InputLayer(dimensionStatesSize.size()));
-    actions->addLayer(new NeuralNetworkCPU::SigmoidLayer(0.0033, 700, actions->getLastLayerNeuronRef()));
-    actions->addLayer(new NeuralNetworkCPU::SigmoidLayer(0.01, numberOfActions, actions->getLastLayerNeuronRef()));
+	actions = new NeuralNetworkGPU::NeuralNetwork();
+    actions->addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize.size()));
+    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(1.2,0.06, 700, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(1.2,0.08, numberOfActions, actions->getLastLayerNeuronRef()));
 }
 
 /*z
@@ -125,16 +124,15 @@ std::pair<double,int> QLearning::learnAction(const State *state, bool skipNotRea
 
 //	int64 timeAfter = cv::getTickCount();
 //	std::cout << (timeAfter - timeBefore)/ cv::getTickFrequency() << "\n";
-
 	return std::pair<double,int>(err, qlAction==nnAction?1:0);
 }
 
 /*
  *
  */
-NeuralNetworkCPU::NNInput QLearning::convertState2NNInput(const State &t_state)
+NeuralNetworkGPU::NNInput QLearning::convertState2NNInput(const State &t_state)
 {
-	NeuralNetworkCPU::NNInput result;
+	NeuralNetworkGPU::NNInput result;
 	for(int i=0; i<t_state.size(); i++) result.push_back((double) t_state[i]);
 	return result;
 }

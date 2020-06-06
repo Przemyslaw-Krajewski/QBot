@@ -13,7 +13,7 @@
 Bot::Bot()
 {
 	reset = false;
-	controlMode = ControlMode::Hybrid;
+	controlMode = ControlMode::NN;
 
 	//Load game in order to avoid not finding player during initializing
 	MemoryAnalyzer::getPtr()->setController(0);
@@ -365,7 +365,7 @@ void Bot::learnFromMemory()
 	for(std::map<ReducedState, State>::iterator i=discoveredStates.begin(); i!=discoveredStates.end(); i++) shuffledStates.push_back(&(i->second));
 
 	//Learn NN
-	int skipStep = 3;
+	int skipStep = 10;
 	if(skipStep < 1) skipStep = 1;
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
 	{

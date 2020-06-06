@@ -74,17 +74,16 @@ namespace NeuralNetworkGPU {
 	 */
 	std::vector<double> NeuralNetwork::determineOutput(std::vector<int> x)
 	{
-//		//Prepare input
-//		(*layers.begin())->setInput(x);
-//
-//		//Calculate
-//		for(auto it = layers.begin(); it != layers.end(); it++)
-//		{
-//			(*it)->determineOutput();
-//		}
-//
-//		return (*layers.rbegin())->getOutput();
-		return std::vector<double>();
+		//Prepare input
+		(*layers.begin())->setInput(x);
+
+		//Calculate
+		for(auto it = layers.begin(); it != layers.end(); it++)
+		{
+			(*it)->determineOutput();
+		}
+
+		return (*layers.rbegin())->getOutput();
 	}
 
 	/*

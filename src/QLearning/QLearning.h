@@ -13,7 +13,7 @@
 
 #include "../Bot/Common.h"
 #include "../HashMap/HashMap.h"
-#include "../NeuralNetwork/NeuralNetwork.h"
+#include "../NeuralNetworkGPU/NeuralNetwork.h"
 
 class QLearning {
 
@@ -38,7 +38,7 @@ public:
 
 private:
 	//Helping
-	NeuralNetworkCPU::NNInput convertState2NNInput(const State &t_state);
+	NeuralNetworkGPU::NNInput convertState2NNInput(const State &t_state);
 	int getIndexOfMaxValue(std::vector<double> t_array);
 
 public:
@@ -55,7 +55,7 @@ private:
 	std::vector<int> dimensionStatesSize;
 
 	HashMap qValues;
-	NeuralNetworkCPU::NeuralNetwork *actions;
+	NeuralNetworkGPU::NeuralNetwork *actions;
 
 public:
 	static constexpr double ACTION_LEARN_THRESHOLD = 40;

@@ -10,7 +10,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#define INPUT_BUFFER_SIZE 2048
+#define INPUT_BUFFER_SIZE 4096
 
 namespace NeuralNetworkGPU
 {
@@ -67,7 +67,7 @@ namespace NeuralNetworkGPU
 		virtual void loadFromFile(std::ifstream &t_file) {assert("loadFromFile() Not implemented" && 0);}
 
 	public:
-		static double getRandomWeight() { return ((double)((rand()%1000))/1000-0.5)*0.5; }
+		static double getRandomWeight() { return ((double)((rand()%1000))/1000-0.5); }
 
 	};
 }
