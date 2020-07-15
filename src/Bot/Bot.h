@@ -80,6 +80,8 @@ private:
 
 	ControlMode controlMode;
 	bool reset;
+	bool resetAc;
+	bool resetCr;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;

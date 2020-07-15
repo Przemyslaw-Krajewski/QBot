@@ -11,7 +11,7 @@
  *
  */
 QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
-	qValues(QValues(t_nActions,t_dimensionStatesSize))
+	qValues(HashMap(t_nActions,t_dimensionStatesSize))
 {
 	alpha = 0.75;
 	gamma = 0.80;

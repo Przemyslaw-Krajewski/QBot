@@ -10,7 +10,7 @@
 /*
  *
  */
-QValues::QValues(int t_nActions, std::vector<int> t_dimensionsSize)
+HashMap::HashMap(int t_nActions, std::vector<int> t_dimensionsSize)
 {
 	changeIndex = t_nActions;
 	maxValues = t_dimensionsSize;
@@ -20,7 +20,7 @@ QValues::QValues(int t_nActions, std::vector<int> t_dimensionsSize)
 /*
  *
  */
-QValues::~QValues()
+HashMap::~HashMap()
 {
 
 }
@@ -28,7 +28,7 @@ QValues::~QValues()
 /*
  *
  */
-double QValues::getValue(State t_state, int t_action)
+double HashMap::getValue(State t_state, int t_action)
 {
 	double result;
 	if(cache[t_action].count(t_state) > 0) result = cache[t_action].find(t_state)->second;
@@ -40,7 +40,7 @@ double QValues::getValue(State t_state, int t_action)
 /*
  *
  */
-std::vector<double> QValues::getValues(State t_state)
+std::vector<double> HashMap::getValues(State t_state)
 {
 	std::vector<double> result;
 	for(int a=0; a<cache.size()-1;a++) result.push_back(getValue(t_state,a));
@@ -51,7 +51,7 @@ std::vector<double> QValues::getValues(State t_state)
 /*
  *
  */
-double QValues::getChange(State t_state)
+double HashMap::getChange(State t_state)
 {
 	double result;
 	if(cache[changeIndex].count(t_state) > 0) result = cache[changeIndex].find(t_state)->second;
@@ -63,7 +63,7 @@ double QValues::getChange(State t_state)
 /*
  *
  */
-void QValues::setValue(State t_state, int t_action, double t_value)
+void HashMap::setValue(State t_state, int t_action, double t_value)
 {
 	(cache[changeIndex])[t_state] = t_value - (cache[t_action])[t_state];
 	(cache[t_action])[t_state] = t_value;

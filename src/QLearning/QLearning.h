@@ -46,7 +46,7 @@ private:
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	QValues qValues;
+	HashMap qValues;
 	NeuralNetwork *actions;
 
 public:

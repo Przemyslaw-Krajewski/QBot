@@ -26,6 +26,8 @@ public:
 	double learn(State t_prevState, State t_state, int t_action, double t_reward);
 
 	void resetActionsNN();
+	void resetCritic();
+	void resetActor();
 
 	double getCriticValue(State t_state) {return criticValues->determineY(t_state)[0];}
 

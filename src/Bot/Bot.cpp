@@ -13,6 +13,8 @@
 Bot::Bot()
 {
 	reset = false;
+	resetAc = false;
+	resetCr = false;
 	controlMode = ControlMode::QL;
 
 	/*  Initialize */
@@ -148,7 +150,6 @@ void Bot::execute()
 			}
 		}
 		MemoryAnalyzer::getPtr()->setController(0);
-
 		loadParameters();
 
 		//Reset?
@@ -158,10 +159,24 @@ void Bot::execute()
 			qLearning->resetActionsNN();
 			reset = false;
 		}
+		if(resetAc)
+		{
+			std::cout << "RESET Actor\n";
+			qLearning->resetActor();
+			resetAc = false;
+		}
+		if(resetCr)
+		{
+			std::cout << "RESET Critic\n";
+			qLearning->resetCritic();
+			resetCr = false;
+		}
 
-		std::cout << score << "\n";
+		std::cout << "Score: "<< score << "\n";
 
+		std::cout << "History size: "<< historyScenario.size();
 		if(scenarioResult == ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
+		std::cout << " -> "<< historyScenario.size() << " \n";
 		learnFromScenarioAC(historyScenario);
 		learnFromMemoryAC();
 	}
@@ -217,6 +232,24 @@ void Bot::loadParameters()
 		reset = true;
 		std::cout << "Reset has been ordered\n";
 	}
+
+	std::ifstream resetCriticFile ("resetcr.param");
+	if (resetCriticFile.is_open())
+	{
+		resetCriticFile.close();
+		std::remove("resetcr.param");
+		resetCr = true;
+		std::cout << "Reset Critic has been ordered\n";
+	}
+
+	std::ifstream resetActorFile ("resetac.param");
+	if (resetActorFile.is_open())
+	{
+		resetActorFile.close();
+		std::remove("resetac.param");
+		resetAc = true;
+		std::cout << "Reset Actor has been ordered\n";
+	}
 }
 
 /*
@@ -236,6 +269,8 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 																								  sarsIterator->state,
 																								  sarsIterator->action,
 																								  sarsIterator->reward);
+		double crVal = qLearning->getCriticValue(sarsIterator->oldState);
+		std::cout << crVal << "  <-  " << cumulatedReward << "  :  " << crVal - cumulatedReward << "\n";
 	}
 
 	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
@@ -249,6 +284,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 									   (*sarsIterator)->action,
 									   (*sarsIterator)->reward));
 	}
+	std::cout << "Sum error: " << sumErr << "\n";
 }
 
 /*
@@ -256,7 +292,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
  */
 void Bot::learnFromMemoryAC()
 {
-	int skipStep = sqrt(memorizedSARS.size())/8;
+	int skipStep = sqrt(memorizedSARS.size())/4;
 	if(skipStep < 1) skipStep = 1;
 
 	double sumErr = 0;

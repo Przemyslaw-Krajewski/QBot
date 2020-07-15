@@ -34,12 +34,28 @@ ActorCritic::~ActorCritic()
  */
 void ActorCritic::resetActionsNN()
 {
-	if(actorValues != nullptr) delete actorValues;
-	actorValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({250,200,numberOfActions}),
-				std::initializer_list<double>({0.033,0.1}),1.4);
+	resetCritic();
+	resetActor();
+}
+
+/*
+ *
+ */
+void ActorCritic::resetCritic()
+{
 	if(criticValues != nullptr) delete criticValues;
-	criticValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({250,200,1}),
-				std::initializer_list<double>({0.01,0.033}),1.5);
+	criticValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({900,1}),
+				std::initializer_list<double>({0.04,0.06}),1.1);
+}
+
+/*
+ *
+ */
+void ActorCritic::resetActor()
+{
+	if(actorValues != nullptr) delete actorValues;
+	actorValues = new NeuralNetwork(dimensionStatesSize.size(),std::initializer_list<int>({900,numberOfActions}),
+				std::initializer_list<double>({0.04,0.06}),1.1);
 }
 
 /*
@@ -50,14 +66,19 @@ std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 	std::vector<double> values = actorValues->determineY(t_state);
 
 	double sum = 0;
-	for(int i=0; i<values.size(); i++) sum += values[i];
+	for(int i=0; i<values.size(); i++)
+	{
+		std::cout << values[i] << "  ";
+		sum += values[i];
+	}
+	std::cout << "\n";
 
 	if(sum == 0) return std::pair<bool,int>(true,rand()%numberOfActions);
 	double randomValue = ((double)(rand()%((int)10000)))/10000;
 	for(int i=0; i<values.size(); i++)
 	{
 		randomValue -= values[i]/sum;
-		if(values[i] > 0.50 || randomValue < 0)	return std::pair<bool,int>(true,i);
+		if(values[i] > 0.60 || randomValue < 0)	return std::pair<bool,int>(true,i);
 	}
 
 	return std::pair<bool,int>(true,values.size()-1);
@@ -86,7 +107,7 @@ double ActorCritic::learn(State t_prevState, State t_state, int t_action, double
 
 	double sum = 0;
 	for(int i=0 ; i<numberOfActions ; i++) sum += actorZ[i];
-	actorZ[t_action] = (t_reward-stateValue[0])/actorZ[t_action] + actorZ[t_action];
+	actorZ[t_action] = -(prevStateValue[0]-stateValue[0])/actorZ[t_action] + actorZ[t_action];
 
 	for(int i=0 ; i<numberOfActions ; i++)
 	{
