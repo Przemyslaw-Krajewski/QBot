@@ -51,13 +51,13 @@ ConvolutionalLayer::ConvolutionalLayer(double t_learnRate, MatrixSize t_filterSi
                 }
 
                 neurons.emplace_back(neuronsReference, &learnRate,&(filters[z]),
-                                     [](double x) -> double { return x > 0 ? x : 0.01*x; },
-                                     [](double x) -> double { return x > 0 ? 1 : 0.01; });
+//                                     [](double x) -> double { return x > 0 ? x : 0.01*x; },
+//                                     [](double x) -> double { return x > 0 ? 1 : 0.01; });
 
-//                [](double x) -> double { return 1 / ( 1 + exp(-0.03* x) ); },
-//                                [](double x) -> double { double e = exp(-0.03*x);
-//                                      double m = 1 + e;
-//                                      return -(0.03*e/(m*m));});
+                [](double x) -> double { return 1 / ( 1 + exp(-0.03* x) ); },
+                                [](double x) -> double { double e = exp(-0.03*x);
+                                      double m = 1 + e;
+                                      return (0.03*e/(m*m));});
             }
         }
     }
@@ -96,7 +96,7 @@ void ConvolutionalLayer::setDelta(std::vector<double> t_z)
     int i=0;
     for( auto it = neurons.begin(); it != neurons.end(); it++,i++)
     {
-        it->setDelta(t_z[i]-it->getOutput());
+        it->setDelta(-t_z[i]+it->getOutput());
     }
 }
 
@@ -110,7 +110,14 @@ void ConvolutionalLayer::learnBackPropagation()
 	#pragma omp parallel for shared(neurons) private(i) default(none)
     for(i=0; i<neurons.size(); i++)
     {
+    	neurons[i].cumulationReset();
         neurons[i].learnDeltaRule();
+    }
+
+	#pragma omp parallel for shared(neurons) private(i) default(none)
+    for(i=0; i<neurons.size(); i++)
+    {
+    	neurons[i].cumulationApply();
     }
 //	int64 afterBefore = cv::getTickCount();
 //	std::cout << "Conv: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";

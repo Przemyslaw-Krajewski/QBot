@@ -45,7 +45,7 @@ ModifiedConvolutionalLayer::ModifiedConvolutionalLayer(double t_learnRate, Matri
 //                [](double x) -> double { return 1 / ( 1 + exp(-0.53* x) ); },
 //                                [](double x) -> double { double e = exp(-0.53*x);
 //                                      double m = 1 + e;
-//                                      return -(0.53*e/(m*m));});
+//                                      return (0.53*e/(m*m));});
             }
         }
     }
@@ -84,7 +84,7 @@ void ModifiedConvolutionalLayer::setDelta(std::vector<double> t_z)
     int i=0;
     for( auto it = neurons.begin(); it != neurons.end(); it++,i++)
     {
-        it->setDelta(t_z[i]-it->getOutput());
+        it->setDelta(-t_z[i]+it->getOutput());
     }
 }
 

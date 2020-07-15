@@ -13,7 +13,7 @@
 
 #include "DesktopHandler.h"
 
-//#define PRINT_ANALYZED_IMAGE
+#define PRINT_ANALYZED_IMAGE
 
 class ImageAnalyzer {
 

@@ -216,8 +216,8 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 																								  sarsIterator->state,
 																								  sarsIterator->action,
 																								  sarsIterator->reward);
-//		double value = actorCritic->getCriticValue((sarsIterator)->oldState);
-//		std::cout << value << " = "<< (sarsIterator)->reward << "\n";
+		double value = actorCritic->getCriticValue((sarsIterator)->oldState);
+		std::cout << value << " = "<< (sarsIterator)->reward << "\n";
 	}
 
 	long counter=0;
@@ -235,7 +235,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 	std::cout << sumErr/sarsPointers.size() << "\n";
 //	actorCritic->drawCriticValues();
 
-	while(1)
+	while(0)
 	{
 
 		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
@@ -260,7 +260,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 			//std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
 		}
 		std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
-		if(counter >100) { int p=0;p=3/p;}
+		if(counter >200) { int p=0;p=3/p;}
 //		if(counter%10==0) actorCritic->drawCriticValues();
 	}
 }

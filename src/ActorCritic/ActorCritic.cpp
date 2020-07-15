@@ -23,24 +23,24 @@ ActorCritic::ActorCritic(int t_nActions, std::vector<int> t_dimensionStatesSize)
  */
 void ActorCritic::resetNN()
 {
-    SigmoidLayer::configure(0.18);
+    SigmoidLayer::configure(0.14);
     actorValues = NeuralNetwork();
     actorValues.addLayer(new InputLayer(dimensionStatesSize.size()));
-    actorValues.addLayer(new ModifiedConvolutionalLayer(0.01, MatrixSize(5,5),60,TensorSize(32,20,6),actorValues.getLastLayerNeuronRef()));
-    //actorValues.addLayer(new PoolingLayer(MatrixSize(16,10),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
-    //actorValues.addLayer(new ConvolutionalLayer(0.0033, MatrixSize(4,4),15,actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new ModifiedConvolutionalLayer(0.25, MatrixSize(3,3),25,TensorSize(32,20,6),actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new PoolingLayer(MatrixSize(16,10),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new ModifiedConvolutionalLayer(0.4, MatrixSize(5,5),60,actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
     actorValues.addLayer(new PoolingLayer(MatrixSize(8,5),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new SigmoidLayer(0.01, 100,actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new SigmoidLayer(0.033 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new SigmoidLayer(0.6, 100,actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new SigmoidLayer(0.9 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
 
     criticValues = NeuralNetwork();
     criticValues.addLayer(new InputLayer(dimensionStatesSize.size()));
-    criticValues.addLayer(new ConvolutionalLayer(0.0033, MatrixSize(7,7),60,TensorSize(32,20,6),criticValues.getLastLayerNeuronRef()));
-//    criticValues.addLayer(new PoolingLayer(MatrixSize(16,10),TensorSize(32,20,6),criticValues.getLastLayerNeuronRef()));
-//    criticValues.addLayer(new ConvolutionalLayer(0.01, MatrixSize(5,5),40,criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new ModifiedConvolutionalLayer(0.25, MatrixSize(3,3),15,TensorSize(32,20,6),criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new PoolingLayer(MatrixSize(16,10),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new ModifiedConvolutionalLayer(0.4, MatrixSize(5,5),30,criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
     criticValues.addLayer(new PoolingLayer(MatrixSize(8,5),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new SigmoidLayer(0.01, 100,criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new SigmoidLayer(0.033 , 1 ,criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new SigmoidLayer(0.6, 100,criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new SigmoidLayer(0.9 , 1 ,criticValues.getLastLayerNeuronRef()));
 }
 
 /*
@@ -49,28 +49,28 @@ void ActorCritic::resetNN()
 std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 {
 
-//	std::vector<double> values = actorValues.determineOutput(t_state);
+	std::vector<double> values = actorValues.determineOutput(t_state);
 	std::vector<double> critic = criticValues.determineOutput(t_state);
 
 	std::cout << critic[0] << "   :    ";
 	double sum = 0;
-//	for(int i=0; i<values.size(); i++)
-//	{
-//		std::cout << values[i] << "  ";
-//		sum += values[i];
-//	}
+	for(int i=0; i<values.size(); i++)
+	{
+		std::cout << values[i] << "  ";
+		sum += values[i];
+	}
 	std::cout << "\n";
-	return std::pair<bool,int>(true,0);
+//	return std::pair<bool,int>(true,0);
 
-//	if(sum == 0) return std::pair<bool,int>(true,rand()%numberOfActions);
-//	double randomValue = ((double)(rand()%((int)10000)))/10000;
-//	for(int i=0; i<values.size(); i++)
-//	{
-//		randomValue -= values[i]/sum;
-//		if(values[i] > 0.90 || randomValue < 0)	return std::pair<bool,int>(true,i);
-//	}
-//
-//	return std::pair<bool,int>(true,values.size()-1);
+	if(sum == 0) return std::pair<bool,int>(true,rand()%numberOfActions);
+	double randomValue = ((double)(rand()%((int)10000)))/10000;
+	for(int i=0; i<values.size(); i++)
+	{
+		randomValue -= values[i]/sum;
+		if(values[i] > 0.90 || randomValue < 0)	return std::pair<bool,int>(true,i);
+	}
+
+	return std::pair<bool,int>(true,values.size()-1);
 }
 
 /*

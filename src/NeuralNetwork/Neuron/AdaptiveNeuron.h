@@ -30,6 +30,11 @@ public:
 	virtual double determineOutput();
 	virtual void learnDeltaRule();
 
+	//cumulative
+	void cumulativeLearnDeltaRule();
+	void cumulationReset() {for (int i=0; i<cumulativeChange.size();i++) cumulativeChange[i] = 0;}
+	void cumulationApply() {for (int i=0; i<cumulativeChange.size();i++) (*weights)[i] += cumulativeChange[i];}
+
     //deriative
     void calculateDerative() { derivative = derivativeActivationFunction(sum);}
     virtual double getDerivative() {return derivative;}
@@ -49,6 +54,7 @@ public:
 protected:
 	std::vector<Neuron*> input;
     std::vector<double> *weights;
+    std::vector<double> cumulativeChange;
     bool commonWeights;
 
     double output;

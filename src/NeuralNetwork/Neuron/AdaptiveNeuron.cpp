@@ -42,6 +42,7 @@ AdaptiveNeuron::AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n,
     for(int i=0; i<t_x.size(); i++)
     {
         weights->push_back(getRandomWeight());
+        cumulativeChange.push_back(0);
         input.push_back(t_x[i]);
     }
 }
@@ -61,6 +62,7 @@ AdaptiveNeuron::AdaptiveNeuron(std::vector<Neuron*> t_x, double *t_n, std::vecto
     //create neurons
     for(int i=0; i<t_x.size(); i++)
     {
+        cumulativeChange.push_back(0);
         input.push_back(t_x[i]);
     }
 }
@@ -128,6 +130,29 @@ void AdaptiveNeuron::learnDeltaRule()
 	for(int i=0; i<input.size(); i++)
 	{
         (*weights)[i] -= p*(input[i]->getOutput());
+	}
+
+	//set delta to deeper neurons
+	int i = 0;
+	for(std::vector<Neuron*>::iterator it=input.begin(); it!=input.end(); it++,i++)
+	{
+		(*it)->addToDelta(delta * derivative * (*weights)[i]);
+	}
+	delta = 0;
+}
+
+/*
+ *
+ */
+void AdaptiveNeuron::cumulativeLearnDeltaRule()
+{
+	//determine common multiplier
+	calculateDerative();
+	double p = (*n) * delta * derivative;
+	//calculate new weights
+	for(int i=0; i<input.size(); i++)
+	{
+        cumulativeChange[i] -= p*(input[i]->getOutput());
 	}
 
 	//set delta to deeper neurons
