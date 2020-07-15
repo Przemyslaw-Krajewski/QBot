@@ -43,8 +43,9 @@ void QLearning::resetActionsNN()
 
 	actions = new NeuralNetworkGPU::NeuralNetwork();
     actions->addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize.size()));
-    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(1.2,0.06, 700, actions->getLastLayerNeuronRef()));
-    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(1.2,0.08, numberOfActions, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.15,0.004, 900, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.006, 500, actions->getLastLayerNeuronRef()));
+    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.8,0.009, numberOfActions, actions->getLastLayerNeuronRef()));
 }
 
 /*z
@@ -111,6 +112,8 @@ std::pair<double,int> QLearning::learnAction(const State *state, bool skipNotRea
 	std::vector<double> nnValues = actions->determineOutput(*state);
 	int qlAction = getIndexOfMaxValue(qlValues);
 	int nnAction = getIndexOfMaxValue(nnValues);
+
+	if(qlAction == nnAction) return std::pair<double,int>(0,1);
 
 	std::vector<double> z;
 	for(int i=0; i<numberOfActions ;i++) z.push_back(0.1);

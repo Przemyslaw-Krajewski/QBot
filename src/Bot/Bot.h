@@ -70,6 +70,7 @@ private:
 	QLearning *qLearning;
 
 	std::map<ReducedState, State> discoveredStates;
+	std::vector<const State*> discoveredStatesPtrs;
 	int playsBeforeNNLearning;
 
 	ControlMode controlMode;
@@ -79,9 +80,9 @@ private:
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 	const int TIME_LIMIT = 150;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 4;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 3;
 };
 
 #endif /* SRC_BOT_H_ */

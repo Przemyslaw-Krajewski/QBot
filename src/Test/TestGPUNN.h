@@ -91,9 +91,9 @@ namespace Test
                 *ptr2 = 255;
                 *ptr3 = 255;
 
-                ptr1 = image.ptr((int) ((0.4) * 1000)) + ((int) x) * 3;
+                ptr1 = image.ptr((int) ((0.6) * 1000)) + ((int) x) * 3;
                 *ptr1 = 255;
-                ptr1 = image.ptr((int) ((0.9) * 1000)) + ((int) x) * 3;
+                ptr1 = image.ptr((int) ((0.1) * 1000)) + ((int) x) * 3;
                 *ptr1 = 255;
             }
 
@@ -156,9 +156,9 @@ namespace Test
 					*ptr2 = 255;
 					*ptr3 = 255;
 
-					ptr1 = image.ptr((int) ((0.6) * 1000)) + ((int) x) * 3;
-					*ptr1 = 255;
-					ptr1 = image.ptr((int) ((0.1) * 1000)) + ((int) x) * 3;
+	                ptr1 = image.ptr((int) ((0.6) * 1000)) + ((int) x) * 3;
+	                *ptr1 = 255;
+	                ptr1 = image.ptr((int) ((0.1) * 1000)) + ((int) x) * 3;
 					*ptr1 = 255;
 //					if(input[0] == t_x[0] || input[0] == t_x[1] || input[0] == t_x[2])
 //					{
@@ -219,6 +219,22 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.008, 10, nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
+                                           {0.4, 0.9, 0.4}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+    }
+
+    /*
+     *
+     */
+    void testPeak3LayersGPU()
+    {
+    	NeuralNetworkGPU::NeuralNetwork nn;
+        nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(10.2,0.05, 30, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(4.2,0.08, 20, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(6.2,0.12, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
                                            {0.4, 0.9, 0.4}, &nn);

@@ -32,7 +32,7 @@ double HashMap::getValue(State t_state, int t_action)
 {
 	double result;
 	if(cache[t_action].count(t_state) > 0) result = cache[t_action].find(t_state)->second;
-	else result = 200-20*t_action;
+	else result = 200-10*t_action;
 
 	return result;
 }

@@ -13,7 +13,7 @@
 Bot::Bot()
 {
 	reset = false;
-	controlMode = ControlMode::NN;
+	controlMode = ControlMode::Hybrid;
 
 	//Load game in order to avoid not finding player during initializing
 	MemoryAnalyzer::getPtr()->setController(0);
@@ -116,7 +116,9 @@ void Bot::execute()
 
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
-			discoveredStates[reduceStateResolution(sceneState)] = sceneState;
+			State reducedState = reduceStateResolution(sceneState);
+			discoveredStates[reducedState] = sceneState;
+			discoveredStatesPtrs.push_back(&(discoveredStates.find(reducedState)->first));
 
 			//Determine new controller input
 			action = qLearning->chooseAction(sceneState, controlMode).second;
@@ -148,7 +150,6 @@ void Bot::execute()
 				time++;
 				if(time > TIME_LIMIT) time = TIME_LIMIT;
 			}
-
 			if(analyzeResult.endScenario)
 			{
 				scenarioResult = analyzeResult.additionalInfo;
@@ -177,6 +178,7 @@ void Bot::execute()
 
 		std::cout << "Added: " << discoveredStates.size() - discoveredStatesSize << "  Discovered: " << discoveredStates.size() << "\n";
 
+		//Learning
 		if(scenarioResult==ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
 		if(controlMode != ControlMode::NNNoLearn) learnFromScenarioQL(historyScenario);
 		eraseNotReadyStates();
@@ -194,7 +196,6 @@ void Bot::execute()
 		}
 		if( playsBeforeNNLearning < 1 && (controlMode == ControlMode::Hybrid || controlMode == ControlMode::NN) )
 		{
-			//Learning
 			learnFromMemory();
 			playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 		}
@@ -272,7 +273,9 @@ void Bot::loadParameters()
 		std::vector<State> stateList = qLearning->getStateList();
 		for(auto it : stateList)
 		{
-			discoveredStates[reduceStateResolution(it)] = it;
+			State reducedState = reduceStateResolution(it);
+			discoveredStates[reducedState] = it;
+			discoveredStatesPtrs.push_back(&(discoveredStates.find(reducedState)->first));
 		}
 		std::cout << "QValues loaded\n";
 	}
@@ -328,27 +331,35 @@ void Bot::learnFromScenario(std::list<SARS> &historyScenario)
 {
 
 	if(LEARN_FROM_HISTORY_ITERATIONS == 0) return;
+	std::vector<const SARS*> shuffledStates;
+	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
+	{
+		shuffledStates.push_back(&(*sarsIterator));
+	}
 
 	for(int i=0; i<LEARN_FROM_HISTORY_ITERATIONS; i++)
 	{
+		std::random_shuffle(shuffledStates.begin(),shuffledStates.end());
+
 		int skipped = 0;
 		int alreadyOK = 0;
 		double error = 0;
-		for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
+		for(std::vector<const SARS*>::iterator sarsIterator = shuffledStates.begin(); sarsIterator!=shuffledStates.end(); sarsIterator++)
 		{
-			if(sarsIterator->action == -1) continue;
+			if((*sarsIterator)->action == -1) continue;
 
-			std::pair<double,int> learnResult = qLearning->learnAction(&sarsIterator->oldState, true);
+			std::pair<double,int> learnResult = qLearning->learnAction(&((*sarsIterator)->oldState), true);
 
 			if( learnResult.second == 2) skipped++; // QL not sure
 			else if(learnResult.second == 3 || learnResult.second == 1) alreadyOK++;
-			else error += learnResult.first;
+			error += learnResult.first;
 
 //			if(learnResult.second == 2 || learnResult.second == 3) sarsIterator->action = -1;
 		}
 
-		std::cout << "Error hist: " << error / ((double)historyScenario.size()-skipped-alreadyOK) << "\n";
-		std::cout << "Skipped hist: " << skipped << "/" << alreadyOK << "/" << historyScenario.size() << "\n";
+		std::cout << "Error hist: " << error / ((double)historyScenario.size()) << "\n";
+		std::cout << "Skipped hist: " << skipped << "/" << historyScenario.size() << "\n";
+		std::cout << "Ok hist: " << alreadyOK << "/" << historyScenario.size()-skipped << "\n";
 	}
 }
 
@@ -365,7 +376,7 @@ void Bot::learnFromMemory()
 	for(std::map<ReducedState, State>::iterator i=discoveredStates.begin(); i!=discoveredStates.end(); i++) shuffledStates.push_back(&(i->second));
 
 	//Learn NN
-	int skipStep = 10;
+	int skipStep = sqrt(discoveredStates.size())/10;
 	if(skipStep < 1) skipStep = 1;
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
 	{
@@ -380,11 +391,12 @@ void Bot::learnFromMemory()
 
 			if( learnResult.second == 2) skipped++; // QL not sure
 			else if(learnResult.second == 3 || learnResult.second == 1) alreadyOK++;
-			else error += learnResult.first;
+			error += learnResult.first;
 		}
 
 		std::cout << "Error mem: " << error / ((double) shuffledStates.size()) << "\n";
-		std::cout << "Skipped mem: "<< skipped << "/" << alreadyOK << "/" << (shuffledStates.size()/skipStep) << "\n" ;
+		std::cout << "Skipped mem: " << skipped << "/" << (shuffledStates.size()/skipStep) << "\n";
+		std::cout << "Ok mem: " << alreadyOK << "/" << (shuffledStates.size()/skipStep)-skipped << "\n";
 	}
 }
 
@@ -422,16 +434,18 @@ void Bot::eraseInvalidLastStates(std::list<SARS> &t_history)
 void Bot::eraseNotReadyStates()
 {
 	long erased = 0;
-	for(std::map<ReducedState, State>::iterator it = discoveredStates.begin(); it!=discoveredStates.end();)
+	int i=0;
+	for(i=0; i<discoveredStatesPtrs.size(); i++)
 	{
-		double change = qLearning->getQChange(it->second);
+		State reducedState = *(discoveredStatesPtrs[i]);
+		double change = qLearning->getQChange(discoveredStates[reducedState]);
 		if(change > QLearning::ACTION_LEARN_THRESHOLD)
 		{
 			erased++;
-			it = discoveredStates.erase(it);
+			discoveredStates.erase(reducedState);
 		}
-		else it++;
 	}
+	discoveredStatesPtrs.clear();
 
 	std::cout << "Erased: " << erased << " states  =>  " << discoveredStates.size() << "\n";
 }
