@@ -55,6 +55,11 @@ namespace NeuralNetworkGPU
 		virtual void setDelta(std::vector<double> t_z) {};
 		virtual void learnBackPropagation() = 0;
 
+		//copy weights
+		virtual void initWeights() {}
+		virtual void writeWeights(std::vector<double> t_values) {}
+		virtual std::vector<double> readWeights() {return std::vector<double>();}
+
 		//configuration
 		virtual NeuronsPtr getNeuronPtr() = 0;
 		virtual TensorSize getTensorOutputSize() {assert("getTensorOutputSize() Not implemented" && 0); return TensorSize(0,0,0);}

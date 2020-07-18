@@ -27,6 +27,14 @@ class Bot {
 
 	struct SARS
 	{
+		SARS()
+		{
+			state = State();
+			oldState = State();
+			reward = 0;
+			action = 0;
+		}
+
 		SARS(State t_oldState, State t_state, int t_action, double t_reward)
 		{
 			state = t_state;
@@ -52,10 +60,8 @@ private:
 	void loadParameters();
 
 	void learnFromScenarioQL(std::list<SARS> &historyScenario);
-	void learnFromScenario(std::list<SARS> &historyScenario);
 	void learnFromMemory();
 	void eraseInvalidLastStates(std::list<SARS> &history);
-	void eraseNotReadyStates();
 
 	ControllerInput determineControllerInput(int t_action);
 	int determineControllerInputInt(int t_action);
@@ -69,12 +75,11 @@ private:
 	StateAnalyzer analyzer;
 	QLearning *qLearning;
 
-	std::map<ReducedState, State> discoveredStates;
-	std::vector<const State*> discoveredStatesPtrs;
-	int playsBeforeNNLearning;
+	std::map<ReducedState, SARS> discoveredSARS;
 
 	ControlMode controlMode;
 	bool reset;
+	int playsBeforeNNLearning;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
@@ -82,7 +87,7 @@ private:
 	const int TIME_LIMIT = 150;
 	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 3;
+	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING = 8;
 };
 
 #endif /* SRC_BOT_H_ */

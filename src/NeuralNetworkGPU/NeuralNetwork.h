@@ -53,7 +53,7 @@ namespace NeuralNetworkGPU {
 			//debug
 //			void drawNeuralNetwork() {for(auto it : layers) it->drawLayer();}
 
-		protected:
+		public:
 			std::list<NNLayer*> layers;
 	};
 

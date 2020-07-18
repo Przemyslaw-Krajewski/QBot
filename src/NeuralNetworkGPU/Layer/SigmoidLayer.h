@@ -26,7 +26,9 @@ namespace NeuralNetworkGPU
 
 		//configuration
 		NeuronsPtr getNeuronPtr() override;
-		void initWeights();
+		void initWeights() override;
+		void writeWeights(std::vector<double> t_values) override;
+		std::vector<double> readWeights() override;
 
 		//save load
 //		void saveToFile(std::ofstream &t_file) override;

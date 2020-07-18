@@ -23,18 +23,16 @@ public:
 
 	//Basic methods
 	std::pair<bool,int> chooseAction(State& t_state, ControlMode mode);
+	std::pair<bool,int> chooseActorAction(State& t_state, ControlMode mode);
 	double learnQL(State t_prevState, State t_state, int t_action, double t_reward);
-	std::pair<double,int> learnAction(const State *state, bool skipNotReady = true);
 
 	//NeuralNetwork methods
 	void resetActionsNN();
+	void copyQValuesToTarget();
 
 	//File operation
-	void saveQValues() {qValues.saveToFile();}
-	void loadQValues() {qValues.loadFromFile();}
-	void saveNeuralNetwork() {actions->saveToFile();}
-	void loadNeuralNetwork() {actions->loadFromFile();}
-	std::vector<State> getStateList() {return qValues.getStateList();}
+	void saveQValues() {qValues->saveToFile();}
+	void loadQValues() {qValues->loadFromFile();}
 
 private:
 	//Helping
@@ -43,9 +41,7 @@ private:
 
 public:
 	//Debug methods
-	void setQValue(State t_state, int t_action, double t_value) {qValues.setValue(t_state, t_action, t_value);}
-	double getQValue(State t_state, int t_action) { return qValues.getValue(t_state,t_action);}
-	double getQChange(State t_state) { return qValues.getChange(t_state);}
+	double getQValue(State t_state, int t_action) { return qValues->determineOutput(t_state)[t_action];}
 
 
 private:
@@ -54,8 +50,9 @@ private:
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	HashMap qValues;
-	NeuralNetworkGPU::NeuralNetwork *actions;
+	NeuralNetworkGPU::NeuralNetwork *qValues;
+	NeuralNetworkGPU::NeuralNetwork *target;
+	NeuralNetworkGPU::NeuralNetwork *actor;
 
 public:
 	static constexpr double ACTION_LEARN_THRESHOLD = 40;

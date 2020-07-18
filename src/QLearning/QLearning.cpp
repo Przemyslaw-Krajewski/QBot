@@ -10,16 +10,17 @@
 /*
  *
  */
-QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
-	qValues(HashMap(t_nActions,t_dimensionStatesSize))
+QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize)
 {
-	alpha = 0.75;
-	gamma = 0.80;
+	alpha = 1;
+	gamma = 0.975;
 
 	dimensionStatesSize = t_dimensionStatesSize;
 	numberOfActions = t_nActions;
 
-	actions = nullptr;
+	qValues = nullptr;
+	target = nullptr;
+	actor = nullptr;
 	resetActionsNN();
 }
 
@@ -28,7 +29,9 @@ QLearning::QLearning(int t_nActions, std::vector<int> t_dimensionStatesSize) :
  */
 QLearning::~QLearning()
 {
-
+	if(qValues != nullptr) delete qValues;
+	if(target != nullptr) delete target;
+	if(actor != nullptr) delete actor;
 }
 
 /*
@@ -39,39 +42,50 @@ void QLearning::resetActionsNN()
 //	long size = qValues.getSize();
 //	std::cout << "NN size: "<< 5+size/5 << "\n";
 
-	if(actions != nullptr) delete actions;
+	if(qValues != nullptr) delete qValues;
+	qValues = new NeuralNetworkGPU::NeuralNetwork();
+	qValues->addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize.size()));
+//	qValues->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.15,0.004, 900, qValues->getLastLayerNeuronRef()));
+	qValues->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.4,0.04, 900, qValues->getLastLayerNeuronRef()));
+	qValues->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, numberOfActions, qValues->getLastLayerNeuronRef()));
 
-	actions = new NeuralNetworkGPU::NeuralNetwork();
-    actions->addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize.size()));
-    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.15,0.004, 900, actions->getLastLayerNeuronRef()));
-    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.006, 500, actions->getLastLayerNeuronRef()));
-    actions->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.8,0.009, numberOfActions, actions->getLastLayerNeuronRef()));
+	if(target != nullptr) delete target;
+	target = new NeuralNetworkGPU::NeuralNetwork();
+	target->addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize.size()));
+//	target->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.15,0.004, 900, target->getLastLayerNeuronRef()));
+	target->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.4,0.04, 900, target->getLastLayerNeuronRef()));
+	target->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, numberOfActions, target->getLastLayerNeuronRef()));
+	copyQValuesToTarget();
+
+	if(actor != nullptr) delete actor;
+	actor= new NeuralNetworkGPU::NeuralNetwork();
+	actor->addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize.size()));
+//	actor->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.15,0.004, 900, actor->getLastLayerNeuronRef()));
+	actor->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.4,0.04, 900, actor->getLastLayerNeuronRef()));
+	actor->addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, numberOfActions, actor->getLastLayerNeuronRef()));
 }
 
-/*z
+/*
+ *
+ */
+void QLearning::copyQValuesToTarget()
+{
+	auto tIt = target->layers.begin();
+	auto qvIt = qValues->layers.begin();
+	while(qvIt!=qValues->layers.end() || tIt!=target->layers.end())
+	{
+		(*tIt)->writeWeights((*qvIt)->readWeights());
+		qvIt++;tIt++;
+	}
+	std::cout << "Copy QValues -> Target\n";
+}
+
+/*
  *
  */
 std::pair<bool,int> QLearning::chooseAction(State& t_state, ControlMode mode)
 {
-	std::vector<double> values;
-	if(mode == ControlMode::NN)
-	{
-		values = actions->determineOutput(t_state);
-	}
-	else if (mode == ControlMode::QL)
-	{
-		values = qValues.getValues(t_state);
-	}
-	else if (mode == ControlMode::Hybrid || mode == ControlMode::NNNoLearn)
-	{
-		if(qValues.getChange(t_state) > ACTION_LEARN_THRESHOLD)
-		{
-			std::vector<double> nnInput = convertState2NNInput(t_state);
-			values = actions->determineOutput(nnInput);
-		}
-		else values = qValues.getValues(t_state);
-	}
-	else assert("no such control mode" && 0);
+	std::vector<double> values = qValues->determineOutput(t_state);
 
 //	for (int i=0; i< values.size() ;i++) std::cout << values[i] << "   ";
 //	std::cout << "\n";
@@ -84,50 +98,85 @@ std::pair<bool,int> QLearning::chooseAction(State& t_state, ControlMode mode)
 /*
  *
  */
-double QLearning::learnQL(State t_prevState, State t_state, int t_action, double t_reward)
+std::pair<bool,int> QLearning::chooseActorAction(State& t_state, ControlMode mode)
 {
-	double maxValue = qValues.getValue(t_state,0);
-	for(int i_action=1; i_action<numberOfActions; i_action++)
+//	return std::pair<bool,int>(true,0);
+	std::vector<double> values = actor->determineOutput(t_state);
+//	std::vector<double> critic = qValues->determineOutput(t_state);
+
+	double sum = 0;
+	for(int i=0; i<values.size(); i++)
 	{
-		double value = qValues.getValue(t_state,i_action);
-		if(maxValue < value) maxValue = value;
+//		std::cout << values[i] << "  ";
+		sum += values[i];
+	}
+//	std::cout << "\n";
+
+//	std::cout << "      ";
+//	for(int i=0; i<critic.size(); i++)
+//	{
+//		std::cout << critic[i] << "  ";
+//	}
+//	std::cout << "\n";
+
+	if(sum == 0) return std::pair<bool,int>(true,rand()%numberOfActions);
+	double randomValue = ((double)(rand()%((int)10000)))/10000;
+	for(int i=0; i<values.size(); i++)
+	{
+		randomValue -= values[i]/sum;
+		if(values[i] > 0.80 || randomValue < 0)	return std::pair<bool,int>(true,i);
 	}
 
-	double prevValue = qValues.getValue(t_prevState,t_action);
-	double value = prevValue + alpha*(t_reward+gamma*maxValue - prevValue);
-	qValues.setValue(t_prevState, t_action, value);
-
-	return qValues.getChange(t_prevState);
+	return std::pair<bool,int>(true,values.size()-1);
 }
+
 
 /*
  *
  */
-std::pair<double,int> QLearning::learnAction(const State *state, bool skipNotReady)
+double QLearning::learnQL(State t_prevState, State t_state, int t_action, double t_reward)
 {
-//	int64 timeBefore = cv::getTickCount();
-	if(qValues.getChange(*state) > ACTION_LEARN_THRESHOLD && skipNotReady) return std::pair<double,int>(0,2);
+	std::vector<double> targetStateValues = qValues->determineOutput(t_state);
+	std::vector<double> prevStateValues = qValues->determineOutput(t_prevState);
 
-	std::vector<double> qlValues = qValues.getValues(*state);
-	std::vector<double> nnValues = actions->determineOutput(*state);
-	int qlAction = getIndexOfMaxValue(qlValues);
-	int nnAction = getIndexOfMaxValue(nnValues);
+	//QValues
+	double maxValue = targetStateValues[t_action];
+	//	double maxValue = targetStateValues[0];
+//	for(int i_action=1; i_action<numberOfActions; i_action++)
+//	{
+//		double value = targetStateValues[i_action];
+//		if(maxValue < value) maxValue = value;
+//	}
 
-	if(qlAction == nnAction) return std::pair<double,int>(0,1);
+	double prevStateValue = prevStateValues[t_action];
+	double value = prevStateValue + alpha*(t_reward+gamma*maxValue - prevStateValue);
 
-	std::vector<double> z;
-	for(int i=0; i<numberOfActions ;i++) z.push_back(0.1);
-	z[qlAction] = 0.9;
+	std::vector<double> qValuesZ = prevStateValues;
 
-	actions->learnBackPropagation(z);
+	double error = qValuesZ[t_action] - value;
+	qValuesZ[t_action] = value > 0.9 ? 0.9 : value;
 
-	//Calculate error;
-	double err = 0;
-	for(int i=0; i<nnValues.size(); i++) err += fabs(nnValues[i]-z[i]);
+	if(t_reward < 0.001) for(int i=0; i< qValuesZ.size();i++) qValuesZ[i] = t_reward;
 
-//	int64 timeAfter = cv::getTickCount();
-//	std::cout << (timeAfter - timeBefore)/ cv::getTickFrequency() << "\n";
-	return std::pair<double,int>(err, qlAction==nnAction?1:0);
+//	std::cout << prevStateValues[t_action] << "  ->  " << qValuesZ[t_action] << "  " << maxValue << "  " << t_reward << "\n";
+	qValues->learnBackPropagation(qValuesZ);
+
+	//Actor
+	std::vector<double> actorZ = actor->determineOutput(t_prevState);
+
+	double sum = 0;
+	for(int i=0 ; i<numberOfActions ; i++) sum += actorZ[i];
+	actorZ[t_action] = -(prevStateValues[t_action]-targetStateValues[t_action])/actorZ[t_action] + actorZ[t_action];
+
+	for(int i=0 ; i<numberOfActions ; i++)
+	{
+		if(actorZ[i] < 0.1) actorZ[i] = 0.1;
+		if(actorZ[i] > 0.9) actorZ[i] = 0.9;
+	}
+
+	actor->learnBackPropagation(actorZ);
+
+	return error;
 }
 
 /*

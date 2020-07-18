@@ -189,6 +189,41 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
+	void SigmoidLayer::writeWeights(std::vector<double> t_values)
+	{
+		double *values = (double*) malloc(sizeof(double)*size*(inputSize+1));
+
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			values[i] = t_values[i];
+
+		}
+		cudaMemcpy(d_weights, values, sizeof(double)*size*(inputSize+1), cudaMemcpyHostToDevice);
+		free(values);
+	}
+
+	/*
+	 *
+	 */
+	std::vector<double> SigmoidLayer::readWeights()
+	{
+		std::vector<double> result;
+		double *values = (double*) malloc(sizeof(double)*size*(inputSize+1));
+		cudaMemcpy(values, d_weights, sizeof(double)*size*(inputSize+1), cudaMemcpyDeviceToHost);
+
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			result.push_back(values[i]);
+
+		}
+		free(values);
+
+		return result;
+	}
+
+	/*
+	 *
+	 */
 	std::vector<double> SigmoidLayer::getOutput()
 	{
 		cudaMemcpy(output, d_output, sizeof(double)*size, cudaMemcpyDeviceToHost);
