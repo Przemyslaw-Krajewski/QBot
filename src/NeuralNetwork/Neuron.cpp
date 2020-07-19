@@ -79,7 +79,7 @@ void Neuron::learnDeltaRule()
 	int i = 0;
 	for(std::vector<Neuron*>::iterator it=input.begin(); it!=input.end(); it++,i++)
 	{
-		(*it)->addToDelta(-delta*((*it)->getDerative())*weights[i]);
+		(*it)->addToDelta(delta*((*it)->getDerative())*weights[i]);
 	}
 	delta = 0;
 }
@@ -99,7 +99,7 @@ double Neuron::derativeActivationFunction(double x)
 {
 	double e = exp(-(*b)*x);
 	double m = 1 + e;
-	return -((*b)*e/(m*m));
+	return ((*b)*e/(m*m));
 }
 
 /*

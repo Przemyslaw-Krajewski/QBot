@@ -198,7 +198,7 @@ void NeuralNetwork::learnBackPropagation(std::vector<double> &z)
 	int i=0;
 	for(std::vector<Neuron>::iterator it=hiddenLayers.back().begin(); it!=hiddenLayers.back().end(); it++,i++)
 	{
-		it->setDelta(z[i] - it->getY());
+		it->setDelta(-z[i] + it->getY());
 	}
 
 	for(std::list<std::vector<Neuron>>::reverse_iterator it_layer=hiddenLayers.rbegin(); it_layer!=hiddenLayers.rend(); it_layer++)

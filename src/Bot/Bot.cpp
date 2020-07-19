@@ -270,7 +270,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 																								  sarsIterator->action,
 																								  sarsIterator->reward);
 		double crVal = qLearning->getCriticValue(sarsIterator->oldState);
-		std::cout << crVal << "  <-  " << cumulatedReward << "  :  " << crVal - cumulatedReward << "\n";
+//		std::cout << crVal << "  <-  " << cumulatedReward << "  :  " << crVal - cumulatedReward << "\n";
 	}
 
 	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());

@@ -68,10 +68,10 @@ std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 	double sum = 0;
 	for(int i=0; i<values.size(); i++)
 	{
-		std::cout << values[i] << "  ";
+//		std::cout << values[i] << "  ";
 		sum += values[i];
 	}
-	std::cout << "\n";
+//	std::cout << "\n";
 
 	if(sum == 0) return std::pair<bool,int>(true,rand()%numberOfActions);
 	double randomValue = ((double)(rand()%((int)10000)))/10000;
