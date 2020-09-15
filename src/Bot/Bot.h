@@ -27,30 +27,6 @@
 
 class Bot {
 	using ScenarioResult = StateAnalyzer::AnalyzeResult::AdditionalInfo;
-	using ReducedState = State;
-
-	struct SARS
-	{
-		SARS()
-		{
-			state = State();
-			oldState = State();
-			reward = 0;
-			action = 0;
-		}
-		SARS(State t_oldState, State t_state, int t_action, double t_reward)
-		{
-			state = t_state;
-			oldState = t_oldState;
-			reward = t_reward;
-			action = t_action;
-		}
-
-		State state;
-		State oldState;
-		int action;
-		double reward;
-	};
 
 public:
 	Bot();
@@ -64,8 +40,6 @@ private:
 
 	void learnFromScenarioAC(std::list<SARS> &historyScenario);
 
-	State createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
-						   ControllerInput& controllerInput, Point& position, Point& velocity);
 	void learnFromMemoryAC();
 	void eraseInvalidLastStates(std::list<SARS> &history);
 
@@ -76,7 +50,7 @@ private:
 
 private:
 	//
-	StateAnalyzer analyzer = StateAnalyzer(Game::BattleToads);
+	StateAnalyzer analyzer;
 	ActorCritic *actorCritic;
 
 	std::map<ReducedState, SARS> memorizedSARS;

@@ -34,18 +34,18 @@ Bot::Bot()
 				throw std::string("Could not initialize, check player visibility");
 
 	ControllerInput controllerInput = determineControllerInput(0);
-	State sceneState = createSceneState(analyzeResult.processedImage,
-								  analyzeResult.processedImagePast,
-								  analyzeResult.processedImagePast2,
-								  controllerInput,
-								  analyzeResult.playerCoords,
-								  analyzeResult.playerVelocity);
+	State sceneState = analyzer.createSceneState(analyzeResult.processedImage,
+												 analyzeResult.processedImagePast,
+												 analyzeResult.processedImagePast2,
+												 controllerInput,
+												 analyzeResult.playerCoords,
+												 analyzeResult.playerVelocity);
 //	DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 	cv::waitKey(1000);
 
 	//Initialize acLearning
 	actorCritic = new ActorCritic(numberOfActions,
-	        std::vector<int>(analyzeResult.processedImage.cols*analyzeResult.processedImage.rows*2*3,255));
+	        std::vector<int>(sceneState.size(),255));
 
 	playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 }
@@ -93,12 +93,12 @@ void Bot::execute()
 		if(analyzeResult.additionalInfo == StateAnalyzer::AnalyzeResult::notFound)
 					throw std::string("Could not initialize, check player visibility");
 
-		sceneState = createSceneState(analyzeResult.processedImage,
-						analyzeResult.processedImagePast,
-						analyzeResult.processedImagePast2,
-						controllerInput,
-						analyzeResult.playerCoords,
-						analyzeResult.playerVelocity);
+		sceneState = analyzer.createSceneState(analyzeResult.processedImage,
+											   analyzeResult.processedImagePast,
+											   analyzeResult.processedImagePast2,
+											   controllerInput,
+											   analyzeResult.playerCoords,
+											   analyzeResult.playerVelocity);
 
 		while(1)
 		{
@@ -112,13 +112,12 @@ void Bot::execute()
 
 			//Analyze situation
 			StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
-//			if(analyzeResult.fieldAndEnemiesLayout.cols == 0 || analyzeResult.fieldAndEnemiesLayout.rows == 0) continue;
-			sceneState = createSceneState(analyzeResult.processedImage,
-										  analyzeResult.processedImagePast,
-										  analyzeResult.processedImagePast2,
-						 	 	 	 	  controllerInput,
-										  analyzeResult.playerCoords,
-										  analyzeResult.playerVelocity);
+			sceneState = analyzer.createSceneState(analyzeResult.processedImage,
+												   analyzeResult.processedImagePast,
+												   analyzeResult.processedImagePast2,
+												   controllerInput,
+												   analyzeResult.playerCoords,
+												   analyzeResult.playerVelocity);
 
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 			//add learning info to history
@@ -158,10 +157,11 @@ void Bot::execute()
 			reset = false;
 		}
 
-		std::cout << score << "\n";
+//		std::cout << score << "\n";
 
-		learnFromScenarioAC(historyScenario);
-		learnFromMemoryAC();
+//		if(scenarioResult==ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
+//		learnFromScenarioAC(historyScenario);
+//		learnFromMemoryAC();
 	}
 }
 
@@ -235,7 +235,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 																								  sarsIterator->action,
 																								  sarsIterator->reward);
 		double value = actorCritic->getCriticValue((sarsIterator)->oldState);
-		std::cout << value << " = "<< (sarsIterator)->reward << "\n";
+//		std::cout << value << " = "<< (sarsIterator)->reward << "\n";
 	}
 
 	long counter=0;
@@ -250,7 +250,7 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 										 (*sarsIterator)->action,
 										 (*sarsIterator)->reward));
 	}
-	std::cout << sumErr/sarsPointers.size() << "\n";
+//	std::cout << sumErr/sarsPointers.size() << "\n";
 //	actorCritic->drawCriticValues();
 
 //	while(0)
@@ -361,50 +361,29 @@ State Bot::reduceSceneState(const State& t_state, double action)
 /*
  *
  */
-std::vector<int> Bot::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
-		ControllerInput& controllerInput, Point& position, Point& velocity)
+void Bot::eraseInvalidLastStates(std::list<SARS> &t_history)
 {
-	State sceneState;
-
-	for(int x=0; x<image.cols; x++)
+	int lastReward = t_history.front().reward;
+	std::vector<int> state = t_history.front().oldState;
+	int counter = 0;
+	while(t_history.size()>0)
 	{
-		for(int y=0; y<image.rows; y++)
-		{
-			uchar* ptrSrc = image.ptr(y)+(3*(x));
-			sceneState.push_back(ptrSrc[0]);
-			sceneState.push_back(ptrSrc[1]);
-			sceneState.push_back(ptrSrc[2]);
-		}
+		counter++;
+		state = t_history.front().oldState;
+		if(	state[2659]==0&&state[2660]==0&&state[2661]==0&&state[2662]==0&&state[2715]==0&&state[2771]==0&&state[2718]==0&&state[2774]==0&&
+			state[2830]==0&&state[2829]==0&&state[2828]==0&&state[2827]==0&&state[2658]==0&&state[2663]==0&&state[2714]==0&&state[2719]==0&&
+			state[2770]==0&&state[2775]==0&&state[2831]==0&&state[2826]==0&&state[2602]==0&&state[2603]==0&&state[2604]==0&&state[2605]==0&&
+			state[2606]==0&&state[2607]==0&&state[2882]==0&&state[2883]==0&&state[2884]==0&&state[2885]==0&&state[2886]==0&&state[2887]==0)
+			t_history.pop_front();
+		else break;
 	}
+	t_history.front().reward=lastReward;
+	std::cout << "Invaled states: " << counter << "\n";
 
-	for(int x=0; x<imagePast.cols; x++)
-	{
-		for(int y=0; y<imagePast.rows; y++)
-		{
-			uchar* ptrSrc = imagePast.ptr(y)+(3*(x));
-			sceneState.push_back(ptrSrc[0]);
-			sceneState.push_back(ptrSrc[1]);
-			sceneState.push_back(ptrSrc[2]);
-		}
-	}
-
-//	for(int x=0; x<imagePast2.cols; x++)
-//	{
-//		for(int y=0; y<imagePast2.rows; y++)
-//		{
-//			uchar* ptrSrc = imagePast2.ptr(y)+(3*(x));
-//			sceneState.push_back((ptrSrc[0] >> 7) + (ptrSrc[1] >> 6) + (ptrSrc[2] >> 5));
-//		}
-//	}
-
-	//Controller
-//	for(bool ci : controllerInput)
-//	{
-//		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
-//		else sceneState.push_back(MIN_INPUT_VALUE);
-//	}
-	return sceneState;
+	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractedSceneState = extractSceneState(state);
+	if(counter > 5) t_history.clear();
 }
+
 
 /*
  *

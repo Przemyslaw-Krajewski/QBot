@@ -72,18 +72,66 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 /*
  *
  */
+std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
+		ControllerInput& controllerInput, Point& position, Point& velocity)
+{
+	State sceneState;
+
+	for(int x=0; x<image.cols; x++)
+	{
+		for(int y=0; y<image.rows; y++)
+		{
+			uchar* ptrSrc = image.ptr(y)+(3*(x));
+			sceneState.push_back(ptrSrc[0]);
+			sceneState.push_back(ptrSrc[1]);
+			sceneState.push_back(ptrSrc[2]);
+		}
+	}
+
+	for(int x=0; x<imagePast.cols; x++)
+	{
+		for(int y=0; y<imagePast.rows; y++)
+		{
+			uchar* ptrSrc = imagePast.ptr(y)+(3*(x));
+			sceneState.push_back(ptrSrc[0]);
+			sceneState.push_back(ptrSrc[1]);
+			sceneState.push_back(ptrSrc[2]);
+		}
+	}
+
+//	for(int x=0; x<imagePast2.cols; x++)
+//	{
+//		for(int y=0; y<imagePast2.rows; y++)
+//		{
+//			uchar* ptrSrc = imagePast2.ptr(y)+(3*(x));
+//			sceneState.push_back((ptrSrc[0] >> 7) + (ptrSrc[1] >> 6) + (ptrSrc[2] >> 5));
+//		}
+//	}
+
+	//Controller
+//	for(bool ci : controllerInput)
+//	{
+//		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+//		else sceneState.push_back(MIN_INPUT_VALUE);
+//	}
+	return sceneState;
+}
+
+/*
+ *
+ */
 void RawImageAnalyzer::calculateSituationSMB(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult)
 {
 	//Player death
 	analyzeResult->playerIsDead = false;
 	analyzeResult->killedByEnemy = false;
 	analyzeResult->playerWon = false;
-	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
+	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,250,250)).empty())
 	{	//Killed by Enemy
 		analyzeResult->playerIsDead = true;
 		analyzeResult->killedByEnemy = true;
 	}
-	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())
+	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,250,250)).empty())
 	{	//Win
 		analyzeResult->playerWon = true;
 	}

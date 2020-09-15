@@ -12,7 +12,7 @@
  */
 ImageAnalyzer::ImageAnalyzer(Game t_game)
 {
-	imageSize = cv::Point(512,448);
+	imageSize = cv::Point(256,256);
 	game = t_game;
 }
 

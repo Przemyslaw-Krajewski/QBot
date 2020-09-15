@@ -26,19 +26,19 @@ void ActorCritic::resetNN()
     SigmoidLayer::configure(0.14);
     actorValues = NeuralNetwork();
     actorValues.addLayer(new InputLayer(dimensionStatesSize.size()));
-    actorValues.addLayer(new ModifiedConvolutionalLayer(0.25, MatrixSize(3,3),25,TensorSize(32,20,6),actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new PoolingLayer(MatrixSize(16,10),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new ModifiedConvolutionalLayer(0.4, MatrixSize(5,5),60,actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new PoolingLayer(MatrixSize(8,5),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+//    actorValues.addLayer(new ModifiedConvolutionalLayer(0.25, MatrixSize(3,3),25,TensorSize(32,20,6),actorValues.getLastLayerNeuronRef()));
+//    actorValues.addLayer(new PoolingLayer(MatrixSize(16,10),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+//    actorValues.addLayer(new ModifiedConvolutionalLayer(0.4, MatrixSize(5,5),60,actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
+//    actorValues.addLayer(new PoolingLayer(MatrixSize(8,5),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
     actorValues.addLayer(new SigmoidLayer(0.6, 100,actorValues.getLastLayerNeuronRef()));
     actorValues.addLayer(new SigmoidLayer(0.9 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
 
     criticValues = NeuralNetwork();
     criticValues.addLayer(new InputLayer(dimensionStatesSize.size()));
-    criticValues.addLayer(new ModifiedConvolutionalLayer(0.25, MatrixSize(3,3),15,TensorSize(32,20,6),criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new PoolingLayer(MatrixSize(16,10),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new ModifiedConvolutionalLayer(0.4, MatrixSize(5,5),30,criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new PoolingLayer(MatrixSize(8,5),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+//    criticValues.addLayer(new ModifiedConvolutionalLayer(0.25, MatrixSize(3,3),15,TensorSize(32,20,6),criticValues.getLastLayerNeuronRef()));
+//    criticValues.addLayer(new PoolingLayer(MatrixSize(16,10),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+//    criticValues.addLayer(new ModifiedConvolutionalLayer(0.4, MatrixSize(5,5),30,criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
+//    criticValues.addLayer(new PoolingLayer(MatrixSize(8,5),criticValues.getLastLayerTensorSize(),criticValues.getLastLayerNeuronRef()));
     criticValues.addLayer(new SigmoidLayer(0.6, 100,criticValues.getLastLayerNeuronRef()));
     criticValues.addLayer(new SigmoidLayer(0.9 , 1 ,criticValues.getLastLayerNeuronRef()));
 }
@@ -48,18 +48,18 @@ void ActorCritic::resetNN()
  */
 std::pair<bool,int> ActorCritic::chooseAction(State& t_state, ControlMode mode)
 {
-
+	return std::pair<bool,int>(true,3);
 	std::vector<double> values = actorValues.determineOutput(t_state);
 	std::vector<double> critic = criticValues.determineOutput(t_state);
 
-	std::cout << critic[0] << "   :    ";
+//	std::cout << critic[0] << "   :    ";
 	double sum = 0;
 	for(int i=0; i<values.size(); i++)
 	{
-		std::cout << values[i] << "  ";
+//		std::cout << values[i] << "  ";
 		sum += values[i];
 	}
-	std::cout << "\n";
+//	std::cout << "\n";
 //	return std::pair<bool,int>(true,0);
 
 	if(sum == 0) return std::pair<bool,int>(true,rand()%numberOfActions);

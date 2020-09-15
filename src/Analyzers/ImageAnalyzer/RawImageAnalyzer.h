@@ -18,6 +18,8 @@ public:
 	virtual ~RawImageAnalyzer();
 
 	void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result);
+	virtual std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
+												  ControllerInput& controllerInput, Point& position, Point& velocity) override;
 
 protected:
 

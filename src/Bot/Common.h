@@ -15,8 +15,8 @@
 const int numberOfActions = 8;
 const int numberOfControllerInputs = 6;
 
-typedef std::vector<int> State;
-//using State = std::vector<int>;
+using State = std::vector<int>;
+using ReducedState = State;
 using ControllerInput = std::vector<bool>;
 
 struct Point
@@ -30,10 +30,30 @@ struct Point
 	int y;
 };
 
-namespace ControlModeEnum
+struct SARS
 {
-	enum ControlMode {QL, NN, Hybrid, NNNoLearn};
-}
-using ControlMode = ControlModeEnum::ControlMode;
+	SARS()
+	{
+		state = State();
+		oldState = State();
+		reward = 0;
+		action = 0;
+	}
+	SARS(State t_oldState, State t_state, int t_action, double t_reward)
+	{
+		state = t_state;
+		oldState = t_oldState;
+		reward = t_reward;
+		action = t_action;
+	}
+
+	State state;
+	State oldState;
+	int action;
+	double reward;
+};
+
+enum class ControlMode {QL, NN, Hybrid, NNNoLearn};
+enum class Game {BattleToads, SuperMarioBros};
 
 #endif /* SRC_BOT_COMMON_H_ */

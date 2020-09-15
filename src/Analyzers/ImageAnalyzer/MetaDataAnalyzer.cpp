@@ -61,6 +61,48 @@ void MetaDataAnalyzer::processImage(cv::Mat* image, ImageAnalyzer::AnalyzeResult
 /*
  *
  */
+std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2, ControllerInput& controllerInput, Point& position, Point& velocity)
+{
+	State sceneState;
+
+	//Terrain
+	for(int x=0; x<image.cols; x++)
+	{
+		for(int y=0; y<image.rows; y++)
+		{
+			uchar* ptr = image.ptr(y)+x*3;
+			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(MAX_INPUT_VALUE);
+			else sceneState.push_back(MIN_INPUT_VALUE);
+		}
+	}
+	//Enemies
+	for(int x=0; x<image.cols; x++)
+	{
+		for(int y=0; y<image.rows; y++)
+		{
+			uchar* ptr = image.ptr(y)+x*3;
+			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(MAX_INPUT_VALUE);
+			else sceneState.push_back(MIN_INPUT_VALUE);
+		}
+	}
+	//Controller
+	for(bool ci : controllerInput)
+	{
+		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+		else sceneState.push_back(MIN_INPUT_VALUE);
+	}
+	//AdditionalInfo
+	sceneState.push_back(position.x);
+	sceneState.push_back(position.y);
+	sceneState.push_back(velocity.x);
+	sceneState.push_back(velocity.y);
+
+	return sceneState;
+}
+
+/*
+ *
+ */
 void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeResult *analyzeResult)
 {
 	//Find objects
@@ -71,14 +113,14 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 	if(image->ptr(1)[3]!=0 && image->ptr(0)[4]!=0 && image->ptr(0)[5]!=0)
 	{
 		//outside
-		blocks1 = findObject(*image,blockImage1,		cv::Point(6,2),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		blocks2	= findObject(*image,blockImage2,		cv::Point(0,0),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		blocks3	= findObject(*image,blockImage3,		cv::Point(0,2),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		goombas	= findObject(*image,enemyImage1,		cv::Point(6,8),	cv::Scalar(0,0,0));
-		koopas	= findObject(*image,enemyImage2,		cv::Point(4,0),	cv::Scalar(0,168,0));
-		floors	= findObject(*image,floorImage1,		cv::Point(0,0),	cv::Scalar(176,188,252),cv::Rect(0,400,496,432));
-		walls	= findObject(*image,wallimage1,		cv::Point(0,0),	cv::Scalar(12,76,200),	cv::Rect(0,0,496,400));
-		pipe	= findObject(*image,pipeImage,		cv::Point(0,0),	cv::Scalar(16,208,128),	cv::Rect(0,0,496,400));
+		blocks1 = findObject(*image,blockImage1,		cv::Point(4,1),	cv::Scalar(12,76,200),	cv::Rect(0,0,248,216));
+		blocks2	= findObject(*image,blockImage2,		cv::Point(0,0),	cv::Scalar(12,76,200),	cv::Rect(0,0,248,216));
+		blocks3	= findObject(*image,blockImage3,		cv::Point(0,1),	cv::Scalar(12,76,200),	cv::Rect(0,0,248,216));
+		goombas	= findObject(*image,enemyImage1,		cv::Point(3,4),	cv::Scalar(0,0,0));
+		koopas	= findObject(*image,enemyImage2,		cv::Point(2,0),	cv::Scalar(0,168,0));
+		floors	= findObject(*image,floorImage1,		cv::Point(0,0),	cv::Scalar(176,188,252),cv::Rect(0,200,248,216));
+		walls	= findObject(*image,wallimage1,		cv::Point(0,0),	cv::Scalar(12,76,200),	cv::Rect(0,0,248,216));
+		pipe	= findObject(*image,pipeImage,		cv::Point(0,0),	cv::Scalar(16,208,128),	cv::Rect(0,0,248,216));
 	}
 	else
 	{
@@ -101,7 +143,7 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 	}
 
 	//clear image
-	cv::Mat analyzedImage = cv::Mat(896, 512, CV_8UC3);
+	cv::Mat analyzedImage = cv::Mat(448, 256, CV_8UC3);
 	for(int y = 0 ; y < analyzedImage.rows ; y++)
 	{
 		uchar* ptr = analyzedImage.ptr((int)y);
@@ -113,23 +155,23 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 	}
 
 	//Mark objects
-	int interval = 16;
-	cv::Point transl = cv::Point(256-playerCoords.x,448-playerCoords.y); // translation
-	cv::Point blockSize = cv::Point(32,32);
+	int interval = 8;
+	cv::Point transl = cv::Point(128-playerCoords.x,224-playerCoords.y); // translation
+	cv::Point blockSize = cv::Point(16,16);
 	if(floors.size()>0)	rectangle(analyzedImage, cv::Rect(cv::Point(transl.x+blockSize.x, floors[0].y+transl.y),
-											     	 	  cv::Point(895,                  floors[0].y+transl.y+blockSize.y)),
+											     	 	  cv::Point(447,                  floors[0].y+transl.y+blockSize.y)),
 														  cv::Scalar(0,0,220), -1);
 	for(cv::Point p : goombas) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 1);
 	for(cv::Point p : koopas)  markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 1);
 	for(cv::Point p : floors)  markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 0);
 	for(cv::Point p : walls)   markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,0), 0);
-	for(cv::Point p : blocks1) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,0), 0);
-	for(cv::Point p : blocks2) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-2,2), 0);
-	for(cv::Point p : blocks3) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,2), 0);
-	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+64,448)+transl),cv::Scalar(100  ,100  ,100), -1);
+	for(cv::Point p : blocks1) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-1,0), 0);
+	for(cv::Point p : blocks2) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-1,1), 0);
+	for(cv::Point p : blocks3) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,1), 0);
+	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+64,224)+transl),cv::Scalar(100  ,100  ,100), -1);
 
 	//Writing DATA OUTPUT
-	cv::Mat fael = cv::Mat(imageSize.y*2/interval, imageSize.x/interval, CV_8UC3);
+	cv::Mat fael = cv::Mat(analyzedImage.rows/interval, analyzedImage.cols/interval, CV_8UC3);
 	for(int y = 0 ; y < fael.rows ; y++)
 	{
 		for(int x = 0 ; x < fael.cols ; x++)
@@ -144,14 +186,14 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 	bool playerIsDead = false;
 	bool killedByEnemy = false;
 	bool playerWon = false;
-	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty()) {playerIsDead = true; killedByEnemy = true;} //Killed by enemy
-	if(playerCoords.y > 388) 																			playerIsDead = true; //pitfall
+	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,248,200)).empty()) {playerIsDead = true; killedByEnemy = true;} //Killed by enemy
+	if(playerCoords.y > 194) 																			playerIsDead = true; //pitfall
 	if(playerCoords.x < 20) 																			playerIsDead = true; // left border
-	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,496,400)).empty())  playerWon = true; //Killed by enemy
+	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,248,200)).empty())  playerWon = true; //Killed by enemy
 
 	#ifdef PRINT_ANALYZED_IMAGE
 		//Print
-		imshow("Objects", analyzedImage);
+		viewImage(8,"FAEL", fael);
 		cv::waitKey(10);
 	#endif
 
@@ -182,7 +224,7 @@ cv::Point MetaDataAnalyzer::findPlayer(cv::Mat &image)
 				double r1 = cv::compareHist( histogram[0], playerHistogram[0], 3 );//CV_COMP_INTERSECT
 				double r2 = cv::compareHist( histogram[1], playerHistogram[1], 3 );//CV_COMP_INTERSECT
 				double r3 = cv::compareHist( histogram[2], playerHistogram[2], 3 );//CV_COMP_INTERSECT
-				if(r1<0.70 && r2<0.7 && r3<0.70)
+				if(r1<0.70 && r2<0.8 && r3<0.8)
 				{
 					return cv::Point(x-4,y-4);
 				}

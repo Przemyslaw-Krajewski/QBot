@@ -13,6 +13,7 @@
 
 #include "../Bot/Common.h"
 #include "ImageAnalyzer/RawImageAnalyzer.h"
+#include "ImageAnalyzer/MetaDataAnalyzer.h"
 #include "MemoryAnalyzer.h"
 
 class StateAnalyzer {
@@ -33,10 +34,12 @@ public:
 	};
 
 public:
-	StateAnalyzer(Game t_game);
+	StateAnalyzer();
 	virtual ~StateAnalyzer();
 
 	AnalyzeResult analyze();
+	std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
+												  ControllerInput& controllerInput, Point& position, Point& velocity);
 
 private:
 
