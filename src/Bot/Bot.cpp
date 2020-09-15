@@ -23,8 +23,16 @@ Bot::Bot()
 
 	//Initialize scene data
 	StateAnalyzer::AnalyzeResult analyzeResult;
+	for(int i=1; i<11; i++)
+	{
+		analyzeResult = analyzer.analyze();
+		if(analyzeResult.additionalInfo != StateAnalyzer::AnalyzeResult::notFound) break;
+		cv::waitKey(1000);
+		std::cout << "Could not find player, atteption: " << i << "\n";
+	}
+	if(analyzeResult.additionalInfo == StateAnalyzer::AnalyzeResult::notFound)
+				throw std::string("Could not initialize, check player visibility");
 
-	analyzeResult = analyzer.analyzeBT();
 	ControllerInput controllerInput = determineControllerInput(0);
 	State sceneState = createSceneState(analyzeResult.processedImage,
 								  analyzeResult.processedImagePast,
@@ -71,10 +79,20 @@ void Bot::execute()
 		//Reload game
 		MemoryAnalyzer::getPtr()->setController(0);
 		MemoryAnalyzer::getPtr()->loadState();
-		cv::waitKey(50);
+		cv::waitKey(100);
 
-		//Get first state
-		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyzeBT();
+		//Get first scene state
+		StateAnalyzer::AnalyzeResult analyzeResult;
+		for(int i=1; i<11; i++)
+		{
+			analyzeResult = analyzer.analyze();
+			if(analyzeResult.additionalInfo != StateAnalyzer::AnalyzeResult::notFound) break;
+			cv::waitKey(1000);
+			std::cout << "Could not find player, atteption: " << i << "\n";
+		}
+		if(analyzeResult.additionalInfo == StateAnalyzer::AnalyzeResult::notFound)
+					throw std::string("Could not initialize, check player visibility");
+
 		sceneState = createSceneState(analyzeResult.processedImage,
 						analyzeResult.processedImagePast,
 						analyzeResult.processedImagePast2,
@@ -93,7 +111,7 @@ void Bot::execute()
 			int oldAction = action;
 
 			//Analyze situation
-			StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyzeBT();
+			StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
 //			if(analyzeResult.fieldAndEnemiesLayout.cols == 0 || analyzeResult.fieldAndEnemiesLayout.rows == 0) continue;
 			sceneState = createSceneState(analyzeResult.processedImage,
 										  analyzeResult.processedImagePast,
@@ -235,34 +253,34 @@ void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
 	std::cout << sumErr/sarsPointers.size() << "\n";
 //	actorCritic->drawCriticValues();
 
-	while(0)
-	{
-
-		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
-
-		//Learning
-		double sumErr = 0;
-		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-		{
-			sumErr += abs(actorCritic->learn((*sarsIterator)->oldState,
-											 (*sarsIterator)->state,
-											 (*sarsIterator)->action,
-											 (*sarsIterator)->reward));
-		}
-		std::cout << sumErr/sarsPointers.size() << "\n";
-
-		sumErr = 0;
-		counter++;
-		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-		{
-			double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
-			sumErr += abs(value-(*sarsIterator)->reward);
-			//std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
-		}
-		std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
-		if(counter >200) { int p=0;p=3/p;}
-//		if(counter%10==0) actorCritic->drawCriticValues();
-	}
+//	while(0)
+//	{
+//
+//		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
+//
+//		//Learning
+//		double sumErr = 0;
+//		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+//		{
+//			sumErr += abs(actorCritic->learn((*sarsIterator)->oldState,
+//											 (*sarsIterator)->state,
+//											 (*sarsIterator)->action,
+//											 (*sarsIterator)->reward));
+//		}
+//		std::cout << sumErr/sarsPointers.size() << "\n";
+//
+//		sumErr = 0;
+//		counter++;
+//		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+//		{
+//			double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
+//			sumErr += abs(value-(*sarsIterator)->reward);
+//			//std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
+//		}
+//		std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
+//		if(counter >200) { int p=0;p=3/p;}
+////		if(counter%10==0) actorCritic->drawCriticValues();
+//	}
 }
 
 /*
@@ -452,7 +470,7 @@ void Bot::testStateAnalyzer()
 {
 	while(1)
 	{
-		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyzeBT();
+		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
 		//Print info
 //		DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 		std::cout << ": " << analyzeResult.reward << "\n";

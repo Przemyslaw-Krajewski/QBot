@@ -20,7 +20,9 @@ add_executable(QBot
 			src/ActorCritic/ActorCritic.cpp
 			src/Analyzers/StateAnalyzer.cpp
 			src/Analyzers/DesktopHandler.cpp
-			src/Analyzers/ImageAnalyzer.cpp
+			src/Analyzers/ImageAnalyzer/ImageAnalyzer.cpp
+			src/Analyzers/ImageAnalyzer/RawImageAnalyzer.cpp
+			src/Analyzers/ImageAnalyzer/MetaDataAnalyzer.cpp
 			src/Analyzers/MemoryAnalyzer.cpp
 			src/NeuralNetwork/NeuralNetwork.cpp
 			src/NeuralNetwork/Neuron/AdaptiveNeuron.cpp

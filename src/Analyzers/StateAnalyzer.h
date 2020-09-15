@@ -12,10 +12,11 @@
 #include <opencv2/opencv.hpp>
 
 #include "../Bot/Common.h"
-#include "ImageAnalyzer.h"
+#include "ImageAnalyzer/RawImageAnalyzer.h"
 #include "MemoryAnalyzer.h"
 
 class StateAnalyzer {
+
 public:
 	struct AnalyzeResult
 	{
@@ -32,14 +33,18 @@ public:
 	};
 
 public:
-	StateAnalyzer();
+	StateAnalyzer(Game t_game);
 	virtual ~StateAnalyzer();
 
 	AnalyzeResult analyze();
-	AnalyzeResult analyzeBT();
 
 private:
-	ImageAnalyzer imageAnalyzer;
+
+	AnalyzeResult analyzeSMB();
+	AnalyzeResult analyzeBT();
+
+	ImageAnalyzer *imageAnalyzer;
+	Game game;
 
 public:
 	static constexpr double WIN_REWARD     = 0.3;

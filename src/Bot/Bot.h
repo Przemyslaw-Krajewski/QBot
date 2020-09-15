@@ -76,7 +76,7 @@ private:
 
 private:
 	//
-	StateAnalyzer analyzer;
+	StateAnalyzer analyzer = StateAnalyzer(Game::BattleToads);
 	ActorCritic *actorCritic;
 
 	std::map<ReducedState, SARS> memorizedSARS;

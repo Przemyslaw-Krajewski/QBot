@@ -7,9 +7,10 @@
 
 #include "StateAnalyzer.h"
 
-StateAnalyzer::StateAnalyzer()
+StateAnalyzer::StateAnalyzer(Game t_game)
 {
-
+	game = t_game;
+	imageAnalyzer = new RawImageAnalyzer(t_game);
 }
 
 StateAnalyzer::~StateAnalyzer()
@@ -19,11 +20,19 @@ StateAnalyzer::~StateAnalyzer()
 
 StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 {
+	if(game==Game::SuperMarioBros) return analyzeSMB();
+	else if(game==Game::BattleToads) return analyzeBT();
+	else throw std::string("StateAnalyzer::No such game");
+}
+
+
+StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB()
+{
 	//Get Desktop Screen
 	cv::Mat colorImage = MemoryAnalyzer::getPtr()->fetchScreenData();
 
 	ImageAnalyzer::AnalyzeResult imageAnalyzeResult;
-	imageAnalyzer.processImage(&colorImage, &imageAnalyzeResult);
+	imageAnalyzer->processImage(&colorImage, &imageAnalyzeResult);
 	MemoryAnalyzer::AnalyzeResult memoryAnalyzeResult = MemoryAnalyzer::getPtr()->fetchData();
 
 	//Additional info
@@ -62,7 +71,7 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeBT()
 	cv::Mat colorImage = MemoryAnalyzer::getPtr()->fetchScreenData();
 
 	ImageAnalyzer::AnalyzeResult imageAnalyzeResult;
-	imageAnalyzer.processImage(&colorImage, &imageAnalyzeResult);
+	imageAnalyzer->processImage(&colorImage, &imageAnalyzeResult);
 
 //	int64 timeAfter = cv::getTickCount();
 //	std::cout << (timeAfter - timeBefore)/ cv::getTickFrequency() << "\n";
