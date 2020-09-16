@@ -1,3 +1,0 @@
-/home/przemo/Moje/QBot/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/przemo/Moje/QBot/cmake-build-debug/CMakeFiles/QBot.dir
-/home/przemo/Moje/QBot/cmake-build-debug/CMakeFiles/edit_cache.dir

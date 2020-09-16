@@ -6,3 +6,4 @@
 .settings
 /bin/
 .idea/
+.cmake-build-debug/
