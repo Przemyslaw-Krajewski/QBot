@@ -21,15 +21,13 @@ class StateAnalyzer {
 public:
 	struct AnalyzeResult
 	{
-		enum AdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};
-
 		cv::Mat processedImage;
 		cv::Mat processedImagePast;
 		cv::Mat processedImagePast2;
 		double reward;
 		Point playerCoords;
 		Point playerVelocity;
-		AnalyzeResult::AdditionalInfo additionalInfo{AdditionalInfo::noInfo};
+		ScenarioAdditionalInfo additionalInfo{ScenarioAdditionalInfo::noInfo};
 		bool endScenario;
 	};
 
@@ -40,6 +38,8 @@ public:
 	AnalyzeResult analyze();
 	std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
 												  ControllerInput& controllerInput, Point& position, Point& velocity);
+	void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo)
+		{imageAnalyzer->correctScenarioHistory(t_history, t_additionalInfo);}
 
 private:
 

@@ -26,7 +26,6 @@
 #include "../Loggers/DataDrawer.h"
 
 class Bot {
-	using ScenarioResult = StateAnalyzer::AnalyzeResult::AdditionalInfo;
 
 public:
 	Bot();
@@ -41,7 +40,6 @@ private:
 	void learnFromScenarioAC(std::list<SARS> &historyScenario);
 
 	void learnFromMemoryAC();
-	void eraseInvalidLastStates(std::list<SARS> &history);
 
 	ControllerInput determineControllerInput(int t_action);
 	int determineControllerInputInt(int t_action);
@@ -50,7 +48,7 @@ private:
 
 private:
 	//
-	StateAnalyzer analyzer;
+	StateAnalyzer stateAnalyzer;
 	ActorCritic *actorCritic;
 
 	std::map<ReducedState, SARS> memorizedSARS;

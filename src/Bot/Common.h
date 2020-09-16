@@ -53,6 +53,7 @@ struct SARS
 	double reward;
 };
 
+enum class ScenarioAdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};
 enum class ControlMode {QL, NN, Hybrid, NNNoLearn};
 enum class Game {BattleToads, SuperMarioBros};
 

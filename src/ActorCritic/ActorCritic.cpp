@@ -80,7 +80,7 @@ double ActorCritic::learn(State &t_prevState, State &t_state, int t_action, doub
 {
 	if(t_prevState.size() == 0 || t_reward == 0)
 	{
-		std::cout << "INVALID STATE!\n";
+		std::cout << t_prevState.size() << "  " << t_reward << "INVALID STATE!\n";
 		return 0;
 	}
 

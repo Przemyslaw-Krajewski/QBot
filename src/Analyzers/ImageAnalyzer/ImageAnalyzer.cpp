@@ -27,6 +27,14 @@ ImageAnalyzer::~ImageAnalyzer()
 /*
  *
  */
+void ImageAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo)
+{
+
+}
+
+/*
+ *
+ */
 void ImageAnalyzer::viewImage(int blockSize, std::string name, cv::Mat &image)
 {
 #ifdef PRINT_ANALYZED_IMAGE

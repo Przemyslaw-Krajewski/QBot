@@ -16,11 +16,11 @@
 
 using CacheMemory = std::map<std::vector<int>,double>;
 
-class QValues
+class HashMap
 {
 public:
-	QValues(int t_nActions, std::vector<int> t_dimensionsSize);
-	~QValues();
+	HashMap(int t_nActions, std::vector<int> t_dimensionsSize);
+	~HashMap();
 
 	double getValue(State t_state, int t_action);
 	double getChange(State t_state);

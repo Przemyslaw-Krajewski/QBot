@@ -25,21 +25,21 @@ Bot::Bot()
 	StateAnalyzer::AnalyzeResult analyzeResult;
 	for(int i=1; i<11; i++)
 	{
-		analyzeResult = analyzer.analyze();
-		if(analyzeResult.additionalInfo != StateAnalyzer::AnalyzeResult::notFound) break;
+		analyzeResult = stateAnalyzer.analyze();
+		if(analyzeResult.additionalInfo != ScenarioAdditionalInfo::notFound) break;
 		cv::waitKey(1000);
 		std::cout << "Could not find player, atteption: " << i << "\n";
 	}
-	if(analyzeResult.additionalInfo == StateAnalyzer::AnalyzeResult::notFound)
+	if(analyzeResult.additionalInfo == ScenarioAdditionalInfo::notFound)
 				throw std::string("Could not initialize, check player visibility");
 
 	ControllerInput controllerInput = determineControllerInput(0);
-	State sceneState = analyzer.createSceneState(analyzeResult.processedImage,
-												 analyzeResult.processedImagePast,
-												 analyzeResult.processedImagePast2,
-												 controllerInput,
-												 analyzeResult.playerCoords,
-												 analyzeResult.playerVelocity);
+	State sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
+													  analyzeResult.processedImagePast,
+													  analyzeResult.processedImagePast2,
+													  controllerInput,
+													  analyzeResult.playerCoords,
+													  analyzeResult.playerVelocity);
 //	DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 	cv::waitKey(1000);
 
@@ -72,7 +72,7 @@ void Bot::execute()
 		State sceneState;
 		ControllerInput controllerInput = determineControllerInput(0);
 		int action = 0;
-		ScenarioResult scenarioResult = ScenarioResult::noInfo;
+		ScenarioAdditionalInfo scenarioResult = ScenarioAdditionalInfo::noInfo;
 //		int time = TIME_LIMIT;
 
 
@@ -85,20 +85,20 @@ void Bot::execute()
 		StateAnalyzer::AnalyzeResult analyzeResult;
 		for(int i=1; i<11; i++)
 		{
-			analyzeResult = analyzer.analyze();
-			if(analyzeResult.additionalInfo != StateAnalyzer::AnalyzeResult::notFound) break;
+			analyzeResult = stateAnalyzer.analyze();
+			if(analyzeResult.additionalInfo != ScenarioAdditionalInfo::notFound) break;
 			cv::waitKey(1000);
 			std::cout << "Could not find player, atteption: " << i << "\n";
 		}
-		if(analyzeResult.additionalInfo == StateAnalyzer::AnalyzeResult::notFound)
+		if(analyzeResult.additionalInfo == ScenarioAdditionalInfo::notFound)
 					throw std::string("Could not initialize, check player visibility");
 
-		sceneState = analyzer.createSceneState(analyzeResult.processedImage,
-											   analyzeResult.processedImagePast,
-											   analyzeResult.processedImagePast2,
-											   controllerInput,
-											   analyzeResult.playerCoords,
-											   analyzeResult.playerVelocity);
+		sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
+													analyzeResult.processedImagePast,
+													analyzeResult.processedImagePast2,
+													controllerInput,
+													analyzeResult.playerCoords,
+													analyzeResult.playerVelocity);
 
 		while(1)
 		{
@@ -111,13 +111,13 @@ void Bot::execute()
 			int oldAction = action;
 
 			//Analyze situation
-			StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
-			sceneState = analyzer.createSceneState(analyzeResult.processedImage,
-												   analyzeResult.processedImagePast,
-												   analyzeResult.processedImagePast2,
-												   controllerInput,
-												   analyzeResult.playerCoords,
-												   analyzeResult.playerVelocity);
+			StateAnalyzer::AnalyzeResult analyzeResult = stateAnalyzer.analyze();
+			sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
+														analyzeResult.processedImagePast,
+														analyzeResult.processedImagePast2,
+														controllerInput,
+														analyzeResult.playerCoords,
+														analyzeResult.playerVelocity);
 
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 			//add learning info to history
@@ -159,9 +159,9 @@ void Bot::execute()
 
 //		std::cout << score << "\n";
 
-//		if(scenarioResult==ScenarioResult::killedByEnemy) eraseInvalidLastStates(historyScenario);
-//		learnFromScenarioAC(historyScenario);
-//		learnFromMemoryAC();
+		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
+		learnFromScenarioAC(historyScenario);
+		learnFromMemoryAC();
 	}
 }
 
@@ -361,33 +361,6 @@ State Bot::reduceSceneState(const State& t_state, double action)
 /*
  *
  */
-void Bot::eraseInvalidLastStates(std::list<SARS> &t_history)
-{
-	int lastReward = t_history.front().reward;
-	std::vector<int> state = t_history.front().oldState;
-	int counter = 0;
-	while(t_history.size()>0)
-	{
-		counter++;
-		state = t_history.front().oldState;
-		if(	state[2659]==0&&state[2660]==0&&state[2661]==0&&state[2662]==0&&state[2715]==0&&state[2771]==0&&state[2718]==0&&state[2774]==0&&
-			state[2830]==0&&state[2829]==0&&state[2828]==0&&state[2827]==0&&state[2658]==0&&state[2663]==0&&state[2714]==0&&state[2719]==0&&
-			state[2770]==0&&state[2775]==0&&state[2831]==0&&state[2826]==0&&state[2602]==0&&state[2603]==0&&state[2604]==0&&state[2605]==0&&
-			state[2606]==0&&state[2607]==0&&state[2882]==0&&state[2883]==0&&state[2884]==0&&state[2885]==0&&state[2886]==0&&state[2887]==0)
-			t_history.pop_front();
-		else break;
-	}
-	t_history.front().reward=lastReward;
-	std::cout << "Invaled states: " << counter << "\n";
-
-	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractedSceneState = extractSceneState(state);
-	if(counter > 5) t_history.clear();
-}
-
-
-/*
- *
- */
 std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> Bot::extractSceneState(State sceneState)
 {
 	cv::Mat fieldAndEnemiesLayout = cv::Mat(56, 32, CV_8UC3);
@@ -449,7 +422,7 @@ void Bot::testStateAnalyzer()
 {
 	while(1)
 	{
-		StateAnalyzer::AnalyzeResult analyzeResult = analyzer.analyze();
+		StateAnalyzer::AnalyzeResult analyzeResult = stateAnalyzer.analyze();
 		//Print info
 //		DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 		std::cout << ": " << analyzeResult.reward << "\n";

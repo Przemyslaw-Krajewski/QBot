@@ -28,7 +28,7 @@ add_executable(QBot
 			src/NeuralNetwork/Neuron/AdaptiveNeuron.cpp
 			src/NeuralNetwork/Neuron/InputNeuron.cpp
 			src/NeuralNetwork/Neuron/PoolingNeuron.cpp
-			src/HashMap/QValues.cpp
+			src/HashMap/HashMap.cpp
 			src/Loggers/DataDrawer.cpp
 			src/NeuralNetwork/Layer/InputLayer.cpp
 			src/NeuralNetwork/Layer/SigmoidLayer.cpp

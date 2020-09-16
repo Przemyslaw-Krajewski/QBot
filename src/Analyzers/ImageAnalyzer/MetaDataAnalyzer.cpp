@@ -61,48 +61,6 @@ void MetaDataAnalyzer::processImage(cv::Mat* image, ImageAnalyzer::AnalyzeResult
 /*
  *
  */
-std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2, ControllerInput& controllerInput, Point& position, Point& velocity)
-{
-	State sceneState;
-
-	//Terrain
-	for(int x=0; x<image.cols; x++)
-	{
-		for(int y=0; y<image.rows; y++)
-		{
-			uchar* ptr = image.ptr(y)+x*3;
-			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(MAX_INPUT_VALUE);
-			else sceneState.push_back(MIN_INPUT_VALUE);
-		}
-	}
-	//Enemies
-	for(int x=0; x<image.cols; x++)
-	{
-		for(int y=0; y<image.rows; y++)
-		{
-			uchar* ptr = image.ptr(y)+x*3;
-			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(MAX_INPUT_VALUE);
-			else sceneState.push_back(MIN_INPUT_VALUE);
-		}
-	}
-	//Controller
-	for(bool ci : controllerInput)
-	{
-		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
-		else sceneState.push_back(MIN_INPUT_VALUE);
-	}
-	//AdditionalInfo
-	sceneState.push_back(position.x);
-	sceneState.push_back(position.y);
-	sceneState.push_back(velocity.x);
-	sceneState.push_back(velocity.y);
-
-	return sceneState;
-}
-
-/*
- *
- */
 void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeResult *analyzeResult)
 {
 	//Find objects
@@ -202,6 +160,77 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 	analyzeResult->killedByEnemy = killedByEnemy;
 	analyzeResult->playerFound = true;
 	analyzeResult->playerWon = playerWon;
+}
+
+/*
+ *
+ */
+std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2, ControllerInput& controllerInput, Point& position, Point& velocity)
+{
+	State sceneState;
+
+	//Terrain
+	for(int x=0; x<image.cols; x++)
+	{
+		for(int y=0; y<image.rows; y++)
+		{
+			uchar* ptr = image.ptr(y)+x*3;
+			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(MAX_INPUT_VALUE);
+			else sceneState.push_back(MIN_INPUT_VALUE);
+		}
+	}
+	//Enemies
+	for(int x=0; x<image.cols; x++)
+	{
+		for(int y=0; y<image.rows; y++)
+		{
+			uchar* ptr = image.ptr(y)+x*3;
+			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(MAX_INPUT_VALUE);
+			else sceneState.push_back(MIN_INPUT_VALUE);
+		}
+	}
+	//Controller
+	for(bool ci : controllerInput)
+	{
+		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+		else sceneState.push_back(MIN_INPUT_VALUE);
+	}
+	//AdditionalInfo
+	sceneState.push_back(position.x);
+	sceneState.push_back(position.y);
+	sceneState.push_back(velocity.x);
+	sceneState.push_back(velocity.y);
+
+	return sceneState;
+}
+
+/*
+ *
+ */
+void MetaDataAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo)
+{
+	if(game==Game::SuperMarioBros && t_additionalInfo==ScenarioAdditionalInfo::killedByEnemy)
+	{
+		double lastReward = t_history.front().reward;
+		std::vector<int> state = t_history.front().oldState;
+		int counter = 0;
+		while(t_history.size()>0)
+		{
+			counter++;
+			state = t_history.front().oldState;
+			if(	state[2659]==0&&state[2660]==0&&state[2661]==0&&state[2662]==0&&state[2715]==0&&state[2771]==0&&state[2718]==0&&state[2774]==0&&
+				state[2830]==0&&state[2829]==0&&state[2828]==0&&state[2827]==0&&state[2658]==0&&state[2663]==0&&state[2714]==0&&state[2719]==0&&
+				state[2770]==0&&state[2775]==0&&state[2831]==0&&state[2826]==0&&state[2602]==0&&state[2603]==0&&state[2604]==0&&state[2605]==0&&
+				state[2606]==0&&state[2607]==0&&state[2882]==0&&state[2883]==0&&state[2884]==0&&state[2885]==0&&state[2886]==0&&state[2887]==0)
+				t_history.pop_front();
+			else break;
+		}
+		t_history.front().reward=lastReward;
+		std::cout << "Invalid states: " << counter << "\n";
+
+//		std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractedSceneState = extractSceneState(state);
+		if(counter > 5) t_history.clear();
+	}
 }
 
 /*

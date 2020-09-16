@@ -40,7 +40,7 @@ public:
 	virtual void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result) = 0;
 	virtual std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
 											  ControllerInput& controllerInput, Point& position, Point& velocity) = 0;
-
+	virtual void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo);
 protected:
 
 	void viewImage(int blockSize, std::string name, cv::Mat &image);

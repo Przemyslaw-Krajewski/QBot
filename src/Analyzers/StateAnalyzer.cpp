@@ -9,8 +9,8 @@
 
 StateAnalyzer::StateAnalyzer()
 {
-	game = Game::SuperMarioBros;
-	imageAnalyzer = new MetaDataAnalyzer(game);
+	game = Game::BattleToads;
+	imageAnalyzer = new RawImageAnalyzer(game);
 }
 
 StateAnalyzer::~StateAnalyzer()
@@ -45,11 +45,11 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB()
 //	std::cout << (timeAfter - timeBefore)/ cv::getTickFrequency() << "\n";
 
 	//Additional info
-	AnalyzeResult::AdditionalInfo additionalInfo = AnalyzeResult::AdditionalInfo::noInfo;
-	if(!imageAnalyzeResult.playerFound) additionalInfo = AnalyzeResult::AdditionalInfo::notFound;
-	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = AnalyzeResult::AdditionalInfo::killedByEnemy;
-	else if(imageAnalyzeResult.playerIsDead) additionalInfo = AnalyzeResult::AdditionalInfo::fallenInPitfall;
-	else if(imageAnalyzeResult.playerWon) additionalInfo = AnalyzeResult::AdditionalInfo::won;
+	ScenarioAdditionalInfo additionalInfo = ScenarioAdditionalInfo::noInfo;
+	if(!imageAnalyzeResult.playerFound) additionalInfo = ScenarioAdditionalInfo::notFound;
+	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = ScenarioAdditionalInfo::killedByEnemy;
+	else if(imageAnalyzeResult.playerIsDead) additionalInfo = ScenarioAdditionalInfo::fallenInPitfall;
+	else if(imageAnalyzeResult.playerWon) additionalInfo = ScenarioAdditionalInfo::won;
 
 	//reward
 	double reward = NOTHING_REWARD;
@@ -90,11 +90,11 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeBT()
 //	MemoryAnalyzer::getPtr()->setMemValue(0x555555ac1408,32);
 
 	//Additional info
-	AnalyzeResult::AdditionalInfo additionalInfo = AnalyzeResult::AdditionalInfo::noInfo;
-	if(!imageAnalyzeResult.playerFound) additionalInfo = AnalyzeResult::AdditionalInfo::notFound;
-	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = AnalyzeResult::AdditionalInfo::killedByEnemy;
-	else if(imageAnalyzeResult.playerIsDead) additionalInfo = AnalyzeResult::AdditionalInfo::fallenInPitfall;
-	else if(imageAnalyzeResult.playerWon) additionalInfo = AnalyzeResult::AdditionalInfo::won;
+	ScenarioAdditionalInfo additionalInfo = ScenarioAdditionalInfo::noInfo;
+	if(!imageAnalyzeResult.playerFound) additionalInfo = ScenarioAdditionalInfo::notFound;
+	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = ScenarioAdditionalInfo::killedByEnemy;
+	else if(imageAnalyzeResult.playerIsDead) additionalInfo = ScenarioAdditionalInfo::fallenInPitfall;
+	else if(imageAnalyzeResult.playerWon) additionalInfo = ScenarioAdditionalInfo::won;
 
 	//reward
 	double reward = ADVANCE_REWARD;

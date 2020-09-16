@@ -12,7 +12,7 @@
 #include <string>
 
 #include "../Bot/Common.h"
-#include "../HashMap/QValues.h"
+#include "../HashMap/HashMap.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
 
 class QLearning {
@@ -45,7 +45,7 @@ private:
 	int numberOfActions;
 	std::vector<int> dimensionStatesSize;
 
-	QValues qValues;
+	HashMap qValues;
 	NeuralNetwork *nnQValues;
 	NeuralNetwork *actions;
 
