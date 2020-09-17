@@ -18,7 +18,7 @@ add_executable(QBot
 			src/Bot/Bot.cpp
 			src/ReinforcementLearning/ReinforcementLearning.cpp
 			src/ReinforcementLearning/QLearning.cpp
-			src/ActorCritic/ActorCritic.cpp
+			src/ReinforcementLearning/ActorCritic.cpp
 			src/Analyzers/StateAnalyzer.cpp
 			src/Analyzers/DesktopHandler.cpp
 			src/Analyzers/ImageAnalyzer/ImageAnalyzer.cpp

@@ -11,30 +11,29 @@
 #include <vector>
 #include <string>
 
+#include "ReinforcementLearning.h"
 #include "../Bot/Common.h"
 #include "../HashMap/HashMap.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
 
-class ActorCritic {
+class ActorCritic : public ReinforcementLearning
+{
 
 public:
-	ActorCritic(int t_nActions, std::vector<int> t_dimensionStatesSize);
+	ActorCritic(int t_nActions, int t_dimensionStatesSize);
 	virtual ~ActorCritic() = default;
 
 	//Basic methods
-	std::pair<bool,int> chooseAction(State& t_state, ControlMode mode);
-	double learn(State &t_prevState, State &t_state, int t_action, double t_reward);
+	virtual int chooseAction(State& t_state) override;
+	virtual double learnSARS(State &t_prevState, State &t_state, int t_action, double t_reward) override;
+
+	virtual double learnFromScenario(std::list<SARS> &t_history) override;
+	virtual double learnFromMemory() override;
 
 	void resetNN();
 
 	double getCriticValue(State t_state) {return criticValues.determineOutput(t_state)[0];}
 	void drawCriticValues() {criticValues.drawNeuralNetwork();}
-
-
-private:
-	NNInput convertState2NNInput(const State &t_state);
-	int getIndexOfMaxValue(std::vector<double> t_array);
-	double getMaxValue(std::vector<double> t_array);
 
 public:
 	//Debug methods
@@ -45,13 +44,16 @@ public:
 
 private:
 	int numberOfActions;
-	std::vector<int> dimensionStatesSize;
+	int dimensionStatesSize;
 
 	NeuralNetwork criticValues;
 	NeuralNetwork actorValues;
 
+	std::map<ReducedState, SARS> memorizedSARS;
+
 public:
-	static constexpr double ACTION_LEARN_THRESHOLD = 40;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 0;
 
 	static constexpr double GAMMA_PARAMETER = 0;		//reward for advancing to next promising state
 	static constexpr double ALPHA_PARAMETER = 1;		//speed of learning QLearning

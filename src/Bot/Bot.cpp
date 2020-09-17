@@ -44,7 +44,7 @@ Bot::Bot()
 	cv::waitKey(1000);
 
 	//Initialize acLearning
-	reinforcementLearning = new QLearning(numberOfActions, (int) sceneState.size());
+	reinforcementLearning = new ActorCritic(numberOfActions, (int) sceneState.size());
 
 	playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 }
@@ -87,7 +87,6 @@ void Bot::execute()
 			analyzeResult = stateAnalyzer.analyze();
 			if(analyzeResult.additionalInfo != ScenarioAdditionalInfo::notFound) break;
 			cv::waitKey(1000);
-			std::cout << "Could not find player, atteption: " << i << "\n";
 		}
 		if(analyzeResult.additionalInfo == ScenarioAdditionalInfo::notFound)
 					throw std::string("Could not initialize, check player visibility");
@@ -137,7 +136,7 @@ void Bot::execute()
 #endif
 			//Timer
 			if(analyzeResult.reward < StateAnalyzer::LITTLE_ADVANCE_REWARD) time--;
-			else if(time < TIME_LIMIT) time++;
+			else if(analyzeResult.reward > StateAnalyzer::LITTLE_ADVANCE_REWARD && time < TIME_LIMIT) time++;
 
 			//End?
 			if(analyzeResult.endScenario || time<0)
@@ -151,7 +150,7 @@ void Bot::execute()
 
 		loadParameters();
 
-//		std::cout << score << "\n";
+		std::cout << score << "\n";
 
 		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
 
@@ -215,102 +214,6 @@ void Bot::loadParameters()
 /*
  *
  */
-//void Bot::learnFromScenarioAC(std::list<SARS> &historyScenario)
-//{
-//	std::vector<SARS*> sarsPointers;
-//	sarsPointers.clear();
-//	double cumulatedReward = 0;
-//	for(std::list<SARS>::iterator sarsIterator = historyScenario.begin(); sarsIterator!=historyScenario.end(); sarsIterator++)
-//	{
-//		cumulatedReward = ActorCritic::LAMBDA_PARAMETER*(sarsIterator->reward + cumulatedReward);
-//		sarsIterator->reward = cumulatedReward;
-//		sarsPointers.push_back(&(*sarsIterator));
-//		memorizedSARS[reduceSceneState(sarsIterator->oldState, sarsIterator->action)] = SARS(sarsIterator->oldState,
-//																								  sarsIterator->state,
-//																								  sarsIterator->action,
-//																								  sarsIterator->reward);
-//		double value = actorCritic->getCriticValue((sarsIterator)->oldState);
-////		std::cout << value << " = "<< (sarsIterator)->reward << "\n";
-//	}
-//
-//	long counter=0;
-//	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
-//
-//	//Learning
-//	double sumErr = 0;
-//	for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-//	{
-//		sumErr += abs(actorCritic->learn((*sarsIterator)->oldState,
-//										 (*sarsIterator)->state,
-//										 (*sarsIterator)->action,
-//										 (*sarsIterator)->reward));
-//	}
-////	std::cout << sumErr/sarsPointers.size() << "\n";
-////	actorCritic->drawCriticValues();
-//
-////	while(0)
-////	{
-////
-////		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
-////
-////		//Learning
-////		double sumErr = 0;
-////		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-////		{
-////			sumErr += abs(actorCritic->learn((*sarsIterator)->oldState,
-////											 (*sarsIterator)->state,
-////											 (*sarsIterator)->action,
-////											 (*sarsIterator)->reward));
-////		}
-////		std::cout << sumErr/sarsPointers.size() << "\n";
-////
-////		sumErr = 0;
-////		counter++;
-////		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-////		{
-////			double value = actorCritic->getCriticValue((*sarsIterator)->oldState);
-////			sumErr += abs(value-(*sarsIterator)->reward);
-////			//std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
-////		}
-////		std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
-////		if(counter >200) { int p=0;p=3/p;}
-//////		if(counter%10==0) actorCritic->drawCriticValues();
-////	}
-//}
-
-/*
- *
- */
-//void Bot::learnFromMemoryAC()
-//{
-//	int skipStep = memorizedSARS.size()/150;
-//	if(skipStep < 1) skipStep = 1;
-//
-//	double sumErr = 0;
-//	if(LEARN_FROM_MEMORY_ITERATIONS == 0) return;
-//	if(memorizedSARS.size() <= 0) return;
-//
-//	//Prepare states
-//	std::vector<SARS*> shuffledSARS;
-//	for(std::map<ReducedState, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++) shuffledSARS.push_back(&(i->second));
-//
-//	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
-//	{
-//
-//		std::random_shuffle(shuffledSARS.begin(),shuffledSARS.end());
-//		for(int j=0; j<shuffledSARS.size(); j+=skipStep)
-//		{
-//			sumErr += abs(actorCritic->learn((shuffledSARS[j])->oldState,
-//										     (shuffledSARS[j])->state,
-//										     (shuffledSARS[j])->action,
-//										     (shuffledSARS[j])->reward));
-//		}
-//	}
-//}
-
-/*
- *
- */
 ControllerInput Bot::determineControllerInput(int t_action)
 {
 	ControllerInput w;
@@ -347,27 +250,6 @@ int Bot::determineControllerInputInt(int t_action)
 		assert("No such action!" && false);
 	}
 	return 0;
-}
-
-/*
- *
- */
-State Bot::reduceSceneState(const State& t_state, double action)
-{
-	int reduceLevel = 4;
-	std::vector<int> result;
-	for(int i=0;i<t_state.size()-10;i++)
-	{
-		if(i%reduceLevel!=0) continue;
-		result.push_back(t_state[i]);
-	}
-	for(int i=t_state.size()-10;i<t_state.size();i++)
-	{
-		result.push_back(t_state[i]);
-	}
-	result.push_back(action);
-
-	return result;
 }
 
 /*

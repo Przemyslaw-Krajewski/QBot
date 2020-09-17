@@ -226,9 +226,6 @@ void MetaDataAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, Scenar
 			else break;
 		}
 		t_history.front().reward=lastReward;
-		std::cout << "Invalid states: " << counter << "\n";
-
-//		std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractedSceneState = extractSceneState(state);
 		if(counter > 5) t_history.clear();
 	}
 }

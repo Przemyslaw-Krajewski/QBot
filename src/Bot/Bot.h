@@ -16,13 +16,12 @@
 #include <iostream>
 #include <fstream>
 
-#include "../ActorCritic/ActorCritic.h"
 #include "Common.h"
 #include "../Analyzers/StateAnalyzer.h"
 
 #include "../Analyzers/MemoryAnalyzer.h"
 #include "../ReinforcementLearning/QLearning.h"
-#include "../ActorCritic/ActorCritic.h"
+#include "../ReinforcementLearning/ActorCritic.h"
 #include "../Loggers/DataDrawer.h"
 
 class Bot {
@@ -44,14 +43,12 @@ private:
 	ControllerInput determineControllerInput(int t_action);
 	int determineControllerInputInt(int t_action);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
-	static State reduceSceneState(const State& t_state, double action);
 
 private:
 	//
 	StateAnalyzer stateAnalyzer;
 	ReinforcementLearning *reinforcementLearning;
 
-	std::map<ReducedState, SARS> memorizedSARS;
 	int playsBeforeNNLearning;
 
 	ControlMode controlMode;
@@ -62,8 +59,6 @@ private:
 	const int MIN_INPUT_VALUE= 0;
 
 	const int TIME_LIMIT = 60;
-	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 0;
 	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING =0;
 };
 

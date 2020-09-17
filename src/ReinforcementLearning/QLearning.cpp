@@ -56,18 +56,18 @@ double QLearning::learnSARS(State &t_prevState, State &t_state, int t_action, do
  */
 double QLearning::learnFromScenario(std::list<SARS> &t_history)
 {
-	double change = 0;
+	double sumErr = 0;
 	//QLearning
 	double cumulatedReward = 0;
 	for(std::list<SARS>::iterator sarsIterator = t_history.begin(); sarsIterator!=t_history.end(); sarsIterator++)
 	{
-		change += abs(learnSARS(sarsIterator->oldState,
+		sumErr += abs(learnSARS(sarsIterator->oldState,
 				  			    sarsIterator->state,
 								sarsIterator->action,
 								sarsIterator->reward + cumulatedReward));
 		cumulatedReward = LAMBDA_PARAMETER*(sarsIterator->reward + cumulatedReward);
 	}
-	return change;
+	return sumErr;
 }
 
 /*
