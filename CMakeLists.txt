@@ -16,7 +16,8 @@ endif()
 add_executable(QBot
 		    src/main.cpp
 			src/Bot/Bot.cpp
-			src/QLearning/QLearning.cpp
+			src/ReinforcementLearning/ReinforcementLearning.cpp
+			src/ReinforcementLearning/QLearning.cpp
 			src/ActorCritic/ActorCritic.cpp
 			src/Analyzers/StateAnalyzer.cpp
 			src/Analyzers/DesktopHandler.cpp

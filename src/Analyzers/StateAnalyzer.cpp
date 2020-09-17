@@ -9,13 +9,13 @@
 
 StateAnalyzer::StateAnalyzer()
 {
-	game = Game::BattleToads;
+	game = Game::SuperMarioBros;
 	imageAnalyzer = new RawImageAnalyzer(game);
 }
 
 StateAnalyzer::~StateAnalyzer()
 {
-
+	delete imageAnalyzer;
 }
 
 StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()

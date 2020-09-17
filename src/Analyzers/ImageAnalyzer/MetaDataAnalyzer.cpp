@@ -126,7 +126,7 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 	for(cv::Point p : blocks1) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-1,0), 0);
 	for(cv::Point p : blocks2) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(-1,1), 0);
 	for(cv::Point p : blocks3) markObjectInImage(analyzedImage, blockSize, p, transl, cv::Point(0,1), 0);
-	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+64,224)+transl),cv::Scalar(100  ,100  ,100), -1);
+	for(cv::Point p : pipe) rectangle(analyzedImage, cv::Rect(p+transl,cv::Point(p.x+32,224)+transl),cv::Scalar(100  ,100  ,100), -1);
 
 	//Writing DATA OUTPUT
 	cv::Mat fael = cv::Mat(analyzedImage.rows/interval, analyzedImage.cols/interval, CV_8UC3);
@@ -135,7 +135,7 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 		for(int x = 0 ; x < fael.cols ; x++)
 		{
 			uchar* ptrDst = fael.ptr(y)+x*3;
-			uchar* ptrSrc = analyzedImage.ptr(y*interval+interval/2)+x*3*interval;
+			uchar* ptrSrc = analyzedImage.ptr(y*interval+interval/2)+(x*interval+interval/2)*3;
 			ptrDst[0]=ptrSrc[0];ptrDst[1]=ptrSrc[1];ptrDst[2]=ptrSrc[2];
 		}
 	}
@@ -253,7 +253,7 @@ cv::Point MetaDataAnalyzer::findPlayer(cv::Mat &image)
 				double r1 = cv::compareHist( histogram[0], playerHistogram[0], 3 );//CV_COMP_INTERSECT
 				double r2 = cv::compareHist( histogram[1], playerHistogram[1], 3 );//CV_COMP_INTERSECT
 				double r3 = cv::compareHist( histogram[2], playerHistogram[2], 3 );//CV_COMP_INTERSECT
-				if(r1<0.70 && r2<0.8 && r3<0.8)
+				if(r1<0.70 && r2<0.8 && r3<0.85)
 				{
 					return cv::Point(x-4,y-4);
 				}

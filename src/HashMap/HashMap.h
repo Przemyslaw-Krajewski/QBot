@@ -19,7 +19,7 @@ using CacheMemory = std::map<std::vector<int>,double>;
 class HashMap
 {
 public:
-	HashMap(int t_nActions, std::vector<int> t_dimensionsSize);
+	HashMap(int t_nActions);
 	~HashMap();
 
 	double getValue(State t_state, int t_action);
@@ -32,7 +32,6 @@ public:
 
 private:
 	std::vector<CacheMemory> cache;
-	std::vector<int> maxValues;
 	int changeIndex;
 
 	const int MAX_CHANGE = 9999;

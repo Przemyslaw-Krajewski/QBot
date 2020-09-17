@@ -2,7 +2,6 @@
 #include <assert.h>
 
 #include "Analyzers/StateAnalyzer.h"
-#include "QLearning/QLearning.h"
 #include "Bot/Bot.h"
 #include "test/NNtest.h"
 

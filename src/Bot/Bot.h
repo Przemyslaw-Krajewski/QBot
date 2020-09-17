@@ -21,7 +21,7 @@
 #include "../Analyzers/StateAnalyzer.h"
 
 #include "../Analyzers/MemoryAnalyzer.h"
-#include "../QLearning/QLearning.h"
+#include "../ReinforcementLearning/QLearning.h"
 #include "../ActorCritic/ActorCritic.h"
 #include "../Loggers/DataDrawer.h"
 
@@ -37,9 +37,9 @@ public:
 private:
 	void loadParameters();
 
-	void learnFromScenarioAC(std::list<SARS> &historyScenario);
+//	void learnFromScenarioAC(std::list<SARS> &historyScenario);
 
-	void learnFromMemoryAC();
+//	void learnFromMemoryAC();
 
 	ControllerInput determineControllerInput(int t_action);
 	int determineControllerInputInt(int t_action);
@@ -49,7 +49,7 @@ private:
 private:
 	//
 	StateAnalyzer stateAnalyzer;
-	ActorCritic *actorCritic;
+	ReinforcementLearning *reinforcementLearning;
 
 	std::map<ReducedState, SARS> memorizedSARS;
 	int playsBeforeNNLearning;

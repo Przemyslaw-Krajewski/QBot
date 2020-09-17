@@ -10,10 +10,9 @@
 /*
  *
  */
-HashMap::HashMap(int t_nActions, std::vector<int> t_dimensionsSize)
+HashMap::HashMap(int t_nActions)
 {
 	changeIndex = t_nActions;
-	maxValues = t_dimensionsSize;
 	for(int i=0; i<t_nActions+1; i++) cache.push_back(CacheMemory());
 }
 
@@ -32,7 +31,7 @@ double HashMap::getValue(State t_state, int t_action)
 {
 	double result;
 	if(cache[t_action].count(t_state) > 0) result = cache[t_action].find(t_state)->second;
-	else result = 2400;
+	else result = 0.9;
 
 	return result;
 }
