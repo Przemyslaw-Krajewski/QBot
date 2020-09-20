@@ -51,7 +51,7 @@ MemoryAnalyzer::MemoryAnalyzer() {
 
 	if(MEM_ADDR == 0x0) assert("FCEU mem not found" && 0);
 
-	std::cout << "PID: "<< pid << " MEM ADDR:" << MEM_ADDR << "\n";
+//	std::cout << "PID: "<< pid << " MEM ADDR:" << MEM_ADDR << "\n";
 }
 
 /*

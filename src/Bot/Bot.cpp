@@ -28,7 +28,7 @@ Bot::Bot()
 		analyzeResult = stateAnalyzer.analyze();
 		if(analyzeResult.additionalInfo != ScenarioAdditionalInfo::notFound) break;
 		cv::waitKey(1000);
-		std::cout << "Could not find player, atteption: " << i << "\n";
+//		std::cout << "Could not find player, atteption: " << i << "\n";
 	}
 	if(analyzeResult.additionalInfo == ScenarioAdditionalInfo::notFound)
 				throw std::string("Could not initialize, check player visibility");
@@ -116,6 +116,7 @@ void Bot::execute()
 														controllerInput,
 														analyzeResult.playerCoords,
 														analyzeResult.playerVelocity);
+			if(analyzeResult.processedImage.cols == 0) continue;
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
@@ -150,7 +151,7 @@ void Bot::execute()
 
 		loadParameters();
 
-		std::cout << score << "\n";
+//		std::cout << score << "\n";
 
 		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
 
@@ -164,51 +165,26 @@ void Bot::execute()
  */
 void Bot::loadParameters()
 {
-	std::ifstream qlFile ("ql.param");
-	if (qlFile.is_open())
-	{
-		qlFile.close();
-		std::remove("ql.param");
+	if(ParameterFileHandler::checkParameter("ql.param","QL mode activated"))
 		controlMode = ControlMode::QL;
-		std::cout << "QL mode activated\n";
-	}
 
-	std::ifstream nnFile ("nn.param");
-	if (nnFile.is_open())
-	{
-		nnFile.close();
-		std::remove("nn.param");
+	if(ParameterFileHandler::checkParameter("nn.param","NN mode activated"))
 		controlMode = ControlMode::NN;
-		std::cout << "NN mode activated\n";
-	}
 
-	std::ifstream hybridFile ("hybrid.param");
-	if (hybridFile.is_open())
+	if(ParameterFileHandler::checkParameter("nnnolearn.param","NN no learn mode activated"))
+		controlMode = ControlMode::NNNoLearn;
+
+	if(ParameterFileHandler::checkParameter("hybrid.param","Hybrid mode activated"))
 	{
-		hybridFile.close();
-		std::remove("hybrid.param");
 		controlMode = ControlMode::Hybrid;
-		std::cout << "Hybrid mode activated\n";
 		playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 	}
 
-	std::ifstream nnNoLearnFile ("nnnolearn.param");
-	if (nnNoLearnFile.is_open())
-	{
-		nnNoLearnFile.close();
-		std::remove("nnnolearn.param");
-		controlMode = ControlMode::NNNoLearn;
-		std::cout << "NN no learn mode activated\n";
-	}
-
-	std::ifstream resetFile ("reset.param");
-	if (resetFile.is_open())
-	{
-		resetFile.close();
-		std::remove("reset.param");
+	if(ParameterFileHandler::checkParameter("reset.param","Reset has been ordered"))
 		reset = true;
-		std::cout << "Reset has been ordered\n";
-	}
+
+	if(ParameterFileHandler::checkParameter("quit.param","Exit program"))
+		throw std::string("Exit program");
 }
 
 /*

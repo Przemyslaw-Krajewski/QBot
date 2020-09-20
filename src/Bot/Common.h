@@ -53,6 +53,23 @@ struct SARS
 	double reward;
 };
 
+class ParameterFileHandler
+{
+public:
+	static bool checkParameter(const char* t_parameterName, std::string t_communiaction)
+	{
+		std::ifstream hybridFile (t_parameterName);
+		if (hybridFile.is_open())
+		{
+			hybridFile.close();
+			std::remove(t_parameterName);
+			std::cout << "Parameter handler: " << t_communiaction << "\n";
+			return true;
+		}
+		return false;
+	}
+};
+
 enum class ScenarioAdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};
 enum class ControlMode {QL, NN, Hybrid, NNNoLearn};
 enum class Game {BattleToads, SuperMarioBros};
