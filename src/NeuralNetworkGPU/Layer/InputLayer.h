@@ -2,19 +2,21 @@
 // Created by przemo on 27.12.2019.
 //
 
-#ifndef QBOT_INPUTLAYER_H
-#define QBOT_INPUTLAYER_H
+#ifndef NEURALNETWORKGPU_INPUTLAYER_H
+#define NEURALNETWORKGPU_INPUTLAYER_H
+
+#include <cuda_runtime_api.h>
+#include <cuda.h>
 
 #include "NNLayer.h"
-#include "../Neuron/InputNeuron.h"
 
-namespace NeuralNetworkCPU
+namespace NeuralNetworkGPU
 {
 	class InputLayer : public NNLayer
 	{
 	public:
 		InputLayer(int t_size);
-		virtual ~InputLayer() = default;
+		virtual ~InputLayer();
 
 	public:
 		//input
@@ -29,15 +31,17 @@ namespace NeuralNetworkCPU
 		void learnBackPropagation() override ;
 
 		//configuration
-		std::vector<Neuron*> getNeuronPtr() override;
+		NeuronsPtr getNeuronPtr() override;
 
 		//save load
-		void saveToFile(std::ofstream &t_file) override;
+//		void saveToFile(std::ofstream &t_file) override;
 
 	protected:
-		std::vector<InputNeuron> neurons;
+		double *d_input;
+		double *input;
+		int size;
 	};
 }
 
 
-#endif //QBOT_INPUTLAYER_H
+#endif //NEURALNETWORKGPU_INPUTLAYER_H

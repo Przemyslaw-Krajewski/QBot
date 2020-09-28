@@ -21,8 +21,9 @@
 
 #include "../Analyzers/MemoryAnalyzer.h"
 #include "../ReinforcementLearning/QLearning.h"
-#include "../ReinforcementLearning/ActorCritic.h"
 #include "../Loggers/DataDrawer.h"
+#include "../ReinforcementLearning/ActorCritic.h"
+#include "../ReinforcementLearning/ActorCriticNN.h"
 
 class Bot {
 

@@ -9,35 +9,37 @@
 #include "../Neuron/PoolingNeuron.h"
 #include "../Neuron/InputNeuron.h"
 
-class PoolingLayer : public NNLayer
+namespace NeuralNetworkCPU
 {
-public:
-    PoolingLayer(MatrixSize t_outputLayerSize, TensorSize t_inputSize, std::vector<Neuron*> t_prevLayerReference);
-    ~PoolingLayer() override = default;
+	class PoolingLayer : public NNLayer
+	{
+	public:
+		PoolingLayer(MatrixSize t_outputLayerSize, TensorSize t_inputSize, std::vector<Neuron*> t_prevLayerReference);
+		~PoolingLayer() override = default;
 
-public:
-    //output
-    std::vector<double> getOutput() override;
-    void determineOutput() override;
+	public:
+		//output
+		std::vector<double> getOutput() override;
+		void determineOutput() override;
 
-    //learn
-    void setDelta(std::vector<double> t_z) override;
-    void learnBackPropagation() override;
+		//learn
+		void setDelta(std::vector<double> t_z) override;
+		void learnBackPropagation() override;
 
-    //configuration
-    std::vector<Neuron*> getNeuronPtr() override;
-    TensorSize getTensorOutputSize() override {return outputSize;}
-    static void configure() {/*Do nothing*/}
+		//configuration
+		std::vector<Neuron*> getNeuronPtr() override;
+		TensorSize getTensorOutputSize() override {return outputSize;}
+		static void configure() {/*Do nothing*/}
 
-protected:
-    static long getIndex(int x, int y, int z, int maxX, int maxY) {return x + y*maxX + z*maxY*maxX; }
+	protected:
+		static long getIndex(int x, int y, int z, int maxX, int maxY) {return x + y*maxX + z*maxY*maxX; }
 
-protected:
-    std::vector<PoolingNeuron> neurons;
-    TensorSize outputSize;
+	protected:
+		std::vector<PoolingNeuron> neurons;
+		TensorSize outputSize;
 
-    double learnRate;
-};
-
+		double learnRate;
+	};
+}
 
 #endif //QBOT_POOLINGLAYER_H

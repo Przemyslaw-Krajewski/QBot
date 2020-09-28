@@ -5,8 +5,8 @@
  *      Author: przemo
  */
 
-#ifndef SRC_ACTORCRITIC_ACTORCRITIC_H_
-#define SRC_ACTORCRITIC_ACTORCRITIC_H_
+#ifndef SRC_ACTORCRITIC_ACTORCRITICNN_H_
+#define SRC_ACTORCRITIC_ACTORCRITICNN_H_
 
 #include <vector>
 #include <string>
@@ -15,13 +15,14 @@
 #include "../Bot/Common.h"
 #include "../HashMap/HashMap.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
+#include "../NeuralNetworkGPU/NeuralNetwork.h"
 
-class ActorCritic : public ReinforcementLearning
+class ActorCriticNN : public ReinforcementLearning
 {
 
 public:
-	ActorCritic(int t_nActions, int t_dimensionStatesSize);
-	virtual ~ActorCritic() = default;
+	ActorCriticNN(int t_nActions, int t_dimensionStatesSize);
+	virtual ~ActorCriticNN() = default;
 
 	//Basic methods
 	virtual int chooseAction(State& t_state) override;
@@ -30,6 +31,10 @@ public:
 	virtual double learnFromScenario(std::list<SARS> &t_history) override;
 	virtual double learnFromMemory() override;
 
+	void resetNN();
+
+	double getCriticValue(State t_state) {return criticValues.determineOutput(t_state)[0];}
+//	void drawCriticValues() {criticValues.drawNeuralNetwork();}
 
 public:
 	//Debug methods
@@ -42,8 +47,10 @@ private:
 	int numberOfActions;
 	int dimensionStatesSize;
 
-	HashMap criticValues;
-	HashMap actorValues;
+	NeuralNetworkCPU::NeuralNetwork criticValues;
+	NeuralNetworkCPU::NeuralNetwork actorValues;
+
+	std::map<ReducedState, SARS> memorizedSARS;
 
 public:
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
@@ -56,4 +63,4 @@ public:
 
 };
 
-#endif /* SRC_ACTORCRITIC_ACTORCRITIC_H */
+#endif /* SRC_ACTORCRITIC_ACTORCRITICNN_H */

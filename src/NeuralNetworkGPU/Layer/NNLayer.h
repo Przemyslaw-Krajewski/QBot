@@ -2,16 +2,17 @@
 // Created by przemo on 27.12.2019.
 //
 
-#ifndef QBOT_NNLAYER_H
-#define QBOT_NNLAYER_H
+#ifndef NEURALNETWORKGPU_NEURON_LAYER_CU_
+#define NEURALNETWORKGPU_NEURON_LAYER_CU_
 
 #include <cassert>
 #include <vector>
-#include "../Neuron/Neuron.h"
 
 #include <opencv2/opencv.hpp>
 
-namespace NeuralNetworkCPU
+#define INPUT_BUFFER_SIZE 4096
+
+namespace NeuralNetworkGPU
 {
 	struct TensorSize
 	{
@@ -27,10 +28,19 @@ namespace NeuralNetworkCPU
 		int x,y;
 	};
 
+	struct NeuronsPtr
+	{
+		NeuronsPtr(double* t_inputPtr, int t_size, double* t_deltaPtr) {inputPtr = t_inputPtr; size = t_size; deltaPtr = t_deltaPtr;}
+		double* inputPtr;
+		double* deltaPtr;
+		int size;
+	};
+
 	class NNLayer
 	{
 	public:
 
+		NNLayer() {};
 		virtual ~NNLayer() = default;
 
 		//input
@@ -46,7 +56,7 @@ namespace NeuralNetworkCPU
 		virtual void learnBackPropagation() = 0;
 
 		//configuration
-		virtual std::vector<Neuron*> getNeuronPtr() = 0;
+		virtual NeuronsPtr getNeuronPtr() = 0;
 		virtual TensorSize getTensorOutputSize() {assert("getTensorOutputSize() Not implemented" && 0); return TensorSize(0,0,0);}
 
 		//visualization
@@ -55,6 +65,9 @@ namespace NeuralNetworkCPU
 		//save load
 		virtual void saveToFile(std::ofstream &t_file) {assert("saveToFile() Not implemented" && 0);}
 		virtual void loadFromFile(std::ifstream &t_file) {assert("loadFromFile() Not implemented" && 0);}
+
+	public:
+		static double getRandomWeight() { return ((double)((rand()%1000))/1000-0.5); }
 
 	};
 }

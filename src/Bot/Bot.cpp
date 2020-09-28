@@ -44,7 +44,7 @@ Bot::Bot()
 	cv::waitKey(1000);
 
 	//Initialize acLearning
-	reinforcementLearning = new ActorCritic(numberOfActions, (int) sceneState.size());
+	reinforcementLearning = new ActorCriticNN(numberOfActions, (int) sceneState.size());
 
 	playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 }
@@ -127,16 +127,17 @@ void Bot::execute()
 			MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
 
 			//Draw info
-//			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extraxtedSceneData = extractSceneState(sceneState);
-//			DataDrawer::drawAnalyzedData(extraxtedSceneData.first,extraxtedSceneData.second,
-//					analyzeResult.reward,actorCritic->getQChange(sceneState));
+			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extraxtedSceneData = extractSceneState(sceneState);
+			DataDrawer::drawAnalyzedData(extraxtedSceneData.first,extraxtedSceneData.second,
+					analyzeResult.reward,0);
 
 #ifdef PRINT_PROCESSING_TIME
 			int64 afterBefore = cv::getTickCount();
 			std::cout << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 #endif
 			//Timer
-			if(analyzeResult.reward < StateAnalyzer::LITTLE_ADVANCE_REWARD) time--;
+			if(analyzeResult.reward < StateAnalyzer::LITTLE_ADVANCE_REWARD)
+				time--;
 			else if(analyzeResult.reward > StateAnalyzer::LITTLE_ADVANCE_REWARD && time < TIME_LIMIT) time++;
 
 			//End?
@@ -155,8 +156,10 @@ void Bot::execute()
 
 		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
 
-		reinforcementLearning->learnFromScenario(historyScenario);
-		reinforcementLearning->learnFromMemory();
+		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
+		double sumErrMem = reinforcementLearning->learnFromMemory();
+
+		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
 	}
 }
 
@@ -270,14 +273,13 @@ std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> Bot::extractSceneState(
 	}
 
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> result ;
-//	result.first.fieldAndEnemiesLayout = fieldAndEnemiesLayout;
-	//TODO disabled
+	result.first.processedImage = fieldAndEnemiesLayout;
 
 //	//AdditionalInfo
-//	result.first.playerCoords.x = sceneState[sceneState.size()-4];
-//	result.first.playerCoords.y = sceneState[sceneState.size()-3];
-//	result.first.playerVelocity.x = sceneState[sceneState.size()-2];
-//	result.first.playerVelocity.y = sceneState[sceneState.size()-1];
+	result.first.playerCoords.x = sceneState[sceneState.size()-4];
+	result.first.playerCoords.y = sceneState[sceneState.size()-3];
+	result.first.playerVelocity.x = sceneState[sceneState.size()-2];
+	result.first.playerVelocity.y = sceneState[sceneState.size()-1];
 
 	//Controller
 	for(int i=0;i<6; i++) result.second.push_back(sceneState[sceneState.size()-1+i]);

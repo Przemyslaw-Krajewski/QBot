@@ -7,35 +7,38 @@
 
 #include "InputNeuron.h"
 
-InputNeuron::InputNeuron()
+namespace NeuralNetworkCPU
 {
-    output = 0;
-    delta = 0;
-}
+	InputNeuron::InputNeuron()
+	{
+		output = 0;
+		delta = 0;
+	}
 
-InputNeuron::InputNeuron(double t_output) : InputNeuron()
-{
-	output = t_output;
-}
+	InputNeuron::InputNeuron(double t_output) : InputNeuron()
+	{
+		output = t_output;
+	}
 
-InputNeuron::~InputNeuron()
-{
-    //Do nothing
-}
+	InputNeuron::~InputNeuron()
+	{
+		//Do nothing
+	}
 
-double InputNeuron::determineOutput()
-{
-    delta = 0;
-	return output;
-}
+	double InputNeuron::determineOutput()
+	{
+		delta = 0;
+		return output;
+	}
 
-void InputNeuron::learnDeltaRule()
-{
-    //Do nothing
-}
+	void InputNeuron::learnDeltaRule()
+	{
+		//Do nothing
+	}
 
-double InputNeuron::setValue(double t_output)
-{
-    output = t_output;
-    return output;
+	double InputNeuron::setValue(double t_output)
+	{
+		output = t_output;
+		return output;
+	}
 }

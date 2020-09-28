@@ -14,44 +14,44 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 {
 	int blockSize = 15;
 //
-//	int xScreenSize = sceneData.fieldAndEnemiesLayout.cols;
-//	int yScreenSize = sceneData.fieldAndEnemiesLayout.rows;
-	int xScreenSize = 25;
-	int yScreenSize = 0;
+	int xScreenSize = sceneData.processedImage.cols;
+	int yScreenSize = sceneData.processedImage.rows;
+//	int xScreenSize = 25;
+//	int yScreenSize = 0;
 //
 //	if(xScreenSize <= 0 && yScreenSize <=0) return;
 //
 //	//map
 	cv::Mat map = cv::Mat(blockSize*(yScreenSize+1), blockSize*(xScreenSize), CV_8UC3);
-//	for(int x=0, xb=0; x<xScreenSize; x++,xb+=blockSize)
-//	{
-//		for(int y=0, yb=0; y<yScreenSize; y++,yb+=blockSize)
-//		{
-//			cv::Scalar color;
-//			uchar* ptrSrc = sceneData.fieldAndEnemiesLayout.ptr(y)+(x+x+x);
-//
-//			if(ptrSrc[0]==100) color = cv::Scalar(100,100,100); //field
-//			else if(ptrSrc[2]==220) color = cv::Scalar(0,0,220); //enemy
-//			else cv::Scalar(0,0,0); // blank
-//
-//			if(x >> 1 == xScreenSize >> 2 && y >> 1 == yScreenSize >> 2)
-//			{
-//				color[0] += 50;
-//				color[1] += 50;
-//				color[2] += 50;
-//			}
-//
-//			drawBlock(&map,blockSize,Point(xb,yb),color);
-//		}
-//	}
-//	for(int x=0; x<map.cols; x++)
-//	{
-//		for(int y=yScreenSize*blockSize; y<map.rows; y++)
-//		{
-//			uchar* ptr = map.ptr(y)+(x)*3;
-//			ptr[0] = ptr[1] = ptr[2] = 20;
-//		}
-//	}
+	for(int x=0, xb=0; x<xScreenSize; x++,xb+=blockSize)
+	{
+		for(int y=0, yb=0; y<yScreenSize; y++,yb+=blockSize)
+		{
+			cv::Scalar color;
+			uchar* ptrSrc = sceneData.processedImage.ptr(y)+(x+x+x);
+
+			if(ptrSrc[0]==100) color = cv::Scalar(100,100,100); //field
+			else if(ptrSrc[2]==220) color = cv::Scalar(0,0,220); //enemy
+			else cv::Scalar(0,0,0); // blank
+
+			if(x >> 1 == xScreenSize >> 2 && y >> 1 == yScreenSize >> 2)
+			{
+				color[0] += 50;
+				color[1] += 50;
+				color[2] += 50;
+			}
+
+			drawBlock(&map,blockSize,Point(xb,yb),color);
+		}
+	}
+	for(int x=0; x<map.cols; x++)
+	{
+		for(int y=yScreenSize*blockSize; y<map.rows; y++)
+		{
+			uchar* ptr = map.ptr(y)+(x)*3;
+			ptr[0] = ptr[1] = ptr[2] = 20;
+		}
+	}
 	//player pos x
 	drawBorderedBlock(&map,blockSize,
 			Point(1*blockSize,yScreenSize*blockSize),

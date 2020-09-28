@@ -1,11 +1,12 @@
 cmake_minimum_required (VERSION 2.8)
-PROJECT(QBot)
+PROJECT(QBot LANGUAGES CXX CUDA)
 
 set(CMAKE_CXX_STANDARD 14)
 
 find_package( OpenCV REQUIRED )
 find_package( X11 REQUIRED )
 find_package(OpenMP)
+find_package(CUDA)
 
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -19,25 +20,29 @@ add_executable(QBot
 			src/ReinforcementLearning/ReinforcementLearning.cpp
 			src/ReinforcementLearning/QLearning.cpp
 			src/ReinforcementLearning/ActorCritic.cpp
+			src/ReinforcementLearning/ActorCriticNN.cpp
 			src/Analyzers/StateAnalyzer.cpp
 			src/Analyzers/DesktopHandler.cpp
 			src/Analyzers/ImageAnalyzer/ImageAnalyzer.cpp
 			src/Analyzers/ImageAnalyzer/RawImageAnalyzer.cpp
 			src/Analyzers/ImageAnalyzer/MetaDataAnalyzer.cpp
 			src/Analyzers/MemoryAnalyzer.cpp
+			src/HashMap/HashMap.cpp
+			src/Loggers/DataDrawer.cpp
 			src/NeuralNetwork/NeuralNetwork.cpp
 			src/NeuralNetwork/Neuron/AdaptiveNeuron.cpp
 			src/NeuralNetwork/Neuron/InputNeuron.cpp
 			src/NeuralNetwork/Neuron/PoolingNeuron.cpp
-			src/HashMap/HashMap.cpp
-			src/Loggers/DataDrawer.cpp
 			src/NeuralNetwork/Layer/InputLayer.cpp
 			src/NeuralNetwork/Layer/SigmoidLayer.cpp
 			src/NeuralNetwork/Layer/ConvolutionalLayer.cpp
 			src/NeuralNetwork/Layer/ModifiedConvolutionalLayer.cpp
-			src/NeuralNetwork/Layer/PoolingLayer.cpp)
-
-include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
+			src/NeuralNetwork/Layer/PoolingLayer.cpp
+			src/NeuralNetworkGPU/NeuralNetwork.cpp
+			src/NeuralNetworkGPU/Layer/InputLayer.cu
+			src/NeuralNetworkGPU/Layer/SigmoidLayer.cu)
+			
+include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
 target_link_libraries( QBot ${OpenCV_LIBRARIES} ${X11_LIBRARIES} xdo pthread)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/graphics DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

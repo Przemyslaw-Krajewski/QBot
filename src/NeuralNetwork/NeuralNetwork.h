@@ -23,35 +23,41 @@
 #include "Layer/ModifiedConvolutionalLayer.h"
 #include "Layer/PoolingLayer.h"
 
-
-using NNInput = std::vector<double>;
-
-class NeuralNetwork
+namespace NeuralNetworkCPU
 {
-public:
-    NeuralNetwork();
-	virtual ~NeuralNetwork();
+	using NNInput = std::vector<double>;
 
-	//Configuration
-	void addLayer(NNLayer *t_newLayer);
-	std::vector<Neuron*> getLastLayerNeuronRef();
-	TensorSize getLastLayerTensorSize();
+	class NeuralNetwork
+	{
+	public:
+		NeuralNetwork();
+		virtual ~NeuralNetwork();
 
-	//basic
-	std::vector<double> determineOutput(std::vector<double> &x);
-	std::vector<double> determineOutput(const std::vector<int> &x);
-	std::vector<double> getOutput();
-	void learnBackPropagation(std::vector<double>& z);
+		//Configuration
+		void addLayer(NNLayer *t_newLayer);
+		std::vector<Neuron*> getLastLayerNeuronRef();
+		TensorSize getLastLayerTensorSize();
 
-	//helping
-protected:
-	std::vector<double> determineY();
-public:
-	//debug
-	void drawNeuralNetwork() {for(auto it : layers) it->drawLayer();}
+		//basic
+		std::vector<double> determineOutput(std::vector<double> &x);
+		std::vector<double> determineOutput(const std::vector<int> &x);
+		std::vector<double> getOutput();
+		void learnBackPropagation(std::vector<double>& z);
 
-protected:
-	std::list<NNLayer*> layers;
-};
+		//save load
+		void saveToFile();
+		void loadFromFile();
+
+		//helping
+	protected:
+		std::vector<double> determineY();
+	public:
+		//debug
+		void drawNeuralNetwork() {for(auto it : layers) it->drawLayer();}
+
+	protected:
+		std::list<NNLayer*> layers;
+	};
+}
 
 #endif /* SRC_NEURALNETWORK_NEURALNETWORK_H_ */

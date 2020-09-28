@@ -9,33 +9,39 @@
 #include "../Neuron/InputNeuron.h"
 #include "../Neuron/AdaptiveNeuron.h"
 
-class SigmoidLayer : public NNLayer
+namespace NeuralNetworkCPU
 {
-public:
-    SigmoidLayer(double t_learnRate, int t_size, std::vector<Neuron*> t_prevLayerReference);
-    virtual ~SigmoidLayer() = default;
+	class SigmoidLayer : public NNLayer
+	{
+	public:
+		SigmoidLayer(double t_parameterB, double t_learnRate, int t_size, std::vector<Neuron*> t_prevLayerReference);
+		virtual ~SigmoidLayer() = default;
 
-public:
-    //output
-    std::vector<double> getOutput() override;
-    void determineOutput() override;
+	public:
+		//output
+		std::vector<double> getOutput() override;
+		void determineOutput() override;
 
-    //learn
-    void setDelta(std::vector<double> t_z) override;
-    void learnBackPropagation() override;
+		//learn
+		void setDelta(std::vector<double> t_z) override;
+		void learnBackPropagation() override;
 
-    //configuration
-    std::vector<Neuron*> getNeuronPtr() override;
-    static void configure(double t_activationFunctionParameter) {b = t_activationFunctionParameter;}
+		//configuration
+		std::vector<Neuron*> getNeuronPtr() override;
+		static void configure(double t_activationFunctionParameter) {b = t_activationFunctionParameter;}
 
-protected:
-    std::vector<AdaptiveNeuron> neurons;
-    InputNeuron biasValue;
+		//save load
+		void saveToFile(std::ofstream &t_file) override;
+		void loadFromFile(std::ifstream &t_file) override;
 
-    double learnRate;
+	protected:
+		std::vector<AdaptiveNeuron> neurons;
+		InputNeuron biasValue;
 
-    static double b;
-};
+		double learnRate;
 
+		static double b;
+	};
+}
 
 #endif //QBOT_SIGMOIDLAYER_H
