@@ -195,9 +195,10 @@ std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
 		else sceneState.push_back(MIN_INPUT_VALUE);
 	}
+
 	//AdditionalInfo
-	sceneState.push_back(position.x);
-	sceneState.push_back(position.y);
+//	sceneState.push_back(position.x);
+//	sceneState.push_back(position.y); // Sick values
 	sceneState.push_back(velocity.x);
 	sceneState.push_back(velocity.y);
 

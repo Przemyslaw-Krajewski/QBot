@@ -20,8 +20,9 @@
 #include "../Analyzers/StateAnalyzer.h"
 
 #include "../Analyzers/MemoryAnalyzer.h"
-#include "../ReinforcementLearning/QLearning.h"
 #include "../Loggers/DataDrawer.h"
+#include "../ReinforcementLearning/QLearning.h"
+#include "../ReinforcementLearning/GeneralizedQL.h"
 #include "../ReinforcementLearning/ActorCritic.h"
 #include "../ReinforcementLearning/ActorCriticNN.h"
 
@@ -36,10 +37,6 @@ public:
 
 private:
 	void loadParameters();
-
-//	void learnFromScenarioAC(std::list<SARS> &historyScenario);
-
-//	void learnFromMemoryAC();
 
 	ControllerInput determineControllerInput(int t_action);
 	int determineControllerInputInt(int t_action);

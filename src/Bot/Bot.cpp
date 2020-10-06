@@ -105,7 +105,7 @@ void Bot::execute()
 			int64 timeBefore = cv::getTickCount();
 #endif
 			cv::waitKey(40);
-			std::vector<int> oldSceneState = sceneState;
+			State oldSceneState = sceneState;
 			int oldAction = action;
 
 			//Analyze situation
@@ -118,6 +118,7 @@ void Bot::execute()
 														analyzeResult.playerVelocity);
 			if(analyzeResult.processedImage.cols == 0) continue;
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
+
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
 
@@ -127,9 +128,9 @@ void Bot::execute()
 			MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
 
 			//Draw info
-			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extraxtedSceneData = extractSceneState(sceneState);
-			DataDrawer::drawAnalyzedData(extraxtedSceneData.first,extraxtedSceneData.second,
-					analyzeResult.reward,0);
+//			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extraxtedSceneData = extractSceneState(sceneState);
+//			DataDrawer::drawAnalyzedData(extraxtedSceneData.first,extraxtedSceneData.second,
+//					analyzeResult.reward,0);
 
 #ifdef PRINT_PROCESSING_TIME
 			int64 afterBefore = cv::getTickCount();
@@ -148,18 +149,16 @@ void Bot::execute()
 			}
 		}
 
+		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
-
 		loadParameters();
-
+		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
 //		std::cout << score << "\n";
 
-		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
-
+		//Learn
 		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
 		double sumErrMem = reinforcementLearning->learnFromMemory();
-
-		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
+//		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
 	}
 }
 

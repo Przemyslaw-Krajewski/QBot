@@ -42,7 +42,7 @@ public:
 
 	AnalyzeResult fetchData();
 
-	unsigned char getMemValue(long addr);
+	unsigned long getMemValue(long addr, size_t size);
 	char setMemValue(long addr, char value);
 
 	cv::Mat fetchScreenData();
@@ -55,12 +55,16 @@ private:
 
 	int pid;
 	off_t MEM_ADDR;
-	const off_t RAM_OFFSET{0x282630};
+
 	const off_t RAM_VEL_X_OFFSET{0x57};
 	const off_t RAM_VEL_Y_OFFSET{0x9f};
 	const off_t RAM_POS_X_OFFSET{0x4ac};
-	const off_t RAM_ADDR{0x555555c29dc0}; // RAM
-	const off_t XBUFF_ADDR{0x55555595e500}; //XBackBuf
+
+	const off_t RAMPTR_ADDR_OFFSET{0x12f198}; // RAMptr 0x555555839198
+	const off_t XBUFFPTR_ADDR_OFFSET{0x1323c8}; // XBackBuffptr 0x55555583c3c8
+
+	off_t RAM_ADDR;
+	off_t XBUFF_ADDR;
 	const off_t PALETTE_ADDR{0x5555558c5a80}; //s_psdl
 	const off_t CONTROL_ADDR{0x55555583c747}; //sterowanie
 	const off_t LOADSTATE_ADDR{0x55555583c746}; //wczytaj

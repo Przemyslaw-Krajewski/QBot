@@ -51,7 +51,26 @@ MemoryAnalyzer::MemoryAnalyzer() {
 
 	if(MEM_ADDR == 0x0) assert("FCEU mem not found" && 0);
 
-//	std::cout << "PID: "<< pid << " MEM ADDR:" << MEM_ADDR << "\n";
+	RAM_ADDR = getMemValue(MEM_ADDR+RAMPTR_ADDR_OFFSET,sizeof(size_t));
+	XBUFF_ADDR = getMemValue(MEM_ADDR+XBUFFPTR_ADDR_OFFSET,sizeof(size_t));
+
+//	std::cout << "PID: "<< pid << "\n";
+//
+//	std::cout << "MEM ADDR:";
+//	std::cout << std::hex << MEM_ADDR;
+//	std::cout << "\n";
+//
+//	std::cout << "RAM PTR ADDR:";
+//	std::cout << std::hex << (MEM_ADDR+RAMPTR_ADDR_OFFSET);
+//	std::cout << "  RAM ADDR:";
+//	std::cout << std::hex << RAM_ADDR;
+//	std::cout << "\n";
+//
+//	std::cout << "XBUFF PTR ADDR:";
+//	std::cout << std::hex << (MEM_ADDR+XBUFFPTR_ADDR_OFFSET);
+//	std::cout << "  XBUFF ADDR:";
+//	std::cout << std::hex << XBUFF_ADDR;
+//	std::cout << "\n";
 }
 
 /*
@@ -64,7 +83,7 @@ MemoryAnalyzer::~MemoryAnalyzer() {
 /*
  *
  */
-unsigned char MemoryAnalyzer::getMemValue(long addr)
+unsigned long MemoryAnalyzer::getMemValue(long addr, size_t size = 1)
 {
 
 	char file[64];
@@ -75,8 +94,8 @@ unsigned char MemoryAnalyzer::getMemValue(long addr)
 	ptrace(PTRACE_ATTACH, pid, 0, 0);
 	waitpid(pid, NULL, 0);
 
-	unsigned char value = 10;
-	pread(fd, &value, sizeof(value), addr);
+	unsigned long value = 0;
+	pread(fd, &value, size, addr);
 
 	ptrace(PTRACE_DETACH, pid, 0, 0);
 	close(fd);
