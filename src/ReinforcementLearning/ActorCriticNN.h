@@ -47,14 +47,16 @@ private:
 	int numberOfActions;
 	int dimensionStatesSize;
 
-	NeuralNetworkCPU::NeuralNetwork criticValues;
-	NeuralNetworkCPU::NeuralNetwork actorValues;
+	double averageReward;
+
+	NeuralNetworkGPU::NeuralNetwork criticValues;
+	NeuralNetworkGPU::NeuralNetwork actorValues;
 
 	std::map<ReducedState, SARS> memorizedSARS;
 
 public:
-	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
-	const int LEARN_FROM_MEMORY_ITERATIONS  = 0;
+	const int LEARN_FROM_HISTORY_ITERATIONS = 2;
+	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
 
 	static constexpr double GAMMA_PARAMETER = 0;		//reward for advancing to next promising state
 	static constexpr double ALPHA_PARAMETER = 1;		//speed of learning QLearning

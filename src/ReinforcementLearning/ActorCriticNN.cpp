@@ -16,6 +16,7 @@ ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize)
 	numberOfActions = t_nActions;
 
     resetNN();
+    averageReward = 0.5;
 }
 
 /*
@@ -23,8 +24,8 @@ ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize)
  */
 void ActorCriticNN::resetNN()
 {
-    actorValues = NeuralNetworkCPU::NeuralNetwork();
-    actorValues.addLayer(new NeuralNetworkCPU::InputLayer(dimensionStatesSize));
+    actorValues = NeuralNetworkGPU::NeuralNetwork();
+    actorValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
 //    actorValues.addLayer(new ModifiedConvolutionalLayer(0.25, MatrixSize(3,3),25,TensorSize(32,20,6),actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new PoolingLayer(MatrixSize(16,10),actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new ModifiedConvolutionalLayer(0.4, MatrixSize(5,5),60,actorValues.getLastLayerTensorSize(),actorValues.getLastLayerNeuronRef()));
@@ -33,15 +34,15 @@ void ActorCriticNN::resetNN()
 //    actorValues.addLayer(new SigmoidLayer(0.9 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.15,0.004, 900, actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.6,0.006, 500, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.3,0.04, 900, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.7,0.06, 500, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(1.0,0.09, numberOfActions, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.04, 900, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.06, 500, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(1.0,0.09, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
-    criticValues = NeuralNetworkCPU::NeuralNetwork();
-    criticValues.addLayer(new NeuralNetworkCPU::InputLayer(dimensionStatesSize));
-    criticValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.3,0.04, 900, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.7,0.06, 500, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(1.0,0.09, 1, criticValues.getLastLayerNeuronRef()));
+    criticValues = NeuralNetworkGPU::NeuralNetwork();
+    criticValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.04, 900, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.06, 500, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(1.0,0.09, 1, criticValues.getLastLayerNeuronRef()));
 }
 
 /*
@@ -53,22 +54,22 @@ int ActorCriticNN::chooseAction(State& t_state)
 	std::vector<double> values = actorValues.determineOutput(t_state);
 	std::vector<double> critic = criticValues.determineOutput(t_state);
 
-	std::cout << critic[0] << "   :    ";
+//	std::cout << averageReward << "   :    ";
+//	std::cout << critic[0] << "   :    ";
 	double sum = 0;
 	for(int i=0; i<values.size(); i++)
 	{
-		std::cout << values[i] << "  ";
+//		std::cout << values[i] << "  ";
 		sum += values[i];
 	}
-	std::cout << "\n";
-	return 0;
+//	std::cout << "\n";
 
 	if(sum == 0) return rand()%numberOfActions;
 	double randomValue = ((double)(rand()%((int)100000)))/100000;
 	for(int i=0; i<values.size(); i++)
 	{
 		randomValue -= values[i]/sum;
-		if(randomValue < 0)	return i;
+		if(values[i] > 0.94 || randomValue < 0)	return i;
 	}
 
 	return values.size()-1;
@@ -91,23 +92,30 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 	criticZ.push_back(t_reward);
 	criticValues.learnBackPropagation(criticZ);
 
-//	std::cout << prevStateValue[0] << " -> " << t_reward << "\n";
-
-//	//Actor
+	//Actor
 	std::vector<double> stateValue = criticValues.determineOutput(t_state);
 	std::vector<double> actorZ = actorValues.determineOutput(t_prevState);
+	averageReward = averageReward*0.99 + stateValue[0]*0.01;
 
-//	std::cout << stateValue[0] << "  " << prevStateValue[0] << "  " << actorZ[t_action] << "  " << log2(actorZ[t_action]) << "\n";
-//	std::cout << -(stateValue[0]-prevStateValue[0])*log(actorZ[t_action]) << "\n";
+//	std::cout << stateValue[0] << " <- " << prevStateValue[0] << "  " << actorZ[t_action] << "  " << log2(actorZ[t_action]) << "\n";
+//	std::cout << -(stateValue[0]-prevStateValue[0])*log2(actorZ[t_action]) << "\n\n";
 
-	actorZ[t_action] = -(stateValue[0]-prevStateValue[0])*log2(actorZ[t_action]) + actorZ[t_action];//(stateValue[0]-prevStateValue[0]);
+//	std::cout << actorZ[t_action] << "  ->  ";
+	double change = (stateValue[0]-prevStateValue[0]+0.02);
+	for(int i=0; i<numberOfActions; i++)
+	{
+		if(i!=t_action) actorZ[i] -= change;
+		else actorZ[i] += change;
+	}
+//	actorZ[t_action] += change;
+//	std::cout << actorZ[t_action] << "\n\n";
 
-
+	//
 
 	for(int i=0 ; i<numberOfActions ; i++)
 	{
-		if(actorZ[i] < 0.001) actorZ[i] = 0.01;
-		if(actorZ[i] > 0.999) actorZ[i] = 0.999;
+		if(actorZ[i] < 0.01) actorZ[i] = 0.01;
+		if(actorZ[i] > 0.99) actorZ[i] = 0.99;
 	}
 //	std::cout << actorZ[t_action] << "\n";
 //	std::cout << "\n";
@@ -192,7 +200,7 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
  */
 double ActorCriticNN::learnFromMemory()
 {
-	int skipStep = memorizedSARS.size()/150;
+	int skipStep = sqrt(memorizedSARS.size())/4;
 	if(skipStep < 1) skipStep = 1;
 
 	double sumErr = 0;
