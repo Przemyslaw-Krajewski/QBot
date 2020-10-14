@@ -137,8 +137,7 @@ void Bot::execute()
 			std::cout << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 #endif
 			//Timer
-			if(analyzeResult.reward < StateAnalyzer::LITTLE_ADVANCE_REWARD)
-				time--;
+			if(analyzeResult.reward <= StateAnalyzer::LITTLE_ADVANCE_REWARD) time--;
 			else if(analyzeResult.reward > StateAnalyzer::LITTLE_ADVANCE_REWARD && time < TIME_LIMIT) time++;
 
 			//End?

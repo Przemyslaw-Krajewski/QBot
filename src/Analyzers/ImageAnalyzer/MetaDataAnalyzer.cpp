@@ -147,7 +147,7 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 	if(!findObject(*image,deadImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,248,200)).empty()) {playerIsDead = true; killedByEnemy = true;} //Killed by enemy
 	if(playerCoords.y > 194) 																			playerIsDead = true; //pitfall
 	if(playerCoords.x < 20) 																			playerIsDead = true; // left border
-	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,248,200)).empty())  playerWon = true; //Killed by enemy
+	if(!findObject(*image,winImage,cv::Point(10,5),cv::Scalar(0,148,0),cv::Rect(0,0,248,200)).empty())  playerWon = true; //Killed by enemy
 
 	#ifdef PRINT_ANALYZED_IMAGE
 		//Print

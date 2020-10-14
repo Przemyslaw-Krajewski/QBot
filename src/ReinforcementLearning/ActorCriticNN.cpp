@@ -34,15 +34,15 @@ void ActorCriticNN::resetNN()
 //    actorValues.addLayer(new SigmoidLayer(0.9 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.15,0.004, 900, actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.6,0.006, 500, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.04, 900, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.06, 500, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(1.0,0.09, numberOfActions, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 900, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, 500, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.8,0.09, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
     criticValues = NeuralNetworkGPU::NeuralNetwork();
     criticValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.04, 900, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.06, 500, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(1.0,0.09, 1, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 900, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, 500, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.8,0.09, 1, criticValues.getLastLayerNeuronRef()));
 }
 
 /*
@@ -50,26 +50,36 @@ void ActorCriticNN::resetNN()
  */
 int ActorCriticNN::chooseAction(State& t_state)
 {
-//	return 3;
+	//getValues
 	std::vector<double> values = actorValues.determineOutput(t_state);
 	std::vector<double> critic = criticValues.determineOutput(t_state);
 
-//	std::cout << averageReward << "   :    ";
+	//print
 //	std::cout << critic[0] << "   :    ";
+//	for(int i=0; i<values.size(); i++) std::cout << values[i] << "  ";
+//	std::cout << "\n";
+
+	//sure action
+	double maxValue = getMaxValue(values);
+	if(maxValue > 0.98) return getIndexOfMaxValue(values);
+
+	//exp
+	for(int i=0; i<values.size(); i++) values[i] = exp(4*values[i]);
+
+	//Sum
 	double sum = 0;
 	for(int i=0; i<values.size(); i++)
 	{
-//		std::cout << values[i] << "  ";
 		sum += values[i];
 	}
-//	std::cout << "\n";
 
+	//Choose random
 	if(sum == 0) return rand()%numberOfActions;
-	double randomValue = ((double)(rand()%((int)100000)))/100000;
+	double randomValue = ((double)(rand()%((int)1000000)))/1000000;
 	for(int i=0; i<values.size(); i++)
 	{
 		randomValue -= values[i]/sum;
-		if(values[i] > 0.94 || randomValue < 0)	return i;
+		if(randomValue < 0)	return i;
 	}
 
 	return values.size()-1;
@@ -97,33 +107,32 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 	std::vector<double> actorZ = actorValues.determineOutput(t_prevState);
 	averageReward = averageReward*0.99 + stateValue[0]*0.01;
 
-//	std::cout << stateValue[0] << " <- " << prevStateValue[0] << "  " << actorZ[t_action] << "  " << log2(actorZ[t_action]) << "\n";
-//	std::cout << -(stateValue[0]-prevStateValue[0])*log2(actorZ[t_action]) << "\n\n";
+	//calculate some things
+	std::vector<double> expActor;
+	for(int i=0; i<actorZ.size(); i++) expActor.push_back(4*exp(actorZ[i]));
+	double expSum = 0;
+	for(int i=0; i<expActor.size(); i++) expSum += expActor[i];
 
-//	std::cout << actorZ[t_action] << "  ->  ";
-	double change = (stateValue[0]-prevStateValue[0]+0.02);
+	double magicReward = 0.6;
+	double change = stateValue[0] < magicReward ? stateValue[0]-prevStateValue[0] : stateValue[0]-magicReward;
+//	std::cout << change << "  " << stateValue[0] << "  " << prevStateValue[0] << "  " << (1-expActor[t_action]/expSum) <<  "\n";
+
 	for(int i=0; i<numberOfActions; i++)
 	{
-		if(i!=t_action) actorZ[i] -= change;
-		else actorZ[i] += change;
+		if(i!=t_action) actorZ[i] -= change*(1-expActor[i]/expSum);
+		else
+		{
+			actorZ[i] += change*(1-expActor[i]/expSum);
+		}
 	}
-//	actorZ[t_action] += change;
-//	std::cout << actorZ[t_action] << "\n\n";
-
-	//
 
 	for(int i=0 ; i<numberOfActions ; i++)
 	{
 		if(actorZ[i] < 0.01) actorZ[i] = 0.01;
 		if(actorZ[i] > 0.99) actorZ[i] = 0.99;
 	}
-//	std::cout << actorZ[t_action] << "\n";
-//	std::cout << "\n";
 
 	actorValues.learnBackPropagation(actorZ);
-//	double sum = 0;
-//	for(int i=0; i<actorZ.size(); i++) {sum += actorZ[i];}
-//	for(int i=0; i<actorZ.size(); i++) actorZ[i] = actorZ[i]/sum;
 
 	return prevStateValue[0] - t_reward;
 }
@@ -145,11 +154,8 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 																							 sarsIterator->state,
 																							 sarsIterator->action,
 																							 sarsIterator->reward);
-//		double value = getCriticValue((sarsIterator)->oldState);
-//		std::cout << sarsIterator->reward << "  " << value << "\n";
 	}
 
-	long counter=0;
 	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
 
 	//Learning
@@ -161,37 +167,7 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 								(*sarsIterator)->action,
 								(*sarsIterator)->reward));
 	}
-	//	std::cout << sumErr/sarsPointers.size() << "\n";
-	//	actorCritic->drawCriticValues();
 
-		while(0)
-		{
-
-//			std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
-
-			//Learning
-			double sumErr = 0;
-			for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-			{
-				sumErr += abs(learnSARS((*sarsIterator)->oldState,
-												 (*sarsIterator)->state,
-												 (*sarsIterator)->action,
-												 (*sarsIterator)->reward));
-			}
-//			std::cout << sumErr/sarsPointers.size() << "\n";
-
-//			sumErr = 0;
-			counter++;
-//			for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-//			{
-//				double value = criticValues.determineOutput((*sarsIterator)->oldState)[0];
-//				sumErr += abs(value-(*sarsIterator)->reward);
-//				//std::cout << value << " = "<< (*sarsIterator)->reward << "\n";
-//			}
-			std::cout << sumErr/sarsPointers.size() << "  " << sarsPointers.size() << "  " << counter << "\n";
-			if(counter >200) { int p=0;p=3/p;}
-	//		if(counter%10==0) actorCritic->drawCriticValues();
-		}
 	return sumErr;
 }
 
