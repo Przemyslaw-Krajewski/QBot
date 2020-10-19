@@ -39,16 +39,17 @@ namespace NeuralNetworkGPU
 		__syncthreads();
 
 		//sums x[i]*w[i]
-		double sum = t_weights[inputSize*threadIdx.x];
+		long weightsIndex = inputSize*(threadIdx.x + blockIdx.x*blockDim.x);
+		double sum = t_weights[weightsIndex];
 		for(int i=0; i<inputSize;i++)
 		{
-			sum += inputBuff[i] * t_weights[ inputSize*threadIdx.x+i+1 ];
+			sum += inputBuff[i] * t_weights[ weightsIndex+i+1 ];
 		}
-		t_sums[threadIdx.x] = sum;
+		t_sums[threadIdx.x + blockIdx.x*blockDim.x] = sum;
 		//activation function
-		t_output[threadIdx.x] = 1 / (1 + exp(-(*d_b)*sum) );
+		t_output[threadIdx.x + blockIdx.x*blockDim.x] = 1 / (1 + exp(-(*d_b)*sum) );
 		//reset delta
-		t_deltas[threadIdx.x] = 0;
+		t_deltas[threadIdx.x + blockIdx.x*blockDim.x] = 0;
 	}
 
 	/*
@@ -62,7 +63,6 @@ namespace NeuralNetworkGPU
 			double *d_n,double *d_b)
 	{
 		int inputSize = *t_inputSize;
-		double delta = t_deltas[threadIdx.x];
 
 		//copy input to common buffer
 		__shared__ double inputBuff[INPUT_BUFFER_SIZE];
@@ -85,19 +85,23 @@ namespace NeuralNetworkGPU
 		}
 		__syncthreads();
 
+		long index = threadIdx.x +  blockIdx.x*blockDim.x;
+		double delta = t_deltas[index];
+
+		long weightsIndex = inputSize*(index);
 		//determine common multiplier
-		double e = exp(-(*d_b)*t_sums[threadIdx.x]);
+		double e = exp(-(*d_b)*t_sums[index]);
 		double m = 1 + e;
 		double derivative = ((*d_b)*e/(m*m));
 
 		double p = (*d_n)* delta * derivative;
 		//calculate new weights
 		//bias weight
-		t_weights[inputSize * threadIdx.x] -= p;
+		t_weights[weightsIndex] -= p;
 		//rest weights
 		for(int i=0; i<inputSize; i++)
 		{
-			t_weights[ inputSize*threadIdx.x+i+1 ] -= p*inputBuff[i];
+			t_weights[ weightsIndex+i+1 ] -= p*inputBuff[i];
 		}
 
 		//set delta to deeper neurons
@@ -105,13 +109,13 @@ namespace NeuralNetworkGPU
 		{
 			for(int i=0; i<*t_inputSize; i++)
 			{
-				int index = inputSize * threadIdx.x + i + 1;
-				t_prevDeltas[i] += delta * derivative * t_weights[index] ;
+				int idx = weightsIndex + i + 1;
+				t_prevDeltas[i] += delta * derivative * t_weights[idx] ;
 			}
 		}
 
 		//reset delta
-		t_deltas[threadIdx.x] = 0;
+		t_deltas[index] = 0;
 
 	}
 
@@ -147,6 +151,17 @@ namespace NeuralNetworkGPU
 		de_prevDeltas = t_prevLayerReference.deltaPtr;
 
 		learnRate = t_learnRate;
+
+		numberOfBlocks = 1;
+		while(1)
+		{
+			numberOfThreads = size/numberOfBlocks;
+			if(numberOfThreads<=800 && numberOfThreads*numberOfBlocks==size) break;
+			numberOfBlocks++;
+
+			assert(numberOfBlocks < 10 && "Could not match thread/block size");
+		}
+
 	}
 
 	/*
@@ -205,7 +220,7 @@ namespace NeuralNetworkGPU
 
 	void SigmoidLayer::determineOutput()
 	{
-		determineOutputFunc<<<1,size>>>(de_input, d_output, d_inputSize, d_sums, d_weights, d_deltas, d_b);
+		determineOutputFunc<<< numberOfThreads , numberOfBlocks >>>(de_input, d_output, d_inputSize, d_sums, d_weights, d_deltas, d_b);
 	}
 
 	void SigmoidLayer::setDelta(std::vector<double> t_z)
@@ -223,7 +238,7 @@ namespace NeuralNetworkGPU
 	void SigmoidLayer::learnBackPropagation()
 	{
 //		int64 timeBefore = cv::getTickCount();
-		learnBackPropagationFunc<<<1,size>>>(de_input, d_inputSize, d_output, d_sums, d_weights, d_deltas, de_prevDeltas, d_n, d_b);
+		learnBackPropagationFunc<<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize, d_output, d_sums, d_weights, d_deltas, de_prevDeltas, d_n, d_b);
 //		int64 afterBefore = cv::getTickCount();
 //		std::cout << "Sigm: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 	}

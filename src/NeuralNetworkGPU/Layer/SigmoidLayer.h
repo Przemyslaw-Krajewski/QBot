@@ -38,6 +38,8 @@ namespace NeuralNetworkGPU
 
 		double *d_output,*output;
 		int size;
+		int numberOfBlocks;
+		int numberOfThreads;
 
 		double *d_sums;
 		double *d_weights;

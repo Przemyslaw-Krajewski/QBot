@@ -97,7 +97,7 @@ namespace Test
 				}
 
 				imshow("Network", image);
-				if (missSum / x.size() < 0.05) break;
+				if (missSum / x.size() < 0.01 || iteration > 5000) break;
 				cv::waitKey(20);
 			}
         }
@@ -171,7 +171,7 @@ namespace Test
 //					}
 				}
 	            imshow("Network", image);
-	            if (missSum / x.size() < 0.05) break;
+	            if (missSum / x.size() < 0.05 ) break;
 	            cv::waitKey(20);
             }
 
@@ -240,14 +240,30 @@ namespace Test
         std::cout << "Done: " << iteration << "\n";
     }
 
+    /*
+     *
+     */
+    void testLargeLayerGPU()
+    {
+    	NeuralNetworkGPU::NeuralNetwork nn;
+        nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.006, 3800, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.01,0.008, 10, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
+                                           {0.4, 0.9, 0.4}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+    }
+
     void testNNSpeedGPU()
     {
         std::vector<double> x = {1};
         std::vector<double> z = {0.5};
         NeuralNetworkGPU::NeuralNetwork nn;
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,20.2,1000,nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2,1000, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,20.2,4000,nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2,4000, nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2, 1, nn.getLastLayerNeuronRef()));
         int64 timeBefore = cv::getTickCount();
         long i;

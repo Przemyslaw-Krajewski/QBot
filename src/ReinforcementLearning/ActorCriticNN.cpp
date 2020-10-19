@@ -34,15 +34,15 @@ void ActorCriticNN::resetNN()
 //    actorValues.addLayer(new SigmoidLayer(0.9 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.15,0.004, 900, actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.6,0.006, 500, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 900, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, 500, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.8,0.09, numberOfActions, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 1800, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.06, 800, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.09, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
     criticValues = NeuralNetworkGPU::NeuralNetwork();
     criticValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 900, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, 500, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.8,0.09, 1, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 1800, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.06, 800, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.09, 1, criticValues.getLastLayerNeuronRef()));
 }
 
 /*
@@ -61,7 +61,7 @@ int ActorCriticNN::chooseAction(State& t_state)
 
 	//sure action
 	double maxValue = getMaxValue(values);
-	if(maxValue > 0.98) return getIndexOfMaxValue(values);
+	if(maxValue > 0.92) return getIndexOfMaxValue(values);
 
 	//exp
 	for(int i=0; i<values.size(); i++) values[i] = exp(4*values[i]);
