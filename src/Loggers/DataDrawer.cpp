@@ -105,6 +105,59 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 
 }
 
+void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_time)
+{
+	int blockSize = 15;
+	int barWidth = 100;
+	cv::Mat map = cv::Mat(blockSize*4, blockSize*2+barWidth, CV_8UC3);
+	for(int x=0; x<map.cols; x++)
+	{
+		for(int y=0; y<map.rows; y++)
+		{
+			uchar* ptr = map.ptr(y)+(x)*3;
+			ptr[0] = 0;
+			ptr[1] = 0;
+			ptr[2] = 0;
+		}
+	}
+
+	drawBar(&map, blockSize, barWidth, (double) t_time/t_maxTime, cv::Point(blockSize,blockSize),
+			cv::Scalar(0,255*t_time/t_maxTime,255*(1-t_time/t_maxTime)));
+
+	double reward = t_reward/StateAnalyzer::ADVANCE_REWARD;
+	if(reward > 1) reward = 1;
+	drawBar(&map, blockSize, barWidth, reward, cv::Point(blockSize,blockSize*3),cv::Scalar(255,255,255));
+
+	//Print
+	imshow("AnalyzedSceneData", map);
+	cv::waitKey(10);
+}
+
+/*
+ *
+ */
+void DataDrawer::drawBar(cv::Mat *mat, int t_barHeight, int t_barWidth, double progress, cv::Point t_point, cv::Scalar t_color)
+{
+	int progressBar = progress*t_barWidth;
+	for(int xx=0; xx<t_barWidth; xx++)
+	{
+		for(int yy=0; yy<t_barHeight; yy++)
+		{
+			uchar* ptr = mat->ptr(t_point.y+yy)+(t_point.x+xx)*3;
+			if(xx == 0 || yy == 0 || xx == t_barWidth-1 || yy == t_barHeight-1 )
+			{
+				ptr[0] = ptr[1] = ptr[2] = 255;
+			}
+			else if(xx < progressBar)
+			{
+				ptr[0] = t_color[0];
+				ptr[1] = t_color[1];
+				ptr[2] = t_color[2];
+			}
+		}
+	}
+}
+
 /*
  *
  */

@@ -135,7 +135,8 @@ MemoryAnalyzer::AnalyzeResult MemoryAnalyzer::fetchData()
 	result.playerVelocityX = (unsigned int) getMemValue(RAM_ADDR+RAM_VEL_X_OFFSET);
 	result.playerVelocityY = (unsigned int) getMemValue(RAM_ADDR+RAM_VEL_Y_OFFSET);
 	result.playerPositionX = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_X_OFFSET);
-
+	result.playerPositionY = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_Y_OFFSET);
+//std::cout << result.playerVelocityX << "  " << result.playerPositionX << "\n";
 	return result;
 }
 

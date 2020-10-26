@@ -227,6 +227,7 @@ namespace NeuralNetworkGPU
 	{
 		assert(t_z.size() == size && "learning values size not match");
 
+		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
 		for(int i=0; i<size; i++ )
 		{
 			deltas[i] = (double) output[i] - t_z[i];

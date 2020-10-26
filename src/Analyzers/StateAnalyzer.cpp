@@ -57,8 +57,10 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB()
 	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = 0.0001;  endScenario = true;}
 	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
 	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD; endScenario = true;}
-	else if(memoryAnalyzeResult.playerPositionX > 60 && memoryAnalyzeResult.playerVelocityX > 16){reward = ADVANCE_REWARD;}
-	else if(memoryAnalyzeResult.playerVelocityX > 16) 										 	 {reward = LITTLE_ADVANCE_REWARD;}
+	else if(memoryAnalyzeResult.playerPositionY > 176) 											 {reward = DIE_REWARD; endScenario = true;} //pitfall
+	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD; endScenario = true;} // left border
+	else if(memoryAnalyzeResult.playerPositionX > 96 && memoryAnalyzeResult.playerVelocityX > 16){reward = ADVANCE_REWARD;}
+	else if(memoryAnalyzeResult.playerVelocityX > 8) 										 	 {reward = LITTLE_ADVANCE_REWARD;}
 
 	//Preparing output
 	AnalyzeResult analyzeResult;

@@ -16,7 +16,6 @@ ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize)
 	numberOfActions = t_nActions;
 
     resetNN();
-    averageReward = 0.5;
 }
 
 /*
@@ -52,16 +51,17 @@ int ActorCriticNN::chooseAction(State& t_state)
 {
 	//getValues
 	std::vector<double> values = actorValues.determineOutput(t_state);
-	std::vector<double> critic = criticValues.determineOutput(t_state);
 
 	//print
-//	std::cout << critic[0] << "   :    ";
-//	for(int i=0; i<values.size(); i++) std::cout << values[i] << "  ";
-//	std::cout << "\n";
+	std::vector<double> critic = criticValues.determineOutput(t_state);
+	std::cout << critic[0] << "   :    ";
+	for(int i=0; i<values.size(); i++) std::cout << values[i] << "  ";
+	std::cout << "\n";
+//	return 0;
 
 	//sure action
 	double maxValue = getMaxValue(values);
-	if(maxValue > 0.92) return getIndexOfMaxValue(values);
+	if(maxValue > 0.90 && critic[0] > 0.70) return getIndexOfMaxValue(values);
 
 	//exp
 	for(int i=0; i<values.size(); i++) values[i] = exp(4*values[i]);
@@ -96,16 +96,17 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 		return 0;
 	}
 
-	//Critic
+
 	std::vector<double> prevStateValue = criticValues.determineOutput(t_prevState);
+
+	//Critic
 	std::vector<double> criticZ = std::vector<double>();
 	criticZ.push_back(t_reward);
 	criticValues.learnBackPropagation(criticZ);
 
 	//Actor
-	std::vector<double> stateValue = criticValues.determineOutput(t_state);
+//	std::vector<double> stateValue = criticValues.determineOutput(t_state);
 	std::vector<double> actorZ = actorValues.determineOutput(t_prevState);
-	averageReward = averageReward*0.99 + stateValue[0]*0.01;
 
 	//calculate some things
 	std::vector<double> expActor;
@@ -113,18 +114,20 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 	double expSum = 0;
 	for(int i=0; i<expActor.size(); i++) expSum += expActor[i];
 
-	double magicReward = 0.6;
-	double change = stateValue[0] < magicReward ? stateValue[0]-prevStateValue[0] : stateValue[0]-magicReward;
-//	std::cout << change << "  " << stateValue[0] << "  " << prevStateValue[0] << "  " << (1-expActor[t_action]/expSum) <<  "\n";
+	double magicReward = 0.70;
+	double previousReward = magicReward > prevStateValue[0] ? prevStateValue[0] : magicReward;
+	double change = t_reward-previousReward;
+//	std::cout << change << "  " << t_reward << " <- " << previousReward << "  " << (1-expActor[t_action]/expSum) <<  "\n";
 
-	for(int i=0; i<numberOfActions; i++)
-	{
-		if(i!=t_action) actorZ[i] -= change*(1-expActor[i]/expSum);
-		else
-		{
-			actorZ[i] += change*(1-expActor[i]/expSum);
-		}
-	}
+//	for(int i=0; i<numberOfActions; i++)
+//	{
+//		if(i!=t_action) actorZ[i] -= change*(1-expActor[i]/expSum)/numberOfActions;
+//		else
+//		{
+//			actorZ[i] += change*(1-expActor[i]/expSum);
+//		}
+//	}
+	actorZ[t_action] += change*(1-expActor[t_action]/expSum);
 
 	for(int i=0 ; i<numberOfActions ; i++)
 	{
@@ -144,31 +147,37 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 {
 	std::vector<SARS*> sarsPointers;
 	sarsPointers.clear();
+
+	//Temporal deference
 	double cumulatedReward = 0;
 	for(std::list<SARS>::iterator sarsIterator = t_history.begin(); sarsIterator!=t_history.end(); sarsIterator++)
 	{
-		cumulatedReward = ActorCriticNN::LAMBDA_PARAMETER*(sarsIterator->reward + cumulatedReward);
+		cumulatedReward = sarsIterator->reward + ActorCriticNN::LAMBDA_PARAMETER*cumulatedReward;
 		sarsIterator->reward = cumulatedReward;
+//		std::cout << cumulatedReward << "\n";
 		sarsPointers.push_back(&(*sarsIterator));
-		memorizedSARS[reduceSceneState(sarsIterator->oldState, sarsIterator->action)] = SARS(sarsIterator->oldState,
-																							 sarsIterator->state,
-																							 sarsIterator->action,
-																							 sarsIterator->reward);
+		memorizedSARS[reduceSceneState(sarsIterator->oldState,sarsIterator->action)] = SARS(sarsIterator->oldState,
+													 	 	 	 	 	 	 	 	 	    sarsIterator->state,
+																							sarsIterator->action,
+																							sarsIterator->reward);
 	}
 
-	std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
-
-	//Learning
 	double sumErr = 0;
-	for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+	for(int i=0 ;i< LEARN_FROM_HISTORY_ITERATIONS ; i++ )
 	{
-		sumErr += abs(learnSARS((*sarsIterator)->oldState,
-								(*sarsIterator)->state,
-								(*sarsIterator)->action,
-								(*sarsIterator)->reward));
+		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
+
+		//Learning
+		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+		{
+			learnSARS((*sarsIterator)->oldState,
+									(*sarsIterator)->state,
+									(*sarsIterator)->action,
+									(*sarsIterator)->reward);
+		}
 	}
 
-	return sumErr;
+	return sumErr/t_history.size();
 }
 
 /*
@@ -176,28 +185,33 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
  */
 double ActorCriticNN::learnFromMemory()
 {
-	int skipStep = sqrt(memorizedSARS.size())/4;
+	int skipStep = memorizedSARS.size()/700;
 	if(skipStep < 1) skipStep = 1;
 
+	std::cout << "Memory size: " << memorizedSARS.size() << "\n";
+
 	double sumErr = 0;
+	long count = 0;
 	if(LEARN_FROM_MEMORY_ITERATIONS == 0) return 0;
 	if(memorizedSARS.size() <= 0) return 0;
 
 	//Prepare states
 	std::vector<SARS*> shuffledSARS;
-	for(std::map<ReducedState, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++) shuffledSARS.push_back(&(i->second));
+	for(std::map<State, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++) shuffledSARS.push_back(&(i->second));
 
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
 	{
 
 		std::random_shuffle(shuffledSARS.begin(),shuffledSARS.end());
+
 		for(int j=0; j<shuffledSARS.size(); j+=skipStep)
 		{
+			count++;
 			sumErr += abs(learnSARS((shuffledSARS[j])->oldState,
 									(shuffledSARS[j])->state,
 									(shuffledSARS[j])->action,
 									(shuffledSARS[j])->reward));
 		}
 	}
-	return sumErr;
+	return sumErr/count;
 }

@@ -131,13 +131,14 @@ void Bot::execute()
 //			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extraxtedSceneData = extractSceneState(sceneState);
 //			DataDrawer::drawAnalyzedData(extraxtedSceneData.first,extraxtedSceneData.second,
 //					analyzeResult.reward,0);
+			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time);
 
 #ifdef PRINT_PROCESSING_TIME
 			int64 afterBefore = cv::getTickCount();
 			std::cout << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 #endif
 			//Timer
-			if(analyzeResult.reward <= StateAnalyzer::LITTLE_ADVANCE_REWARD) time--;
+			if(analyzeResult.reward < StateAnalyzer::LITTLE_ADVANCE_REWARD) time--;
 			else if(analyzeResult.reward > StateAnalyzer::LITTLE_ADVANCE_REWARD && time < TIME_LIMIT) time++;
 
 			//End?
@@ -157,7 +158,7 @@ void Bot::execute()
 		//Learn
 		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
 		double sumErrMem = reinforcementLearning->learnFromMemory();
-//		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
+		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
 	}
 }
 

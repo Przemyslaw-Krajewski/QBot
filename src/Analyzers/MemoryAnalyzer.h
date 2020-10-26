@@ -59,6 +59,7 @@ private:
 	const off_t RAM_VEL_X_OFFSET{0x57};
 	const off_t RAM_VEL_Y_OFFSET{0x9f};
 	const off_t RAM_POS_X_OFFSET{0x4ac};
+	const off_t RAM_POS_Y_OFFSET{0x0ce};
 
 	const off_t RAMPTR_ADDR_OFFSET{0x12f198}; // RAMptr 0x555555839198
 	const off_t XBUFFPTR_ADDR_OFFSET{0x1323c8}; // XBackBuffptr 0x55555583c3c8

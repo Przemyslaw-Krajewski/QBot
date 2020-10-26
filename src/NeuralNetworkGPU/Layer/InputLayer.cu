@@ -69,6 +69,7 @@ namespace NeuralNetworkGPU
 	{
 		assert(t_input.size() == size && "InputLayer::setInput input size not match");
 
+		#pragma omp parallel for shared(input, t_input, size) private(i) default(none)
 		for(int i=0; i<size; i++ )
 		{
 			input[i] = (double) t_input[i];
