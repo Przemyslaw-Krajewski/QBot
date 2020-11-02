@@ -54,7 +54,7 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB()
 	//reward
 	double reward = NOTHING_REWARD;
 	bool endScenario = false;
-	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = 0.0001;  endScenario = true;}
+	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = NOTHING_REWARD;}
 	else if(imageAnalyzeResult.playerIsDead) 			 									 	 {reward = DIE_REWARD; endScenario = true;}
 	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD; endScenario = true;}
 	else if(memoryAnalyzeResult.playerPositionY > 176) 											 {reward = DIE_REWARD; endScenario = true;} //pitfall

@@ -21,6 +21,22 @@ ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize)
 /*
  *
  */
+ActorCriticNN::~ActorCriticNN()
+{
+	std::remove("Memento.dat");
+	std::ofstream file("Memento.dat");
+
+	std::cout << memorizedSARS.size() << "\n";
+
+	for(std::map<State, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++)
+		LogFileHandler::printSARStoFile(file, i->second);
+
+	file.close();
+}
+
+/*
+ *
+ */
 void ActorCriticNN::resetNN()
 {
     actorValues = NeuralNetworkGPU::NeuralNetwork();
@@ -33,15 +49,15 @@ void ActorCriticNN::resetNN()
 //    actorValues.addLayer(new SigmoidLayer(0.9 , numberOfActions ,actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.15,0.004, 900, actorValues.getLastLayerNeuronRef()));
 //    actorValues.addLayer(new NeuralNetworkCPU::SigmoidLayer(0.6,0.006, 500, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 1800, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.06, 800, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.09, numberOfActions, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.025, 2500, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.04, 1500, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.5,0.06, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
     criticValues = NeuralNetworkGPU::NeuralNetwork();
     criticValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.04, 1800, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.06, 800, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7,0.09, 1, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.004, 2500, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3,0.006, 1500, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.5,0.009, 1, criticValues.getLastLayerNeuronRef()));
 }
 
 /*
@@ -51,17 +67,17 @@ int ActorCriticNN::chooseAction(State& t_state)
 {
 	//getValues
 	std::vector<double> values = actorValues.determineOutput(t_state);
+	std::vector<double> critic = criticValues.determineOutput(t_state);
 
 	//print
-	std::vector<double> critic = criticValues.determineOutput(t_state);
 	std::cout << critic[0] << "   :    ";
 	for(int i=0; i<values.size(); i++) std::cout << values[i] << "  ";
 	std::cout << "\n";
-//	return 0;
+	return 0;
 
 	//sure action
 	double maxValue = getMaxValue(values);
-	if(maxValue > 0.90 && critic[0] > 0.70) return getIndexOfMaxValue(values);
+	if(maxValue > 0.95 && critic[0]) return getIndexOfMaxValue(values);
 
 	//exp
 	for(int i=0; i<values.size(); i++) values[i] = exp(4*values[i]);
@@ -99,43 +115,48 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 
 	std::vector<double> prevStateValue = criticValues.determineOutput(t_prevState);
 
-	//Critic
-	std::vector<double> criticZ = std::vector<double>();
-	criticZ.push_back(t_reward);
-	criticValues.learnBackPropagation(criticZ);
-
-	//Actor
-//	std::vector<double> stateValue = criticValues.determineOutput(t_state);
-	std::vector<double> actorZ = actorValues.determineOutput(t_prevState);
-
-	//calculate some things
-	std::vector<double> expActor;
-	for(int i=0; i<actorZ.size(); i++) expActor.push_back(4*exp(actorZ[i]));
-	double expSum = 0;
-	for(int i=0; i<expActor.size(); i++) expSum += expActor[i];
-
-	double magicReward = 0.70;
-	double previousReward = magicReward > prevStateValue[0] ? prevStateValue[0] : magicReward;
-	double change = t_reward-previousReward;
-//	std::cout << change << "  " << t_reward << " <- " << previousReward << "  " << (1-expActor[t_action]/expSum) <<  "\n";
-
-//	for(int i=0; i<numberOfActions; i++)
-//	{
-//		if(i!=t_action) actorZ[i] -= change*(1-expActor[i]/expSum)/numberOfActions;
-//		else
-//		{
-//			actorZ[i] += change*(1-expActor[i]/expSum);
-//		}
-//	}
-	actorZ[t_action] += change*(1-expActor[t_action]/expSum);
-
-	for(int i=0 ; i<numberOfActions ; i++)
+	if(t_action == -1)
 	{
-		if(actorZ[i] < 0.01) actorZ[i] = 0.01;
-		if(actorZ[i] > 0.99) actorZ[i] = 0.99;
+		//Critic
+		std::vector<double> criticZ = std::vector<double>();
+		criticZ.push_back(t_reward);
+		criticValues.learnBackPropagation(criticZ);
 	}
+	else
+	{
+		//Actor
+	//	std::vector<double> stateValue = criticValues.determineOutput(t_state);
+		std::vector<double> actorZ = actorValues.determineOutput(t_prevState);
 
-	actorValues.learnBackPropagation(actorZ);
+		//calculate some things
+		std::vector<double> expActor;
+		for(int i=0; i<actorZ.size(); i++) expActor.push_back(4*exp(actorZ[i]));
+		double expSum = 0;
+		for(int i=0; i<expActor.size(); i++) expSum += expActor[i];
+
+		double magicReward = 0.70;
+		double previousReward = magicReward > prevStateValue[0] ? prevStateValue[0] : magicReward;
+		double change = t_reward-previousReward;
+//		std::cout << change << "  " << t_reward << " <- " << previousReward << "  " << (1-expActor[t_action]/expSum) <<  "\n";
+
+		for(int i=0; i<numberOfActions; i++)
+		{
+			if(i!=t_action) actorZ[i] -= change*(1-expActor[i]/expSum)/numberOfActions;
+			else
+			{
+				actorZ[i] += change*(1-expActor[i]/expSum);
+			}
+		}
+	//	actorZ[t_action] += change*(1-expActor[t_action]/expSum);
+
+		for(int i=0 ; i<numberOfActions ; i++)
+		{
+			if(actorZ[i] < 0.01) actorZ[i] = 0.01;
+			if(actorZ[i] > 0.99) actorZ[i] = 0.99;
+		}
+
+		actorValues.learnBackPropagation(actorZ);
+	}
 
 	return prevStateValue[0] - t_reward;
 }
@@ -167,12 +188,20 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 	{
 		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
 
-		//Learning
+		//Learning Actor
 		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
 		{
 			learnSARS((*sarsIterator)->oldState,
 									(*sarsIterator)->state,
 									(*sarsIterator)->action,
+									(*sarsIterator)->reward);
+		}
+		//Learning Critic
+		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
+		{
+			learnSARS((*sarsIterator)->oldState,
+									(*sarsIterator)->state,
+									-1,
 									(*sarsIterator)->reward);
 		}
 	}
@@ -206,12 +235,26 @@ double ActorCriticNN::learnFromMemory()
 
 		for(int j=0; j<shuffledSARS.size(); j+=skipStep)
 		{
+			learnSARS((shuffledSARS[j])->oldState,
+									(shuffledSARS[j])->state,
+									(shuffledSARS[j])->action,
+									(shuffledSARS[j])->reward);
+		}
+		for(int j=0; j<shuffledSARS.size(); j+=skipStep)
+		{
 			count++;
 			sumErr += abs(learnSARS((shuffledSARS[j])->oldState,
 									(shuffledSARS[j])->state,
-									(shuffledSARS[j])->action,
+									-1,
 									(shuffledSARS[j])->reward));
 		}
 	}
 	return sumErr/count;
+}
+
+
+void ActorCriticNN::handleParameters()
+{
+	if(ParameterFileHandler::checkParameter("reset.param","Reset has been ordered"))
+		resetNN();
 }

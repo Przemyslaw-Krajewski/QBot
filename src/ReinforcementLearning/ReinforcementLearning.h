@@ -25,6 +25,8 @@ public:
 	virtual double learnFromScenario(std::list<SARS> &t_history) = 0;
 	virtual double learnFromMemory() = 0;
 
+	virtual void handleParameters() {};
+
 
 protected:
 //	NNInput convertState2NNInput(const State &t_state);

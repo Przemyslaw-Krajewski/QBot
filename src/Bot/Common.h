@@ -70,6 +70,65 @@ public:
 	}
 };
 
+class LogFileHandler
+{
+public:
+	static void printState(State &t_state)
+	{
+		int xSize = 32;
+		int ySize = 56;
+
+		std::vector<int> result;
+
+		for(int y=0;y<56;y++)
+		{
+			for(int x=0;x<32;x++)
+			{
+				if(t_state[32*56+x*56+y] > 0) std::cout << "X";
+				else if(t_state[x*56+y] > 0) std::cout << "#";
+				else std::cout << ".";
+			}
+			std::cout << "\n";
+		}
+		std::cout << t_state[t_state.size()-2] << "    " << t_state[t_state.size()-1] << "\n";
+		std::cout << "\n";
+		std::cout << "\n";
+	}
+
+	static void printSARStoFile(std::ofstream &t_file, SARS &t_sars)
+	{
+		int xSize = 32;
+		int ySize = 56;
+
+		for(int y=0;y<56;y++)
+		{
+			for(int x=0;x<32;x++)
+			{
+				if(t_sars.oldState[32*56+x*56+y] > 0) t_file << "X";
+				else if(t_sars.oldState[x*56+y] > 0) t_file << "#";
+				else t_file << ".";
+			}
+			t_file << "		";
+			for(int x=0;x<32;x++)
+			{
+				if(t_sars.state[32*56+x*56+y] > 0) t_file << "X";
+				else if(t_sars.state[x*56+y] > 0) t_file << "#";
+				else t_file << ".";
+			}
+			t_file << "\n";
+		}
+		int v1 = t_sars.oldState[t_sars.oldState.size()-2];
+		int v2 = t_sars.oldState[t_sars.oldState.size()-1];
+		int v3 = t_sars.state[t_sars.state.size()-2];
+		int v4 = t_sars.state[t_sars.state.size()-1];
+		t_file << v1 << "  " << v2;
+		t_file << "					";
+		t_file << v3 << "  " << v4 << "\n";
+		t_file << t_sars.action << "  " << t_sars.reward << "\n";
+		t_file << "\n";
+		t_file << "\n";
+	}
+};
 enum class ScenarioAdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};
 enum class ControlMode {QL, NN, Hybrid, NNNoLearn};
 enum class Game {BattleToads, SuperMarioBros};

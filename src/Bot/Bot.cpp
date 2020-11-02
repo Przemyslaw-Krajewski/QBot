@@ -129,9 +129,13 @@ void Bot::execute()
 
 			//Draw info
 //			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extraxtedSceneData = extractSceneState(sceneState);
+//			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> redExtraxtedSceneData = extractSceneState(reduceSceneState(sceneState,0),8,14);
 //			DataDrawer::drawAnalyzedData(extraxtedSceneData.first,extraxtedSceneData.second,
 //					analyzeResult.reward,0);
+//			DataDrawer::drawAnalyzedData(redExtraxtedSceneData.first,redExtraxtedSceneData.second,
+//					analyzeResult.reward,0);
 			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time);
+//			LogFileHandler::printState(sceneState);
 
 #ifdef PRINT_PROCESSING_TIME
 			int64 afterBefore = cv::getTickCount();
@@ -144,6 +148,7 @@ void Bot::execute()
 			//End?
 			if(analyzeResult.endScenario || time<0)
 			{
+				if(time<0) historyScenario.begin()->reward = 0.5; // No kill penalty for timeout
 				scenarioResult = analyzeResult.additionalInfo;
 				break;
 			}
@@ -152,13 +157,14 @@ void Bot::execute()
 		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
 		loadParameters();
+		reinforcementLearning->handleParameters();
 		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
 		std::cout << score << "\n";
 
 		//Learn
 		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
 		double sumErrMem = reinforcementLearning->learnFromMemory();
-		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
+//		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
 	}
 }
 
@@ -167,24 +173,6 @@ void Bot::execute()
  */
 void Bot::loadParameters()
 {
-	if(ParameterFileHandler::checkParameter("ql.param","QL mode activated"))
-		controlMode = ControlMode::QL;
-
-	if(ParameterFileHandler::checkParameter("nn.param","NN mode activated"))
-		controlMode = ControlMode::NN;
-
-	if(ParameterFileHandler::checkParameter("nnnolearn.param","NN no learn mode activated"))
-		controlMode = ControlMode::NNNoLearn;
-
-	if(ParameterFileHandler::checkParameter("hybrid.param","Hybrid mode activated"))
-	{
-		controlMode = ControlMode::Hybrid;
-		playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
-	}
-
-	if(ParameterFileHandler::checkParameter("reset.param","Reset has been ordered"))
-		reset = true;
-
 	if(ParameterFileHandler::checkParameter("quit.param","Exit program"))
 		throw std::string("Exit program");
 }
@@ -233,9 +221,10 @@ int Bot::determineControllerInputInt(int t_action)
 /*
  *
  */
-std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> Bot::extractSceneState(State sceneState)
+std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> Bot::extractSceneState(State sceneState, int xScreenSize, int yScreenSize)
 {
-	cv::Mat fieldAndEnemiesLayout = cv::Mat(56, 32, CV_8UC3);
+	std::cout << sceneState.size() << "\n";
+	cv::Mat fieldAndEnemiesLayout = cv::Mat(yScreenSize, xScreenSize, CV_8UC3);
 
 	for(int x=0; x<fieldAndEnemiesLayout.cols; x++)
 	{
@@ -281,7 +270,7 @@ std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> Bot::extractSceneState(
 	result.first.playerVelocity.y = sceneState[sceneState.size()-1];
 
 	//Controller
-	for(int i=0;i<6; i++) result.second.push_back(sceneState[sceneState.size()-1+i]);
+//	for(int i=0;i<6; i++) result.second.push_back(sceneState[sceneState.size()-1+i]);
 
 	return result;
 }

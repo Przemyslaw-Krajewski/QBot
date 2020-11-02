@@ -40,7 +40,7 @@ private:
 
 	ControllerInput determineControllerInput(int t_action);
 	int determineControllerInputInt(int t_action);
-	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData);
+	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData, int xScreenSize=32, int yScreenSize=56);
 
 private:
 	//
@@ -56,7 +56,7 @@ private:
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 
-	const int TIME_LIMIT = 60;
+	const int TIME_LIMIT = 80;
 	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING =0;
 };
 

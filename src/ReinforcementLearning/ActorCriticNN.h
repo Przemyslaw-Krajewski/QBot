@@ -22,7 +22,7 @@ class ActorCriticNN : public ReinforcementLearning
 
 public:
 	ActorCriticNN(int t_nActions, int t_dimensionStatesSize);
-	virtual ~ActorCriticNN() = default;
+	virtual ~ActorCriticNN();
 
 	//Basic methods
 	virtual int chooseAction(State& t_state) override;
@@ -30,6 +30,8 @@ public:
 
 	virtual double learnFromScenario(std::list<SARS> &t_history) override;
 	virtual double learnFromMemory() override;
+
+	virtual void handleParameters();
 
 	void resetNN();
 

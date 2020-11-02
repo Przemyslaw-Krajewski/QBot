@@ -197,8 +197,8 @@ std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 	//AdditionalInfo
 //	sceneState.push_back(position.x);
 //	sceneState.push_back(position.y);
-	sceneState.push_back(velocity.x/4);
-	sceneState.push_back(velocity.y/4);
+	sceneState.push_back(velocity.x);
+	sceneState.push_back(velocity.y);
 
 	return sceneState;
 }
