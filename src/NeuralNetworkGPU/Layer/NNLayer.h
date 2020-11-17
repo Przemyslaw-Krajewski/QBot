@@ -18,6 +18,8 @@ namespace NeuralNetworkGPU
 	{
 		TensorSize(const TensorSize& t_ts) {x = t_ts.x;y = t_ts.y;z = t_ts.z;}
 		TensorSize(int t_x, int t_y, int t_z) { x=t_x;y=t_y;z=t_z;}
+		TensorSize() : TensorSize(0,0,0) {};
+		int multiply() { return x*y*z;}
 		int x,y,z;
 	};
 
@@ -25,6 +27,7 @@ namespace NeuralNetworkGPU
 	{
 		MatrixSize(const MatrixSize& t_ms) {x = t_ms.x;y = t_ms.y;}
 		MatrixSize(int t_x, int t_y) { x=t_x;y=t_y;}
+		int multiply() { return x*y;}
 		int x,y;
 	};
 

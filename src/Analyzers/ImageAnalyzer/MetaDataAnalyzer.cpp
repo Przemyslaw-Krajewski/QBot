@@ -226,6 +226,8 @@ void MetaDataAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, Scenar
 		}
 		t_history.front().reward=lastReward;
 		if(counter > 5) t_history.clear();
+
+		std::cout << "Erased: " << counter << "\n";
 	}
 }
 

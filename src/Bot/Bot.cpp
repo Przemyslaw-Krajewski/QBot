@@ -70,6 +70,7 @@ void Bot::execute()
 		std::list<SARS> historyScenario;
 		State sceneState;
 		ControllerInput controllerInput = determineControllerInput(0);
+		int changeController = 3;
 		int action = 0;
 		ScenarioAdditionalInfo scenarioResult = ScenarioAdditionalInfo::noInfo;
 		int time = TIME_LIMIT;
@@ -97,6 +98,9 @@ void Bot::execute()
 													controllerInput,
 													analyzeResult.playerCoords,
 													analyzeResult.playerVelocity);
+		action = reinforcementLearning->chooseAction(sceneState);
+		controllerInput = determineControllerInput(action);
+		MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
 
 		while(1)
 		{
@@ -111,6 +115,7 @@ void Bot::execute()
 			//Analyze situation
 			StateAnalyzer::AnalyzeResult analyzeResult = stateAnalyzer.analyze();
 			if(analyzeResult.processedImage.cols == 0) continue;
+			if(controllerInput[0] && analyzeResult.playerVelocity.y == 0) controllerInput[1] = true;
 			sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
 														analyzeResult.processedImagePast,
 														analyzeResult.processedImagePast2,
@@ -119,13 +124,20 @@ void Bot::execute()
 														analyzeResult.playerVelocity);
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 
+			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput);
+
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
 
 			//Determine new controller input
-			action = reinforcementLearning->chooseAction(sceneState);
-			controllerInput = determineControllerInput(action);
-			MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
+			changeController--;
+			if(changeController < 1)
+			{
+				changeController = 2;
+				action = reinforcementLearning->chooseAction(sceneState);
+				controllerInput = determineControllerInput(action);
+				MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
+			}
 
 			//Draw info
 //			std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extraxtedSceneData = extractSceneState(sceneState);
@@ -134,7 +146,6 @@ void Bot::execute()
 //					analyzeResult.reward,0);
 //			DataDrawer::drawAnalyzedData(redExtraxtedSceneData.first,redExtraxtedSceneData.second,
 //					analyzeResult.reward,0);
-			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time);
 //			LogFileHandler::printState(sceneState);
 
 #ifdef PRINT_PROCESSING_TIME
@@ -143,7 +154,8 @@ void Bot::execute()
 #endif
 			//Timer
 			if(analyzeResult.reward < StateAnalyzer::LITTLE_ADVANCE_REWARD) time--;
-			else if(analyzeResult.reward > StateAnalyzer::LITTLE_ADVANCE_REWARD && time < TIME_LIMIT) time++;
+			else if(analyzeResult.reward > StateAnalyzer::LITTLE_ADVANCE_REWARD) time+=4;
+			if(time > TIME_LIMIT) time = TIME_LIMIT;
 
 			//End?
 			if(analyzeResult.endScenario || time<0)
@@ -185,8 +197,32 @@ ControllerInput Bot::determineControllerInput(int t_action)
 	ControllerInput w;
 	for(int i=0; i<numberOfControllerInputs; i++) w.push_back(false);
 
-	w[ 2+(t_action%4) ] = true;
-	w[0] = t_action>3;
+//	w[ 2+(t_action%4) ] = true;
+//	w[0] = t_action>3;
+
+	switch(t_action)
+	{
+	case 0: //Right
+		w[4] = true;
+		break;
+	case 1: //Right jump
+		w[0] = true;
+		w[4] = true;
+		break;
+	case 2: //Left
+		w[2] = true;
+		break;
+	case 3: //Jump
+		w[0] = true;
+		break;
+	case 4: //Left Jump
+		w[0] = true;
+		w[2] = true;
+		break;
+	default:
+		std::cout << t_action << "\n";
+		assert("No such action!" && false);
+	}
 
 	return w;
 }
