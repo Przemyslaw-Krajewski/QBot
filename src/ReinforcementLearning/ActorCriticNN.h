@@ -57,13 +57,14 @@ private:
 public:
 	static constexpr double UPPER_REWARD_CUP = 0.75;
 	static constexpr double LOWER_REWARD_CUP = 0.20;
+	static constexpr double MEMORIZE_SARS_CUP = 0.60;
 
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;
 
 	static constexpr double GAMMA_PARAMETER = 0;		//reward for advancing to next promising state
 	static constexpr double ALPHA_PARAMETER = 1;		//speed of learning QLearning
-	static constexpr double LAMBDA_PARAMETER = 0.92;		//reward cumulation factor
+	static constexpr double LAMBDA_PARAMETER = 0.92;	//reward cumulation factor
 
 
 };

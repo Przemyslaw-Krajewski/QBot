@@ -89,11 +89,11 @@ int ActorCriticNN::chooseAction(State& t_state)
 //	return 0;
 
 	//sure action
-	double maxValue = getMaxValue(values);
-	if(maxValue > 0.90 && critic[0] > UPPER_REWARD_CUP) return getIndexOfMaxValue(values);
+//	double maxValue = getMaxValue(values);
+//	if(maxValue > 0.90 && critic[0] > UPPER_REWARD_CUP) return getIndexOfMaxValue(values);
 
 	//exp
-	for(int i=0; i<values.size(); i++) values[i] = exp(4*values[i]);
+	for(int i=0; i<values.size(); i++) values[i] = exp(5*values[i]);
 
 	//Sum
 	double sum = 0;
@@ -148,7 +148,7 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 
 	//calculate some things
 	std::vector<double> expActor;
-	for(int i=0; i<actorZ.size(); i++) expActor.push_back(exp(4*actorZ[i]));
+	for(int i=0; i<actorZ.size(); i++) expActor.push_back(exp(5*actorZ[i]));
 	double expSum = 0;
 	for(int i=0; i<expActor.size(); i++) expSum += expActor[i];
 
@@ -200,7 +200,7 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 		State rs = reduceSceneState(sarsIterator->oldState,0);//sarsIterator->action
 		bool exists = memorizedSARS.find(rs) != memorizedSARS.end();
 		if((exists && (memorizedSARS[rs].action == sarsIterator->action || memorizedSARS[rs].reward < sarsIterator->reward))
-				|| (!exists && sarsIterator->reward > 0.6))
+				|| (!exists && sarsIterator->reward > MEMORIZE_SARS_CUP))
 		{
 			memorizedSARS[rs] = SARS(sarsIterator->oldState,sarsIterator->state,sarsIterator->action,sarsIterator->reward);
 		}

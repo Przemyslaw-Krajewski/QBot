@@ -17,16 +17,6 @@ ReinforcementLearning::~ReinforcementLearning()
 
 }
 
-///*
-// *
-// */
-//NNInput ReinforcementLearning::convertState2NNInput(const State &t_state)
-//{
-//	NNInput result;
-//	for(int i=0; i<t_state.size(); i++) result.push_back((double) t_state[i]);
-//	return result;
-//}
-
 /*
  *
  */

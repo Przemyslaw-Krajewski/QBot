@@ -190,8 +190,8 @@ std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 	//Controller
 	for(bool ci : controllerInput)
 	{
-		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
-		else sceneState.push_back(MIN_INPUT_VALUE);
+		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE*5);
+		else sceneState.push_back(MIN_INPUT_VALUE*5);
 	}
 
 	//AdditionalInfo
