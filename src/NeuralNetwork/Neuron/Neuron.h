@@ -21,7 +21,7 @@ namespace NeuralNetworkCPU
 		//basic
 		virtual double getOutput() {return output;}
 		virtual double determineOutput() = 0;
-		virtual void learnDeltaRule() = 0;
+		virtual void learnSGD() = 0;
 
 		//delta
 		void setDelta(double nd) {delta = nd;}

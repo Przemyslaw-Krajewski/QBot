@@ -105,7 +105,7 @@ namespace NeuralNetworkCPU
 	/*
 	 *
 	 */
-	void ConvolutionalLayer::learnBackPropagation()
+	void ConvolutionalLayer::learnSGD()
 	{
 	//	int64 timeBefore = cv::getTickCount();
 		int i;
@@ -113,7 +113,7 @@ namespace NeuralNetworkCPU
 		for(i=0; i<neurons.size(); i++)
 		{
 			neurons[i].cumulationReset();
-			neurons[i].learnDeltaRule();
+			neurons[i].learnSGD();
 		}
 
 		#pragma omp parallel for shared(neurons) private(i) default(none)

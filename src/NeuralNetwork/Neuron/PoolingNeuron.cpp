@@ -56,7 +56,7 @@ namespace NeuralNetworkCPU
 	/*
 	 *
 	 */
-	void PoolingNeuron::learnDeltaRule()
+	void PoolingNeuron::learnSGD()
 	{
 		//set delta to deeper neurons
 		int i = 0;

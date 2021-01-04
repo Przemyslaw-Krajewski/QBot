@@ -43,7 +43,7 @@ namespace NeuralNetworkCPU
 
 		//learn
 		virtual void setDelta(std::vector<double> t_z) {};
-		virtual void learnBackPropagation() = 0;
+		virtual void learnSGD() = 0;
 
 		//configuration
 		virtual std::vector<Neuron*> getNeuronPtr() = 0;

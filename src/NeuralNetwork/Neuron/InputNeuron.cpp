@@ -31,7 +31,7 @@ namespace NeuralNetworkCPU
 		return output;
 	}
 
-	void InputNeuron::learnDeltaRule()
+	void InputNeuron::learnSGD()
 	{
 		//Do nothing
 	}

@@ -22,7 +22,8 @@ namespace NeuralNetworkGPU
 
 		//learn
 		void setDelta(std::vector<double> t_z) override;
-		void learnBackPropagation() override;
+		void learnSGD() override;
+		void learnAdam() override;
 
 		//configuration
 		NeuronsPtr getNeuronPtr() override;
@@ -46,7 +47,9 @@ namespace NeuralNetworkGPU
 
 		double *d_deltas, *deltas, *de_prevDeltas;
 
-		double *d_n, *d_b;
+		double *d_n, *d_b;		// learning rate, b parameter
+		double *d_m, *d_v;  	// 1st moment vector, 2nd moment vector
+		double *d_B1, *d_B2; 	// Decay rates for moment vectors
 
 		double learnRate;
 		static double b;

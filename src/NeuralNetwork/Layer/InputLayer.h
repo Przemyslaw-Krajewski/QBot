@@ -26,7 +26,7 @@ namespace NeuralNetworkCPU
 		void determineOutput() override;
 
 		//learn
-		void learnBackPropagation() override ;
+		void learnSGD() override ;
 
 		//configuration
 		std::vector<Neuron*> getNeuronPtr() override;

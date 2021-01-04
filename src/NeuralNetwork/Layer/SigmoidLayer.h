@@ -24,7 +24,7 @@ namespace NeuralNetworkCPU
 
 		//learn
 		void setDelta(std::vector<double> t_z) override;
-		void learnBackPropagation() override;
+		void learnSGD() override;
 
 		//configuration
 		std::vector<Neuron*> getNeuronPtr() override;

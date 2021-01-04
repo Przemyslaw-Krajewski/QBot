@@ -28,7 +28,8 @@ namespace NeuralNetworkGPU
 		void determineOutput() override;
 
 		//learn
-		void learnBackPropagation() override ;
+		void learnSGD() override ;
+		void learnAdam() override ;
 
 		//configuration
 		NeuronsPtr getNeuronPtr() override;

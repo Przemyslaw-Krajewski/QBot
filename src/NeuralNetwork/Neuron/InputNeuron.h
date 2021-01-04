@@ -20,7 +20,7 @@ namespace NeuralNetworkCPU
 		virtual ~InputNeuron();
 
 		virtual double determineOutput();
-		virtual void learnDeltaRule();
+		virtual void learnSGD();
 
 		double setValue(double t_output);
 	};

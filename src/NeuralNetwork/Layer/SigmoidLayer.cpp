@@ -62,7 +62,7 @@ namespace NeuralNetworkCPU
 		}
 	}
 
-	void SigmoidLayer::learnBackPropagation()
+	void SigmoidLayer::learnSGD()
 	{
 
 	//	int64 timeBefore = cv::getTickCount();
@@ -70,7 +70,7 @@ namespace NeuralNetworkCPU
 		#pragma omp parallel for shared(neurons) private(i) default(none)
 		for(i=0; i<neurons.size(); i++)
 		{
-			neurons[i].learnDeltaRule();
+			neurons[i].learnSGD();
 		}
 	//	int64 afterBefore = cv::getTickCount();
 	//	std::cout << "Sigm: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";

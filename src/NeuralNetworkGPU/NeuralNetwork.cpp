@@ -12,8 +12,9 @@ namespace NeuralNetworkGPU {
 	/*
 	 *
 	 */
-	NeuralNetwork::NeuralNetwork()
+	NeuralNetwork::NeuralNetwork(LearnMode t_lm)
 	{
+		learnMode = t_lm;
 		srand (time(NULL));
 	}
 
@@ -101,9 +102,19 @@ namespace NeuralNetworkGPU {
 	{
 		(*layers.rbegin())->setDelta(z);
 
-		for(auto it=layers.rbegin(); it!=layers.rend(); it++)
+		if(learnMode == LearnMode::SGD)
 		{
-			(*it)->learnBackPropagation();
+			for(auto it=layers.rbegin(); it!=layers.rend(); it++)
+			{
+				(*it)->learnSGD();
+			}
+		}
+		else if(learnMode == LearnMode::Adam)
+		{
+			for(auto it=layers.rbegin(); it!=layers.rend(); it++)
+			{
+				(*it)->learnAdam();
+			}
 		}
 	}
 

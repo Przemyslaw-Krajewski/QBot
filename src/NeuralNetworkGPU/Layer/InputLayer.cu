@@ -123,7 +123,15 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void InputLayer::learnBackPropagation()
+	void InputLayer::learnSGD()
+	{
+		//Do nothing
+	}
+
+	/*
+	 *
+	 */
+	void InputLayer::learnAdam()
 	{
 		//Do nothing
 	}

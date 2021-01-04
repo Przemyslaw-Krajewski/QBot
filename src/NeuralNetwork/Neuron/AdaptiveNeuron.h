@@ -32,7 +32,7 @@ namespace NeuralNetworkCPU
 		//basic
 		virtual double getOutput() {return output;}
 		virtual double determineOutput();
-		virtual void learnDeltaRule();
+		virtual void learnSGD();
 
 		//cumulative
 		void cumulativeLearnDeltaRule();

@@ -123,7 +123,7 @@ namespace NeuralNetworkCPU
 	/*
 	 *
 	 */
-	void AdaptiveNeuron::learnDeltaRule()
+	void AdaptiveNeuron::learnSGD()
 	{
 		//determine common multiplier
 		derivative = derivativeActivationFunction(sum);

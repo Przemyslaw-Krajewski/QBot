@@ -259,12 +259,17 @@ namespace NeuralNetworkGPU
 		cudaMemcpy(d_deltas, deltas, sizeof(double)*size.multiply(), cudaMemcpyHostToDevice);
 	}
 
-	void ConvolutionalLayer::learnBackPropagation()
+	void ConvolutionalLayer::learnSGD()
 	{
 //		int64 timeBefore = cv::getTickCount();
 //		learnBackPropagationFuncConv<<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize, d_output, d_sums, d_weights, d_deltas, de_prevDeltas, d_n, d_b);
 //		int64 afterBefore = cv::getTickCount();
 //		std::cout << "Sigm: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
+	}
+
+	void ConvolutionalLayer::learnAdam()
+	{
+		//Implement SGD first
 	}
 
 	/*

@@ -55,9 +55,9 @@ private:
 	std::map<State, SARS> memorizedSARS;
 
 public:
-	static constexpr double UPPER_REWARD_CUP = 0.75;
+	static constexpr double UPPER_REWARD_CUP = 0.70;
 	static constexpr double LOWER_REWARD_CUP = 0.20;
-	static constexpr double MEMORIZE_SARS_CUP = 0.60;
+	static constexpr double MEMORIZE_SARS_CUP = 0.70;
 
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;

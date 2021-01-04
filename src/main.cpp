@@ -3,7 +3,8 @@
 
 #include "Analyzers/StateAnalyzer.h"
 #include "Bot/Bot.h"
-#include "test/NNtest.h"
+#include "test/NNtestCPU.h"
+#include "test/NNtestGPU.h"
 
 /*
  *

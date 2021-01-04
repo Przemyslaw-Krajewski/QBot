@@ -56,7 +56,8 @@ namespace NeuralNetworkGPU
 
 		//learn
 		virtual void setDelta(std::vector<double> t_z) {};
-		virtual void learnBackPropagation() = 0;
+		virtual void learnSGD() = 0;
+		virtual void learnAdam() = 0;
 
 		//configuration
 		virtual NeuronsPtr getNeuronPtr() = 0;

@@ -103,7 +103,7 @@ namespace NeuralNetworkCPU
 
 		for(auto it=layers.rbegin(); it!=layers.rend(); it++)
 		{
-			(*it)->learnBackPropagation();
+			(*it)->learnSGD();
 		}
 	}
 

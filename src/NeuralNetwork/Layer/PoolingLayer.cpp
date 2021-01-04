@@ -76,14 +76,14 @@ namespace NeuralNetworkCPU
 	/*
 	 *
 	 */
-	void PoolingLayer::learnBackPropagation()
+	void PoolingLayer::learnSGD()
 	{
 	//	int64 timeBefore = cv::getTickCount();
 		int i;
 	#pragma omp parallel for shared(neurons) private(i) default(none)
 		for(i=0; i<neurons.size(); i++)
 		{
-			neurons[i].learnDeltaRule();
+			neurons[i].learnSGD();
 		}
 	//	int64 afterBefore = cv::getTickCount();
 	//	std::cout << "Pool: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";

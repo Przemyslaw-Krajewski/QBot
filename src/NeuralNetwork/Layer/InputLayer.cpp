@@ -65,7 +65,7 @@ namespace NeuralNetworkCPU
 	/*
 	 *
 	 */
-	void InputLayer::learnBackPropagation()
+	void InputLayer::learnSGD()
 	{
 		//Do nothing
 	}

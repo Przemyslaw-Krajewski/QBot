@@ -27,9 +27,11 @@ namespace NeuralNetworkGPU {
 
 	using NNInput = std::vector<double>;
 
+	enum class LearnMode {SGD, Adam};
+
 	class NeuralNetwork {
 		public:
-			NeuralNetwork();
+			NeuralNetwork(LearnMode t_lm = LearnMode::SGD);
 			virtual ~NeuralNetwork();
 
 			//Configuration
@@ -56,6 +58,7 @@ namespace NeuralNetworkGPU {
 
 		protected:
 			std::list<NNLayer*> layers;
+			LearnMode learnMode;
 	};
 
 } /* namespace NeuralNetworkGPU */
