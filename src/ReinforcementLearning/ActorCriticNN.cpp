@@ -41,15 +41,15 @@ void ActorCriticNN::resetNN()
 {
     actorValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
     actorValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.000025, 1600, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.5,0.00004, 1200, actorValues.getLastLayerNeuronRef()));
-    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.00006, numberOfActions, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3f,0.00012f, 1600, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7f,0.00017f, 1200, actorValues.getLastLayerNeuronRef()));
+    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.9f,0.00026f, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
     criticValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
     criticValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.00004, 1600, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.5,0.00006, 1200, criticValues.getLastLayerNeuronRef()));
-    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.00009, 1, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3f,0.00004f, 1600, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7f,0.00006f, 1200, criticValues.getLastLayerNeuronRef()));
+    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.9f,0.00009f, 1, criticValues.getLastLayerNeuronRef()));
 
 }
 
@@ -123,8 +123,8 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 	previousReward = LOWER_REWARD_CUP < previousReward ? previousReward : LOWER_REWARD_CUP;
 	double change = t_reward-previousReward;
 
-	int maxValue = getIndexOfMaxValue(actorZ);
-	if(t_action == maxValue && actorZ[maxValue] > 0.90 && prevStateValue[0] > UPPER_REWARD_CUP && change > 0) return 0;
+//	int maxValue = getIndexOfMaxValue(actorZ);
+//	if(t_action == maxValue && actorZ[maxValue] > 0.90 && prevStateValue[0] > UPPER_REWARD_CUP && change > 0) return 0;
 
 	//calculate some things
 	std::vector<double> expActor;
@@ -151,7 +151,7 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 
 	for(int i=0 ; i<numberOfActions ; i++)
 	{
-		if(actorZ[i] < 0.05) actorZ[i] = 0.05;
+		if(actorZ[i] < 0.03) actorZ[i] = 0.05;
 		if(actorZ[i] > 0.97) actorZ[i] = 0.97;
 	}
 

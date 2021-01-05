@@ -12,7 +12,7 @@ namespace NeuralNetworkGPU
 	class SigmoidLayer : public NNLayer
 	{
 	public:
-		SigmoidLayer(double t_parameterB, double t_learnRate, int t_size, NeuronsPtr t_prevLayerReference);
+		SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, NeuronsPtr t_prevLayerReference);
 		virtual ~SigmoidLayer();
 
 	public:
@@ -34,24 +34,24 @@ namespace NeuralNetworkGPU
 //		void loadFromFile(std::ifstream &t_file) override;
 
 	protected:
-		double *de_input;
+		float *de_input;
 		int *d_inputSize, inputSize;
 
-		double *d_output,*output;
+		float *d_output,*output;
 		int size;
 		int numberOfBlocks;
 		int numberOfThreads;
 
-		double *d_sums;
-		double *d_weights;
+		float *d_sums;
+		float *d_weights;
 
-		double *d_deltas, *deltas, *de_prevDeltas;
+		float *d_deltas, *deltas, *de_prevDeltas;
 
-		double *d_n, *d_b;		// learning rate, b parameter
-		double *d_m, *d_v;  	// 1st moment vector, 2nd moment vector
-		double *d_B1, *d_B2; 	// Decay rates for moment vectors
+		float *d_n, *d_b;		// learning rate, b parameter
+		float *d_m, *d_v;  	// 1st moment vector, 2nd moment vector
+		float *d_B1, *d_B2; 	// Decay rates for moment vectors
 
-		double learnRate;
+		float learnRate;
 		static double b;
 	};
 }

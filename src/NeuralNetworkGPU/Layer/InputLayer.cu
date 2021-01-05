@@ -48,8 +48,8 @@ namespace NeuralNetworkGPU
 			assert("CUDA input buffer to small");
 		}
 		size = t_size;
-		input = (double*) malloc(sizeof(double)*size);
-		cudaMalloc( (void **) &d_input, sizeof(double)*size);
+		input = (float*) malloc(sizeof(float)*size);
+		cudaMalloc( (void **) &d_input, sizeof(float)*size);
 
 	}
 
@@ -72,10 +72,10 @@ namespace NeuralNetworkGPU
 		#pragma omp parallel for shared(input, t_input, size) private(i) default(none)
 		for(int i=0; i<size; i++ )
 		{
-			input[i] = (double) t_input[i];
+			input[i] = (float) t_input[i];
 		}
 
-		cudaMemcpy(d_input, input, sizeof(double)*size, cudaMemcpyHostToDevice);
+		cudaMemcpy(d_input, input, sizeof(float)*size, cudaMemcpyHostToDevice);
 
 	}
 
@@ -88,10 +88,10 @@ namespace NeuralNetworkGPU
 
 		for(int i=0; i<size; i++ )
 		{
-			input[i] = (double) t_input[i];
+			input[i] = (float) t_input[i];
 		}
 
-		cudaMemcpy(d_input, input, sizeof(double)*size, cudaMemcpyHostToDevice);
+		cudaMemcpy(d_input, input, sizeof(float)*size, cudaMemcpyHostToDevice);
 
 	}
 
@@ -100,7 +100,7 @@ namespace NeuralNetworkGPU
 	 */
 	std::vector<double> InputLayer::getOutput()
 	{
-		cudaMemcpy(input, d_input, sizeof(double)*size, cudaMemcpyDeviceToHost);
+		cudaMemcpy(input, d_input, sizeof(float)*size, cudaMemcpyDeviceToHost);
 
 		std::vector<double> result;
 		for(int i=0; i<size; i++ )

@@ -12,7 +12,7 @@ namespace NeuralNetworkGPU
 	class ConvolutionalLayer : public NNLayer
 	{
 	public:
-		ConvolutionalLayer(double t_parameterB, double t_learnRate, MatrixSize t_filterSize, TensorSize t_size, TensorSize t_inputSize, NeuronsPtr t_prevLayerReference);;
+		ConvolutionalLayer(float t_parameterB, float t_learnRate, MatrixSize t_filterSize, TensorSize t_size, TensorSize t_inputSize, NeuronsPtr t_prevLayerReference);;
 		virtual ~ConvolutionalLayer();
 
 	public:
@@ -34,19 +34,19 @@ namespace NeuralNetworkGPU
 //		void loadFromFile(std::ifstream &t_file) override;
 
 	protected:
-		double *de_input;
+		float *de_input;
 		TensorSize *d_inputSize,inputSize;
 
-		double *d_output,*output;
+		float *d_output,*output;
 		TensorSize size;
 
-		double *d_sums;
-		double *d_weights;
+		float *d_sums;
+		float *d_weights;
 		MatrixSize *d_filterSize;
 
-		double *d_deltas, *deltas, *de_prevDeltas;
+		float *d_deltas, *deltas, *de_prevDeltas;
 
-		double *d_n, *d_b;
+		float *d_n, *d_b;
 	};
 }
 

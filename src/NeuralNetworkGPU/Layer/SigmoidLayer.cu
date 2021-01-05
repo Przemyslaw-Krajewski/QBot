@@ -10,15 +10,15 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void determineOutputFunc(double *t_input, double *t_output, int *t_inputSize,
-			double *t_sums,
-			double *t_weights,
-			double *t_deltas,
-			double *d_b)
+	__global__ void determineOutputFunc(float *t_input, float *t_output, int *t_inputSize,
+			float *t_sums,
+			float *t_weights,
+			float *t_deltas,
+			float *d_b)
 	{
 		int inputSize = (*t_inputSize);
 		//copy input to common buffer
-		__shared__ double inputBuff[INPUT_BUFFER_SIZE];
+		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
 		if(inputSize == blockDim.x)
 		{
 			inputBuff[threadIdx.x] = t_input[threadIdx.x];
@@ -40,14 +40,14 @@ namespace NeuralNetworkGPU
 
 		//sums x[i]*w[i]
 		long weightsIndex = inputSize*(threadIdx.x + blockIdx.x*blockDim.x);
-		double sum = t_weights[weightsIndex];
+		float sum = t_weights[weightsIndex];
 		for(int i=0; i<inputSize;i++)
 		{
 			sum += inputBuff[i] * t_weights[ weightsIndex+i+1 ];
 		}
 		t_sums[threadIdx.x + blockIdx.x*blockDim.x] = sum;
 		//activation function
-		t_output[threadIdx.x + blockIdx.x*blockDim.x] = 1 / (1 + exp(-(*d_b)*sum) );
+		t_output[threadIdx.x + blockIdx.x*blockDim.x] = __frcp_rd(1 + exp(-(*d_b)*sum) );
 		//reset delta
 		t_deltas[threadIdx.x + blockIdx.x*blockDim.x] = 0;
 	}
@@ -55,17 +55,17 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void learnSGDFunc(double *t_input, int *t_inputSize,
-			double *t_output,
-			double *t_sums,
-			double *t_weights,
-			double *t_deltas, double *t_prevDeltas,
-			double *d_n,double *d_b)
+	__global__ void learnSGDFunc(float *t_input, int *t_inputSize,
+			float *t_output,
+			float *t_sums,
+			float *t_weights,
+			float *t_deltas, float *t_prevDeltas,
+			float *d_n,float *d_b)
 	{
 		int inputSize = *t_inputSize;
 
 		//copy input to common buffer
-		__shared__ double inputBuff[INPUT_BUFFER_SIZE];
+		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
 		if(inputSize == blockDim.x)
 		{
 			inputBuff[threadIdx.x] = t_input[threadIdx.x];
@@ -86,15 +86,15 @@ namespace NeuralNetworkGPU
 		__syncthreads();
 
 		long index = threadIdx.x +  blockIdx.x*blockDim.x;
-		double delta = t_deltas[index];
+		float delta = t_deltas[index];
 
 		long weightsIndex = inputSize*(index);
 		//determine common multiplier
-		double e = exp(-(*d_b)*t_sums[index]);
-		double m = 1 + e;
-		double derivative = ((*d_b)*e/(m*m));
+		float e = __powf(2.71828,(-(*d_b)*t_sums[index]));
+		float m = 1 + e;
+		float derivative = __fdiv_rd((*d_b)*e,(m*m));
 
-		double p = (*d_n)* delta * derivative;
+		float p = (*d_n)* delta * derivative;
 		//calculate new weights
 		//bias weight
 		t_weights[weightsIndex] -= p;
@@ -122,19 +122,19 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void learnAdamFunc(double *t_input, int *t_inputSize,
-			double *t_output,
-			double *t_sums,
-			double *t_weights,
-			double *t_deltas, double *t_prevDeltas,
-			double *t_m,double *t_v,
-			double *t_n,double *t_b,
-			double *t_B1,double *t_B2)
+	__global__ void learnAdamFunc(float *t_input, int *t_inputSize,
+			float *t_output,
+			float *t_sums,
+			float *t_weights,
+			float *t_deltas, float *t_prevDeltas,
+			float *t_m,float *t_v,
+			float *t_n,float *t_b,
+			float *t_B1,float *t_B2)
 	{
 		int inputSize = *t_inputSize;
 
 		//copy input to common buffer
-		__shared__ double inputBuff[INPUT_BUFFER_SIZE];
+		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
 		if(inputSize == blockDim.x)
 		{
 			inputBuff[threadIdx.x] = t_input[threadIdx.x];
@@ -155,31 +155,33 @@ namespace NeuralNetworkGPU
 		__syncthreads();
 
 		long index = threadIdx.x +  blockIdx.x*blockDim.x;
-		double delta = t_deltas[index];
 
 		long weightsIndex = inputSize*(index);
 		//determine common multiplier
-		double e = exp(-(*t_b)*t_sums[index]);
-		double m = 1 + e;
-		double derivative = ((*t_b)*e/(m*m));
-		double grad = delta*derivative; // gradient without x factor
-		double grad2 = grad*grad;
+		float e = __powf(2.71828,(-(*t_b)*t_sums[index]));
+		float m = 1 + e;
+		float derivative = __fdiv_rd((*t_b)*e,(m*m));
+		float grad = t_deltas[index]*derivative; // gradient without x factor
+		float grad2 = grad*grad;
 
-		//calculate moment vectors
-		t_m[weightsIndex] = (*t_B1)*t_m[weightsIndex] + (1-(*t_B1))*grad;
-		t_v[weightsIndex] = (*t_B2)*t_v[weightsIndex] + (1-(*t_B2))*grad*grad;
-		for(int i=0; i<inputSize; i++)
-		{
-			t_m[weightsIndex+i+1] = (*t_B1)*t_m[weightsIndex+i+1] + (1-(*t_B1))*grad*inputBuff[i];
-			t_v[weightsIndex+i+1] = (*t_B2)*t_v[weightsIndex+i+1] + (1-(*t_B2))*grad2*inputBuff[i]*inputBuff[i];
-		}
+		//calculate new moment vectors and weights
+		float mNew,vNew;
+		mNew = grad - (*t_B1)*(grad-t_m[weightsIndex]);
+		vNew = grad2 - (*t_B2)*(grad2-t_v[weightsIndex]);
+		t_weights[weightsIndex] -= __fdiv_rd( (*t_n)*mNew , (__fsqrt_rd(vNew)+0.00001));
+		t_m[weightsIndex] = mNew;
+		t_v[weightsIndex] = vNew;
 
-		//calculate new weights
-		t_weights[weightsIndex] -= (*t_n)*t_m[weightsIndex] / (__fsqrt_rd(t_v[weightsIndex]+0.00000001));
-		for(int i=0; i<inputSize; i++)
+		float mTarget,vTarget;
+		for(int i=0, indx=weightsIndex+1; i<inputSize; i++,indx++)
 		{
-//			t_weights[ weightsIndex+i+1 ] -= p*inputBuff[i];
-			t_weights[weightsIndex+i+1] -= (*t_n)*t_m[weightsIndex+i+1] / (__fsqrt_rd(t_v[weightsIndex+i+1]+0.00000001));
+			mTarget = grad*inputBuff[i];
+			vTarget = grad2*inputBuff[i]*inputBuff[i];
+			mNew = mTarget - (*t_B1)*(mTarget-t_m[indx]);
+			vNew = vTarget - (*t_B2)*(vTarget-t_v[indx]);
+			t_weights[indx] -= __fdiv_rd ((*t_n)*mNew , (__fsqrt_rd(vNew)+0.00001));
+			t_m[indx] = mNew;
+			t_v[indx] = vNew;
 		}
 
 		//set delta to deeper neurons
@@ -187,8 +189,7 @@ namespace NeuralNetworkGPU
 		{
 			for(int i=0; i<*t_inputSize; i++)
 			{
-				int idx = weightsIndex + i + 1;
-				t_prevDeltas[i] += grad * t_weights[idx] ;
+				t_prevDeltas[i] += grad * t_weights[weightsIndex+i+1] ;
 			}
 		}
 
@@ -202,50 +203,50 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	SigmoidLayer::SigmoidLayer(double t_parameterB, double t_learnRate, int t_size, NeuronsPtr t_prevLayerReference)
+	SigmoidLayer::SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, NeuronsPtr t_prevLayerReference)
 	{
-		double b1 = 0.9, b2 = 0.999;
+		float b1 = 0.9, b2 = 0.999;
 
 		size = t_size;
 		de_input = t_prevLayerReference.inputPtr;
 
 		//Parameters
-		cudaMalloc( (void **) &d_n, sizeof(double));
-		cudaMemcpy(d_n, &(t_learnRate), sizeof(double), cudaMemcpyHostToDevice);
+		cudaMalloc( (void **) &d_n, sizeof(float));
+		cudaMemcpy(d_n, &(t_learnRate), sizeof(float), cudaMemcpyHostToDevice);
 		learnRate = t_learnRate;
-		cudaMalloc( (void **) &d_b, sizeof(double));
-		cudaMemcpy(d_b, &(t_parameterB), sizeof(double), cudaMemcpyHostToDevice);
-		cudaMalloc( (void **) &d_B1, sizeof(double));
-		cudaMemcpy(d_B1, &(b1), sizeof(double), cudaMemcpyHostToDevice);
-		cudaMalloc( (void **) &d_B2, sizeof(double));
-		cudaMemcpy(d_B2, &(b2), sizeof(double), cudaMemcpyHostToDevice);
+		cudaMalloc( (void **) &d_b, sizeof(float));
+		cudaMemcpy(d_b, &(t_parameterB), sizeof(float), cudaMemcpyHostToDevice);
+		cudaMalloc( (void **) &d_B1, sizeof(float));
+		cudaMemcpy(d_B1, &(b1), sizeof(float), cudaMemcpyHostToDevice);
+		cudaMalloc( (void **) &d_B2, sizeof(float));
+		cudaMemcpy(d_B2, &(b2), sizeof(float), cudaMemcpyHostToDevice);
 
 		//Input/output
 		cudaMalloc( (void **) &d_inputSize, sizeof(int));
 		cudaMemcpy(d_inputSize, &(t_prevLayerReference.size), sizeof(int), cudaMemcpyHostToDevice);
 		inputSize = t_prevLayerReference.size;
 
-		cudaMalloc( (void **) &d_output, sizeof(double)*size);
-		output = (double*) std::malloc(sizeof(double)*size);
+		cudaMalloc( (void **) &d_output, sizeof(float)*size);
+		output = (float*) std::malloc(sizeof(float)*size);
 
 		//basic to learn
-		cudaMalloc( (void **) &d_sums, sizeof(double)*size);
+		cudaMalloc( (void **) &d_sums, sizeof(float)*size);
 
-		cudaMalloc( (void **) &d_weights, sizeof(double)*size*(inputSize+1));
+		cudaMalloc( (void **) &d_weights, sizeof(float)*size*(inputSize+1));
 		initWeights();
 
-		cudaMalloc( (void **) &d_deltas, sizeof(double)*size);
-		deltas = (double*) malloc(sizeof(double)*size);
+		cudaMalloc( (void **) &d_deltas, sizeof(float)*size);
+		deltas = (float*) malloc(sizeof(float)*size);
 		de_prevDeltas = t_prevLayerReference.deltaPtr;
 
 		//additional to learn
-		double *zeros = (double*) malloc(sizeof(double)*size*(inputSize+1));
+		float *zeros = (float*) malloc(sizeof(float)*size*(inputSize+1));
 		for(int i=0; i<(inputSize+1)*size; i++)	zeros[i] = 0;
 
-		cudaMalloc( (void **) &d_m, sizeof(double)*size*(inputSize+1));
-		cudaMemcpy(d_m, zeros, sizeof(double)*size*(inputSize+1), cudaMemcpyHostToDevice);
-		cudaMalloc( (void **) &d_v, sizeof(double)*size*(inputSize+1));
-		cudaMemcpy(d_v, zeros, sizeof(double)*size*(inputSize+1), cudaMemcpyHostToDevice);
+		cudaMalloc( (void **) &d_m, sizeof(float)*size*(inputSize+1));
+		cudaMemcpy(d_m, zeros, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
+		cudaMalloc( (void **) &d_v, sizeof(float)*size*(inputSize+1));
+		cudaMemcpy(d_v, zeros, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
 
 		free(zeros);
 
@@ -291,15 +292,15 @@ namespace NeuralNetworkGPU
 	 */
 	void SigmoidLayer::initWeights()
 	{
-		double *randomValues = (double*) malloc(sizeof(double)*size*(inputSize+1));
+		float *randomValues = (float*) malloc(sizeof(float)*size*(inputSize+1));
 
 		for(int i=0; i<(inputSize+1)*size; i++)
 		{
-			double randomValue = getRandomWeight();
+			float randomValue = getRandomWeight();
 			randomValues[i] = randomValue;
 
 		}
-		cudaMemcpy(d_weights, randomValues, sizeof(double)*size*(inputSize+1), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_weights, randomValues, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
 		free(randomValues);
 	}
 
@@ -308,7 +309,7 @@ namespace NeuralNetworkGPU
 	 */
 	std::vector<double> SigmoidLayer::getOutput()
 	{
-		cudaMemcpy(output, d_output, sizeof(double)*size, cudaMemcpyDeviceToHost);
+		cudaMemcpy(output, d_output, sizeof(float)*size, cudaMemcpyDeviceToHost);
 
 		std::vector<double> result;
 		for(int i=0; i<size; i++ )
@@ -332,10 +333,10 @@ namespace NeuralNetworkGPU
 		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
 		for(int i=0; i<size; i++ )
 		{
-			deltas[i] = (double) output[i] - t_z[i];
+			deltas[i] = (float) output[i] - t_z[i];
 		}
 
-		cudaMemcpy(d_deltas, deltas, sizeof(double)*size, cudaMemcpyHostToDevice);
+		cudaMemcpy(d_deltas, deltas, sizeof(float)*size, cudaMemcpyHostToDevice);
 	}
 
 	void SigmoidLayer::learnSGD()

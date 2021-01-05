@@ -203,6 +203,28 @@ namespace Test
         std::cout << (timeAfter - timeBefore) / cv::getTickFrequency() << "\n";
     }
 
+    void testNNSpeedAdamGPU()
+    {
+        std::vector<double> x = {1};
+        std::vector<double> z = {0.5};
+        NeuralNetworkGPU::NeuralNetwork nn(NeuralNetworkGPU::LearnMode::Adam);
+        nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,20.2,4000,nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2,4000, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2, 1, nn.getLastLayerNeuronRef()));
+        int64 timeBefore = cv::getTickCount();
+        long i;
+        for (i = 0; i < 1000; i++)
+        {
+            nn.determineOutput(x);
+            nn.learnBackPropagation(z);
+            nn.determineOutput(z);
+        }
+
+        int64 timeAfter = cv::getTickCount();
+        std::cout << (timeAfter - timeBefore) / cv::getTickFrequency() << "\n";
+    }
+
     /*
      *
      */

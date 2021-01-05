@@ -38,8 +38,8 @@ namespace NeuralNetworkGPU
 //		void saveToFile(std::ofstream &t_file) override;
 
 	protected:
-		double *d_input;
-		double *input;
+		float *d_input;
+		float *input;
 		int size;
 	};
 }

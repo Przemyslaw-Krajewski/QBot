@@ -33,9 +33,9 @@ namespace NeuralNetworkGPU
 
 	struct NeuronsPtr
 	{
-		NeuronsPtr(double* t_inputPtr, int t_size, double* t_deltaPtr) {inputPtr = t_inputPtr; size = t_size; deltaPtr = t_deltaPtr;}
-		double* inputPtr;
-		double* deltaPtr;
+		NeuronsPtr(float* t_inputPtr, int t_size, float* t_deltaPtr) {inputPtr = t_inputPtr; size = t_size; deltaPtr = t_deltaPtr;}
+		float* inputPtr;
+		float* deltaPtr;
 		int size;
 	};
 
@@ -71,7 +71,7 @@ namespace NeuralNetworkGPU
 		virtual void loadFromFile(std::ifstream &t_file) {assert("loadFromFile() Not implemented" && 0);}
 
 	public:
-		static double getRandomWeight() { return ((double)((rand()%1000))/1000-0.5); }
+		static double getRandomWeight() { return 0.25*((double)((rand()%100000))/100000-0.5); }
 
 	};
 }
