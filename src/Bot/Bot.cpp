@@ -115,7 +115,6 @@ void Bot::execute()
 			//Analyze situation
 			StateAnalyzer::AnalyzeResult analyzeResult = stateAnalyzer.analyze();
 			if(analyzeResult.processedImage.cols == 0) continue;
-			if(controllerInput[0] && analyzeResult.playerVelocity.y == 0) controllerInput[1] = true;
 			sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
 														analyzeResult.processedImagePast,
 														analyzeResult.processedImagePast2,
@@ -124,7 +123,7 @@ void Bot::execute()
 														analyzeResult.playerVelocity);
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 
-			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput);
+			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
 
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
@@ -166,12 +165,13 @@ void Bot::execute()
 			}
 		}
 
+		std::cout << score << "\n";
+
 		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
 		loadParameters();
 		reinforcementLearning->handleParameters();
 		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
-		std::cout << score << "\n";
 
 		//Learn
 		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);

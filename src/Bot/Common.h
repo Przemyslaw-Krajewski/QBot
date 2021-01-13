@@ -117,10 +117,10 @@ public:
 			}
 			t_file << "\n";
 		}
-		int v1 = t_sars.oldState[t_sars.oldState.size()-2];
-		int v2 = t_sars.oldState[t_sars.oldState.size()-1];
-		int v3 = t_sars.state[t_sars.state.size()-2];
-		int v4 = t_sars.state[t_sars.state.size()-1];
+		int v1 = t_sars.oldState[t_sars.oldState.size()-4];
+		int v2 = t_sars.oldState[t_sars.oldState.size()-3];
+		int v3 = t_sars.state[t_sars.state.size()-4];
+		int v4 = t_sars.state[t_sars.state.size()-3];
 		t_file << v1 << "  " << v2;
 		t_file << "					";
 		t_file << v3 << "  " << v4 << "\n";

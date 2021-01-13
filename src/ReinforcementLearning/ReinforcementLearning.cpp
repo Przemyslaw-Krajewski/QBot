@@ -69,8 +69,10 @@ State ReinforcementLearning::reduceSceneState(const State& t_state, double actio
 			result.push_back(value);
 		}
 	}
-	result.push_back(t_state[t_state.size()-8]/3);
-	result.push_back(t_state[t_state.size()-9]);
+	result.push_back(t_state[t_state.size()-4]/3);
+	result.push_back(t_state[t_state.size()-3]);
+	result.push_back(t_state[t_state.size()-1]);
+
 	result.push_back(action);
 
 	return result;

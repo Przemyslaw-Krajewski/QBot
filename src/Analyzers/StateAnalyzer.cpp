@@ -55,10 +55,10 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB()
 	double reward = NOTHING_REWARD;
 	bool endScenario = false;
 	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = NOTHING_REWARD;std::cout << "Not found\n";}
-	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy)				 {reward = DIE_REWARD; endScenario = true; std::cout << "Dead\n";}
+	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy)				 {reward = DIE_REWARD; endScenario = true;}
 	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD; endScenario = true;std::cout << "Win\n";}
-	else if(memoryAnalyzeResult.playerPositionY > 180) 											 {reward = DIE_REWARD; endScenario = true;std::cout << "Pitfall\n";} //pitfall
-	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD; endScenario = true;std::cout << "No retreat\n";} // left border
+	else if(memoryAnalyzeResult.playerPositionY > 180) 											 {reward = DIE_REWARD; endScenario = true;} //pitfall
+	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD; endScenario = true;} // left border
 	else if(memoryAnalyzeResult.playerPositionX > 96 && memoryAnalyzeResult.playerVelocityX > 16){reward = ADVANCE_REWARD;}
 	else if(memoryAnalyzeResult.playerVelocityX > 8) 										 	 {reward = LITTLE_ADVANCE_REWARD;}
 
@@ -68,7 +68,7 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB()
 	analyzeResult.processedImagePast = imageAnalyzeResult.processedImagePast;
 	analyzeResult.additionalInfo = additionalInfo;
 	analyzeResult.playerCoords = Point(memoryAnalyzeResult.playerPositionX,memoryAnalyzeResult.playerPositionY);
-	analyzeResult.playerVelocity = Point(memoryAnalyzeResult.playerVelocityX/4,memoryAnalyzeResult.playerVelocityY/2);
+	analyzeResult.playerVelocity = Point(memoryAnalyzeResult.playerVelocityX,memoryAnalyzeResult.playerVelocityY);
 	analyzeResult.reward = reward;
 	analyzeResult.endScenario = endScenario;
 

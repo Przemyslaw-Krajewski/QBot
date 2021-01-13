@@ -105,11 +105,11 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 
 }
 
-void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_time, ControllerInput t_keys)
+void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_time, ControllerInput t_keys, bool pressedKey)
 {
 	int blockSize = 15;
 	int barWidth = 100;
-	cv::Mat map = cv::Mat(blockSize*6, blockSize*2+barWidth, CV_8UC3);
+	cv::Mat map = cv::Mat(blockSize*8, blockSize*2+barWidth, CV_8UC3);
 	for(int x=0; x<map.cols; x++)
 	{
 		for(int y=0; y<map.rows; y++)
@@ -136,6 +136,9 @@ void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_
 				Point((1+i)*blockSize,5*blockSize),
 				cv::Scalar(value,value,value));
 	}
+	drawBorderedBlock(&map,blockSize,
+			Point((1)*blockSize,7*blockSize),
+			cv::Scalar(pressedKey*255,pressedKey*255,pressedKey*255));
 
 	//Print
 	imshow("AnalyzedSceneData", map);
