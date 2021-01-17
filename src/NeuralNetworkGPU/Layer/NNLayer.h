@@ -16,27 +16,66 @@ namespace NeuralNetworkGPU
 {
 	struct TensorSize
 	{
-		TensorSize(const TensorSize& t_ts) {x = t_ts.x;y = t_ts.y;z = t_ts.z;}
-		TensorSize(int t_x, int t_y, int t_z) { x=t_x;y=t_y;z=t_z;}
-		TensorSize() : TensorSize(0,0,0) {};
-		int multiply() { return x*y*z;}
+		TensorSize(const TensorSize& t_ts) 
+		{
+			x = t_ts.x;
+			y = t_ts.y;
+			z = t_ts.z;
+			m = x*y*z;
+		}
+		TensorSize(int t_x, int t_y, int t_z) 
+		{
+			x=t_x;
+			y=t_y;
+			z=t_z;
+			m = x*y*z;
+		}
+		TensorSize() : TensorSize(0,0,0) {}
+		int multiply() { m=x*y*z; return m;}
 		int x,y,z;
+		int m;
 	};
 
 	struct MatrixSize
 	{
-		MatrixSize(const MatrixSize& t_ms) {x = t_ms.x;y = t_ms.y;}
-		MatrixSize(int t_x, int t_y) { x=t_x;y=t_y;}
-		int multiply() { return x*y;}
+		MatrixSize(const MatrixSize& t_ms) 
+		{
+			x = t_ms.x;
+			y = t_ms.y;
+			m = x*y;
+		}
+		MatrixSize(int t_x, int t_y)
+		{
+			x=t_x;
+			y=t_y;
+			m = x*y;
+		}
+		MatrixSize() : MatrixSize(0,0) {}
+		int multiply() { m=x*y; return m;}
 		int x,y;
+		int m;
 	};
 
 	struct NeuronsPtr
 	{
-		NeuronsPtr(float* t_inputPtr, int t_size, float* t_deltaPtr) {inputPtr = t_inputPtr; size = t_size; deltaPtr = t_deltaPtr;}
+		NeuronsPtr(float* t_inputPtr, int t_size, float* t_deltaPtr)
+		{
+			inputPtr = t_inputPtr;
+			size = t_size;
+			deltaPtr = t_deltaPtr;
+			tSize = TensorSize(-1,-1,-1);
+		}
+		NeuronsPtr(float* t_inputPtr, TensorSize t_tSize, float* t_deltaPtr)
+		{
+			inputPtr = t_inputPtr;
+			size = t_tSize.m;
+			deltaPtr = t_deltaPtr;
+			tSize = t_tSize;
+		}
 		float* inputPtr;
 		float* deltaPtr;
 		int size;
+		TensorSize tSize;
 	};
 
 	class NNLayer

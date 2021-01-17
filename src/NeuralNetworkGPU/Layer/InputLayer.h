@@ -16,6 +16,7 @@ namespace NeuralNetworkGPU
 	{
 	public:
 		InputLayer(int t_size);
+		InputLayer(TensorSize t_size);
 		virtual ~InputLayer();
 
 	public:
@@ -41,6 +42,7 @@ namespace NeuralNetworkGPU
 		float *d_input;
 		float *input;
 		int size;
+		TensorSize tSize;
 	};
 }
 

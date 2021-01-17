@@ -11,7 +11,7 @@
 namespace Test
 {
 
-	void gpuNNSmokeTest()
+	void gpuSigmoidNNSmokeTest()
 	{
 		NeuralNetworkGPU::NeuralNetwork nn;
 		nn.addLayer(new NeuralNetworkGPU::InputLayer(3));
@@ -38,13 +38,40 @@ namespace Test
 		for(double i : out) std::cout << "   " << i << "\n";
 	}
 
+	void gpuConvNNSmokeTest()
+	{
+		NeuralNetworkGPU::NeuralNetwork nn;
+		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(3,3,1)));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.001,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+
+		std::vector<double> in;
+		in.push_back(1);in.push_back(2);in.push_back(3);
+		in.push_back(4);in.push_back(5);in.push_back(6);
+		in.push_back(7);in.push_back(8);in.push_back(9);
+
+		std::cout << "Input:\n";
+		for(double i : in) std::cout << "   " << i << "\n";
+
+		nn.determineOutput(in);
+		std::vector<double> out = nn.getOutput();
+		std::cout << "Output:\n";
+		for(double i : out) std::cout << "   " << i << "\n";
+
+		std::vector<double> z = {300};
+		nn.learnBackPropagation(z);
+
+		out = nn.determineOutput(in);
+		std::cout << "Output:\n";
+		for(double i : out) std::cout << "   " << i << "\n";
+	}
+
     /*
      *
      */
-    long testNeuralNetwork(std::vector<double> t_x, std::vector<double> t_z, NeuralNetworkGPU::NeuralNetwork *nn)
+    long testNeuralNetwork(std::vector<std::vector<double>> t_x, std::vector<double> t_z, NeuralNetworkGPU::NeuralNetwork *nn)
     {
         std::vector<std::vector<double>> x;
-        for (double &i : t_x) x.push_back({i});
+        for (std::vector<double> &i : t_x) x.push_back(i);
         std::vector<std::vector<double>> z;
         for (double &i : t_z) z.push_back({i});
 
@@ -61,12 +88,14 @@ namespace Test
             {
                 nn->determineOutput(x[i]);
                 nn->learnBackPropagation(z[i]);
-                double miss = nn->determineOutput(x[i])[0] - z[i][0];
+                double value = nn->determineOutput(x[i])[0];
+                double miss = value - z[i][0];
                 missSum += fabs(miss);
+                std::cout << "Value: " << value << "\n";
                 std::cout << "Miss: "<< miss << "\n";
             }
 
-            if(iteration %100 == 0 || missSum / x.size() < 0.01)
+            if(x[0].size() == 1 && (iteration %100 == 0 || missSum / x.size() < 0.01))
 			{
 				for (int y = 0; y < image.rows; y++)
 				{
@@ -114,7 +143,7 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,0.01, 1, nn.getLastLayerNeuronRef()));
 
-        long iteration = testNeuralNetwork({0.6, 0.8},
+        long iteration = testNeuralNetwork({{0.6}, {0.8}},
                                            {0.4, 0.9}, &nn);
         std::cout << "Done: " << iteration << "\n";
     }
@@ -129,7 +158,7 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.003, 15, nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.01, 1, nn.getLastLayerNeuronRef()));
 
-        long iteration = testNeuralNetwork({0.6, 0.8},
+        long iteration = testNeuralNetwork({{0.6}, {0.8}},
                                            {0.4, 0.9}, &nn);
         std::cout << "Done: " << iteration << "\n";
     }
@@ -144,7 +173,7 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.008, 10, nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
 
-        long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
+        long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
         std::cout << "Done: " << iteration << "\n";
     }
@@ -160,7 +189,7 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.008, 20, nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
 
-        long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
+        long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
         std::cout << "Done: " << iteration << "\n";
     }
@@ -176,7 +205,7 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.01,0.008, 10, nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
 
-        long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
+        long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
         std::cout << "Done: " << iteration << "\n";
     }
@@ -237,9 +266,94 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(9.2,0.0008, 20, nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.0012, 1, nn.getLastLayerNeuronRef()));
 
-        long iteration = testNeuralNetwork({0.6, 0.7, 0.8},
+        long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
         std::cout << "Done: " << iteration << "\n";
+    }
+
+	void testConv1ValueGPU()
+	{
+		NeuralNetworkGPU::NeuralNetwork nn;
+		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(3,3,1)));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.1, 0.2, 0.3, 0.1, 0.2, 0.3}},
+                                           {40}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+	}
+
+	void testConv2ValuesGPU()
+	{
+		NeuralNetworkGPU::NeuralNetwork nn;
+		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(3,3,1)));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.1, 0.2, 0.3, 0.1, 0.2, 0.3},
+        									{0.3, 0.2, 0.1, 0.3, 0.2, 0.1, 0.3, 0.2, 0.1}},
+                                           {40,100}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+	}
+
+	void testConv2ConvValuesGPU()
+	{
+		NeuralNetworkGPU::NeuralNetwork nn;
+		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(3,3,2)));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.1, 0.2, 0.3, 0.1, 0.2, 0.3,0.1, 0.2, 0.3, 0.1, 0.2, 0.3, 0.1, 0.2, 0.3},
+        									{0.3, 0.2, 0.1, 0.3, 0.2, 0.1, 0.3, 0.2, 0.1,0.3, 0.2, 0.1, 0.3, 0.2, 0.1, 0.3, 0.2, 0.1}},
+                                           {40,100}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+	}
+
+	void testConv2LayersGPU()
+	{
+		NeuralNetworkGPU::NeuralNetwork nn;
+		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(5,5,1)));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.04,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5},
+        									{0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1}},
+                                           {40,100}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+	}
+
+	void testConvAndSigmoidGPU()
+	{
+		NeuralNetworkGPU::NeuralNetwork nn;
+		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(3,3,1)));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(11.2,0.03, 1, nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.1, 0.2, 0.3, 0.1, 0.2, 0.3},
+										    {0.3, 0.2, 0.1, 0.3, 0.2, 0.1, 0.3, 0.2, 0.1},
+											{0.8, 0.2, 0.1, 0.8, 0.2, 0.1, 0.8, 0.2, 0.1}},
+                                           {0.8, 0.1, 0.8}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+	}
+
+    void testConvNNSpeedGPU()
+    {
+        std::vector<double> x = std::vector<double>(32*32);
+        std::vector<double> z = {0.5};
+        NeuralNetworkGPU::NeuralNetwork nn(NeuralNetworkGPU::LearnMode::Adam);
+        nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(32,32,1)));
+        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,100,NeuralNetworkGPU::MatrixSize(9,9),nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1000,NeuralNetworkGPU::MatrixSize(9,9),nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,10,NeuralNetworkGPU::MatrixSize(9,9),nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2, 1, nn.getLastLayerNeuronRef()));
+        int64 timeBefore = cv::getTickCount();
+        long i;
+        for (i = 0; i < 1000; i++)
+        {
+            nn.determineOutput(x);
+            nn.learnBackPropagation(z);
+            nn.determineOutput(x);
+        }
+
+        int64 timeAfter = cv::getTickCount();
+        std::cout << (timeAfter - timeBefore) / cv::getTickFrequency() << "\n";
     }
 
 }

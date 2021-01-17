@@ -7,12 +7,14 @@
 
 #include "NNLayer.h"
 
+#include <stdio.h>
+
 namespace NeuralNetworkGPU
 {
 	class ConvolutionalLayer : public NNLayer
 	{
 	public:
-		ConvolutionalLayer(float t_parameterB, float t_learnRate, MatrixSize t_filterSize, TensorSize t_size, TensorSize t_inputSize, NeuronsPtr t_prevLayerReference);;
+		ConvolutionalLayer(float t_parameterB, float t_learnRate, int convLayers, MatrixSize t_filterSize, NeuronsPtr t_prevLayerReference);
 		virtual ~ConvolutionalLayer();
 
 	public:
@@ -43,6 +45,7 @@ namespace NeuralNetworkGPU
 		float *d_sums;
 		float *d_weights;
 		MatrixSize *d_filterSize;
+		MatrixSize filterSize;
 
 		float *d_deltas, *deltas, *de_prevDeltas;
 

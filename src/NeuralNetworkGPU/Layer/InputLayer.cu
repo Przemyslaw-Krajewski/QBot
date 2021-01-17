@@ -12,36 +12,6 @@ namespace NeuralNetworkGPU
 	 */
 	InputLayer::InputLayer(int t_size)
 	{
-//				int *d_a, *d_b;
-//				int a=15;int b;
-//				cudaMalloc( (void **) &d_a, sizeof(int));
-//				cudaMalloc( (void **) &d_b, sizeof(int));
-//
-//				cudaMemcpy(d_a, &a, sizeof(int), cudaMemcpyHostToDevice);
-//				funkcja<<<2,1>>>(d_a,d_b);
-//				cudaMemcpy(&b, d_b, sizeof(int), cudaMemcpyDeviceToHost);
-//
-//				std::cout << a << "  " << b << "\n";
-//
-//				cudaFree(d_a);
-//				cudaFree(d_b);
-//
-//				InputNeuron *d_n;
-//				cudaMalloc( (void **) &d_n, sizeof(InputNeuron));
-//
-//				double *d_in, *d_out;
-//				double in=2.5;double out;
-//				cudaMalloc( (void **) &d_in, sizeof(double));
-//				cudaMalloc( (void **) &d_out, sizeof(double));
-//
-//				cudaMemcpy(d_in, &in, sizeof(double), cudaMemcpyHostToDevice);
-//				funkcja2<<<1,1>>>(d_n,d_in,d_out);
-//				cudaMemcpy(&out, d_out, sizeof(double), cudaMemcpyDeviceToHost);
-//				std::cout << out << "\n";
-//
-//				cudaFree(d_n);
-//				cudaFree(d_in);
-//				cudaFree(d_out);
 		if(INPUT_BUFFER_SIZE < t_size)
 		{
 			std::cout << t_size;
@@ -50,6 +20,20 @@ namespace NeuralNetworkGPU
 		size = t_size;
 		input = (float*) malloc(sizeof(float)*size);
 		cudaMalloc( (void **) &d_input, sizeof(float)*size);
+
+	}
+
+	/*
+	 *
+	 */
+	InputLayer::InputLayer(TensorSize t_size)
+	{
+		//TODO::Validate data
+
+		size = t_size.x;
+		tSize = t_size;
+		input = (float*) malloc(sizeof(float)*tSize.m);
+		cudaMalloc( (void **) &d_input, sizeof(float)*tSize.m);
 
 	}
 
@@ -84,14 +68,27 @@ namespace NeuralNetworkGPU
 	 */
 	void InputLayer::setInput(std::vector<double> t_input)
 	{
-		assert(t_input.size() == size && "InputLayer::setInput input size not match");
 
-		for(int i=0; i<size; i++ )
+		if(tSize.m > 0)
 		{
-			input[i] = (float) t_input[i];
-		}
+			assert(t_input.size()==tSize.m && "InputLayer::setInput input size not match");
 
-		cudaMemcpy(d_input, input, sizeof(float)*size, cudaMemcpyHostToDevice);
+			for(int i=0; i<tSize.m; i++ )
+			{
+				input[i] = (float) t_input[i];
+			}
+			cudaMemcpy(d_input, input, sizeof(float)*tSize.m, cudaMemcpyHostToDevice);
+		}
+		else
+		{
+			assert(t_input.size() == size && "InputLayer::setInput input size not match");
+
+			for(int i=0; i<size; i++ )
+			{
+				input[i] = (float) t_input[i];
+			}
+			cudaMemcpy(d_input, input, sizeof(float)*size, cudaMemcpyHostToDevice);
+		}
 
 	}
 
@@ -141,7 +138,8 @@ namespace NeuralNetworkGPU
 	 */
 	NeuronsPtr InputLayer::getNeuronPtr()
 	{
-		return NeuronsPtr(d_input,size, nullptr);
+		if(tSize.m != 0) return NeuronsPtr(d_input,tSize, nullptr);
+		else return NeuronsPtr(d_input,size, nullptr);
 	}
 
 	/*

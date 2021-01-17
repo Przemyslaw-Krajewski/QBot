@@ -10,121 +10,148 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void determineOutputFuncConv(float *t_input, float *t_output, TensorSize *t_inputSize,
+	__global__ void determineOutputFuncConv(float *t_input, TensorSize *t_inputSize,
+			float *t_output,
 			float *t_sums,
-			float *t_weights,
-			MatrixSize *t_filterSize,
+			float *t_weights, MatrixSize *t_filterSize,
 			float *t_deltas,
 			float *d_b)
 	{
-		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
+//		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
 
-		int inputSize = t_inputSize->x*t_inputSize->y*t_inputSize->z;
 		//copy input to common buffer
-		if(inputSize == blockDim.x)
-		{
-			inputBuff[threadIdx.x] = t_input[threadIdx.x];
-		}
-		else if(inputSize < blockDim.x)
-		{
-			if(threadIdx.x < inputSize) inputBuff[threadIdx.x] = t_input[threadIdx.x];
-		}
-		else if(inputSize > blockDim.x)
-		{
-			int index = inputSize-threadIdx.x-1;
-			while(index >= 0)
-			{
-				inputBuff[index] = t_input[index];
-				index -= blockDim.x;
-			}
-		}
-		__syncthreads();
+//		if(inputSize == blockDim.x)
+//		{
+//			inputBuff[threadIdx.x] = t_input[threadIdx.x];
+//		}
+//		else if(inputSize < blockDim.x)
+//		{
+//			if(threadIdx.x < inputSize) inputBuff[threadIdx.x] = t_input[threadIdx.x];
+//		}
+//		else if(inputSize > blockDim.x)
+//		{
+//			int index = inputSize-threadIdx.x-1;
+//			while(index >= 0)
+//			{
+//				inputBuff[index] = t_input[index];
+//				index -= blockDim.x;
+//			}
+//		}
+//		__syncthreads();
 
-		long weightsIndex = inputSize*(threadIdx.x + blockIdx.x*blockDim.x);
-		for(int x=0; x<t_filterSize->x; x++)
+		//sums x[i]*w[i]
+		int xHalfFilterSize = t_filterSize->x/2;
+		int yHalfFilterSize = t_filterSize->y/2;
+		float sum = 0;
+		for(int x=-xHalfFilterSize; x<=xHalfFilterSize; x++)
 		{
-			for(int y=0; y<t_filterSize->y; y++)
+			for(int y=-yHalfFilterSize; y<=yHalfFilterSize; y++)
 			{
 				for(int z=0; z<t_inputSize->z; z++)
 				{
+					int fx = xHalfFilterSize+x;
+					int fy = yHalfFilterSize+y;
+					int tx = xHalfFilterSize+blockIdx.x+x;
+					int ty = yHalfFilterSize+blockIdx.y+y;
+					int tz = z;
 
+					sum += t_input[tx + ty*t_inputSize->x + tz*t_inputSize->x*t_inputSize->y] *
+								t_weights[fx + fy*t_filterSize->x + z*t_filterSize->x*t_filterSize->y];
 				}
 			}
 		}
 
-		//sums x[i]*w[i]
-//		long weightsIndex = inputSize*(threadIdx.x + blockIdx.x*blockDim.x);
-		float sum = t_weights[weightsIndex];
-		for(int i=0; i<inputSize;i++)
-		{
-			sum += inputBuff[i] * t_weights[ weightsIndex+i+1 ];
-		}
-		t_sums[threadIdx.x + blockIdx.x*blockDim.x] = sum;
+		t_sums[blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y] = sum;
 		//activation function
-		t_output[threadIdx.x + blockIdx.x*blockDim.x] = 1 / (1 + exp(-(*d_b)*sum) );
+		t_output[blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y] =
+//				1 / (1 + exp(-(*d_b)*sum) );	//sigmoid function
+				sum > 0 ? sum : sum*0.1; 					//RELU function
 		//reset delta
-		t_deltas[threadIdx.x + blockIdx.x*blockDim.x] = 0;
+		t_deltas[blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y] = 0;
 	}
 
 	/*
 	 *
 	 */
-	__global__ void learnBackPropagationFuncConv(float *t_input, int *t_inputSize,
+	__global__ void learnSGDConv(float *t_input, TensorSize *t_inputSize,
 			float *t_output,
 			float *t_sums,
-			float *t_weights,
+			float *t_weights, MatrixSize *t_filterSize,
 			float *t_deltas, float *t_prevDeltas,
 			float *d_n,float *d_b)
 	{
-		int inputSize = *t_inputSize;
+//		int inputSize = 3;//*t_inputSize;
 
 		//copy input to common buffer
-		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
-		if(inputSize == blockDim.x)
-		{
-			inputBuff[threadIdx.x] = t_input[threadIdx.x];
-		}
-		else if(inputSize < blockDim.x)
-		{
-			if(threadIdx.x < inputSize) inputBuff[threadIdx.x] = t_input[threadIdx.x];
-		}
-		else if(inputSize > blockDim.x)
-		{
-			int index = inputSize-threadIdx.x-1;
-			while(index >= 0)
-			{
-				inputBuff[index] = t_input[index];
-				index -= blockDim.x;
-			}
-		}
-		__syncthreads();
+//		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
+//		if(inputSize == blockDim.x)
+//		{
+//			inputBuff[threadIdx.x] = t_input[threadIdx.x];
+//		}
+//		else if(inputSize < blockDim.x)
+//		{
+//			if(threadIdx.x < inputSize) inputBuff[threadIdx.x] = t_input[threadIdx.x];
+//		}
+//		else if(inputSize > blockDim.x)
+//		{
+//			int index = inputSize-threadIdx.x-1;
+//			while(index >= 0)
+//			{
+//				inputBuff[index] = t_input[index];
+//				index -= blockDim.x;
+//			}
+//		}
+//		__syncthreads();
 
-		long index = threadIdx.x +  blockIdx.x*blockDim.x;
+		long index = blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y;
 		float delta = t_deltas[index];
 
-		long weightsIndex = inputSize*(index);
 		//determine common multiplier
-		float e = exp(-(*d_b)*t_sums[index]);
-		float m = 1 + e;
-		float derivative = ((*d_b)*e/(m*m));
+//		float e = exp(-(*d_b)*t_sums[index]);
+//		float m = 1 + e;
+//		float derivative = ((*d_b)*e/(m*m));
+		float derivative = t_sums[index] > 0 ? 1 : 0.1;
 
 		float p = (*d_n)* delta * derivative;
 		//calculate new weights
-		//bias weight
-		t_weights[weightsIndex] -= p;
-		//rest weights
-		for(int i=0; i<inputSize; i++)
+		int xHalfFilterSize = t_filterSize->x/2;
+		int yHalfFilterSize = t_filterSize->y/2;
+		for(int x=-xHalfFilterSize; x<=xHalfFilterSize; x++)
 		{
-			t_weights[ weightsIndex+i+1 ] -= p*inputBuff[i];
+			for(int y=-yHalfFilterSize; y<=yHalfFilterSize; y++)
+			{
+				for(int z=0; z<t_inputSize->z; z++)
+				{
+					int fx = xHalfFilterSize+x;
+					int fy = yHalfFilterSize+y;
+					int tx = xHalfFilterSize+blockIdx.x+x;
+					int ty = yHalfFilterSize+blockIdx.y+y;
+					int tz = z;
+					t_weights[ fx + fy*t_filterSize->x + z*t_filterSize->x*t_filterSize->y ] -=
+				    		p*t_input[tx + ty*t_inputSize->x + tz*t_inputSize->x*t_inputSize->y];
+				}
+			}
 		}
 
 		//set delta to deeper neurons
 		if(t_prevDeltas != nullptr)
 		{
-			for(int i=0; i<*t_inputSize; i++)
+			for(int x=-xHalfFilterSize; x<=xHalfFilterSize; x++)
 			{
-				int idx = weightsIndex + i + 1;
-				t_prevDeltas[i] += delta * derivative * t_weights[idx] ;
+				for(int y=-yHalfFilterSize; y<=yHalfFilterSize; y++)
+				{
+					for(int z=0; z<t_inputSize->z; z++)
+					{
+						int fx = xHalfFilterSize+x;
+						int fy = yHalfFilterSize+y;
+						int tx = xHalfFilterSize+blockIdx.x+x;
+						int ty = yHalfFilterSize+blockIdx.y+y;
+						int tz = z;
+
+						t_prevDeltas[tx + ty*t_inputSize->x + tz*t_inputSize->x*t_inputSize->y] +=
+								delta * derivative * t_weights[ fx + fy*t_filterSize->x + z*t_filterSize->x*t_filterSize->y ];;
+					}
+				}
 			}
 		}
 
@@ -136,10 +163,12 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	ConvolutionalLayer::ConvolutionalLayer(float t_parameterB, float t_learnRate,
-			MatrixSize t_filterSize, TensorSize t_size, TensorSize t_inputSize, NeuronsPtr t_prevLayerReference)
+	ConvolutionalLayer::ConvolutionalLayer(float t_parameterB, float t_learnRate, int convLayers,
+			MatrixSize t_filterSize, NeuronsPtr t_prevLayerReference)
 	{
-		size = t_size;
+		size = TensorSize(t_prevLayerReference.tSize.x-t_filterSize.x+1,
+						  t_prevLayerReference.tSize.y-t_filterSize.y+1,
+						  convLayers);
 		de_input = t_prevLayerReference.inputPtr;
 
 		//learn rate
@@ -151,36 +180,27 @@ namespace NeuralNetworkGPU
 
 		//input size
 		cudaMalloc( (void **) &d_inputSize, sizeof(TensorSize));
-		cudaMemcpy(d_inputSize, &t_inputSize, sizeof(TensorSize), cudaMemcpyHostToDevice);
-		inputSize = t_inputSize;
+		cudaMemcpy(d_inputSize, &t_prevLayerReference.tSize, sizeof(TensorSize), cudaMemcpyHostToDevice);
+		inputSize = t_prevLayerReference.tSize;
 
 		//output
-		cudaMalloc( (void **) &d_output, sizeof(float)*size.multiply());
-		output = (float*) std::malloc(sizeof(float)*size.multiply());
+		cudaMalloc( (void **) &d_output, sizeof(float)*size.m);
+		output = (float*) std::malloc(sizeof(float)*size.m);
 
-		//weights
-		cudaMalloc( (void **) &d_weights, sizeof(float)*size.multiply()*t_filterSize.multiply()*t_inputSize.z);
-		initWeights();
 		//filter size
+		filterSize = t_filterSize;
 		cudaMalloc( (void **) &d_filterSize, sizeof(MatrixSize));
 		cudaMemcpy(d_filterSize, &t_filterSize, sizeof(MatrixSize), cudaMemcpyHostToDevice);
+		//weights
+		cudaMalloc( (void **) &d_weights, sizeof(float)*t_filterSize.m*t_prevLayerReference.tSize.z);
+		initWeights();
 
 		//sums
-		cudaMalloc( (void **) &d_sums, sizeof(float)*size.multiply());
+		cudaMalloc( (void **) &d_sums, sizeof(float)*size.m);
 		//deltas
-		cudaMalloc( (void **) &d_deltas, sizeof(float)*size.multiply());
-		deltas = (float*) malloc(sizeof(float)*size.multiply());
+		cudaMalloc( (void **) &d_deltas, sizeof(float)*size.m);
+		deltas = (float*) malloc(sizeof(float)*size.m);
 		de_prevDeltas = t_prevLayerReference.deltaPtr;
-
-//		numberOfBlocks = 1;
-//		while(1)
-//		{
-//			numberOfThreads = size/numberOfBlocks;
-//			if(numberOfThreads<=800 && numberOfThreads*numberOfBlocks==size) break;
-//			numberOfBlocks++;
-//
-//			assert(numberOfBlocks < 10 && "Could not match thread/block size");
-//		}
 
 	}
 
@@ -197,6 +217,8 @@ namespace NeuralNetworkGPU
 		cudaFree(d_sums);
 		cudaFree(d_weights);
 
+		cudaFree(d_filterSize);
+
 		cudaFree(d_deltas);
 
 		free(output);
@@ -208,16 +230,14 @@ namespace NeuralNetworkGPU
 	 */
 	void ConvolutionalLayer::initWeights()
 	{
-		long weightsSize = inputSize.multiply()*size.multiply()*inputSize.z;
+		long weightsSize = filterSize.m*inputSize.z;
 
 		float *randomValues = (float*) malloc(sizeof(float)*weightsSize);
 
 		for(int i=0; i< weightsSize; i++)
 		{
-//			std::cout << (int) (100*i/((inputSize+1)*size)) << "%\n";
 			float randomValue = getRandomWeight();
 			randomValues[i] = randomValue;
-
 		}
 		cudaMemcpy(d_weights, randomValues, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
 		free(randomValues);
@@ -228,7 +248,7 @@ namespace NeuralNetworkGPU
 	 */
 	std::vector<double> ConvolutionalLayer::getOutput()
 	{
-		cudaMemcpy(output, d_output, sizeof(float)*size.multiply(), cudaMemcpyDeviceToHost);
+		cudaMemcpy(output, d_output, sizeof(float)*size.m, cudaMemcpyDeviceToHost);
 
 		std::vector<double> result;
 		int outputSize = size.multiply();
@@ -243,7 +263,14 @@ namespace NeuralNetworkGPU
 
 	void ConvolutionalLayer::determineOutput()
 	{
-		determineOutputFuncConv<<< 12 , 12>>>(de_input, d_output, d_inputSize, d_sums, d_weights, d_filterSize, d_deltas, d_b);
+		dim3 threadsPerBlock(size.z);
+		dim3 numBlocks(size.x, size.y);
+		determineOutputFuncConv<<< numBlocks , threadsPerBlock >>>(de_input, d_inputSize,
+																  d_output,
+																  d_sums,
+																  d_weights, d_filterSize,
+																  d_deltas,
+																  d_b);
 	}
 
 	void ConvolutionalLayer::setDelta(std::vector<double> t_z)
@@ -262,14 +289,21 @@ namespace NeuralNetworkGPU
 	void ConvolutionalLayer::learnSGD()
 	{
 //		int64 timeBefore = cv::getTickCount();
-//		learnBackPropagationFuncConv<<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize, d_output, d_sums, d_weights, d_deltas, de_prevDeltas, d_n, d_b);
+		dim3 threadsPerBlock(size.z);
+		dim3 numBlocks(size.x, size.y);
+		learnSGDConv<<< numBlocks , threadsPerBlock >>>(de_input, d_inputSize,
+														d_output,
+														d_sums,
+														d_weights, d_filterSize,
+														d_deltas, de_prevDeltas,
+														d_n, d_b);
 //		int64 afterBefore = cv::getTickCount();
 //		std::cout << "Sigm: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 	}
 
 	void ConvolutionalLayer::learnAdam()
 	{
-		//Implement SGD first
+		//TODO::Implement SGD first
 	}
 
 	/*
@@ -277,6 +311,6 @@ namespace NeuralNetworkGPU
 	 */
 	NeuronsPtr ConvolutionalLayer::getNeuronPtr()
 	{
-		return NeuronsPtr(d_output,size.x*size.y*size.z, d_deltas);
+		return NeuronsPtr(d_output,size, d_deltas);
 	}
 }
