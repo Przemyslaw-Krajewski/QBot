@@ -11,11 +11,10 @@
  */
 int main()
 {
-	Test::testConvNNSpeedGPU();
-//	Bot bot;
+	Bot bot;
 	try
 	{
-//		bot.execute();
+		bot.execute();
 	}
 	catch(std::string& e)
 	{

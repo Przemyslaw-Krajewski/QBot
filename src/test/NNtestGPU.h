@@ -91,7 +91,6 @@ namespace Test
                 double value = nn->determineOutput(x[i])[0];
                 double miss = value - z[i][0];
                 missSum += fabs(miss);
-                std::cout << "Value: " << value << "\n";
                 std::cout << "Miss: "<< miss << "\n";
             }
 
@@ -310,8 +309,8 @@ namespace Test
 	{
 		NeuralNetworkGPU::NeuralNetwork nn;
 		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(5,5,1)));
-		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.04,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
-		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.004,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.001,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5},
         									{0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1}},
@@ -335,17 +334,17 @@ namespace Test
 
     void testConvNNSpeedGPU()
     {
-        std::vector<double> x = std::vector<double>(32*32);
+        std::vector<double> x = std::vector<double>(20*20);
         std::vector<double> z = {0.5};
         NeuralNetworkGPU::NeuralNetwork nn(NeuralNetworkGPU::LearnMode::Adam);
-        nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(32,32,1)));
-        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,100,NeuralNetworkGPU::MatrixSize(9,9),nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1000,NeuralNetworkGPU::MatrixSize(9,9),nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,10,NeuralNetworkGPU::MatrixSize(9,9),nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(20,20,1)));
+        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,100,NeuralNetworkGPU::MatrixSize(5,5),nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,100,NeuralNetworkGPU::MatrixSize(5,5),nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,10,NeuralNetworkGPU::MatrixSize(5,5),nn.getLastLayerNeuronRef()));
 		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2, 1, nn.getLastLayerNeuronRef()));
         int64 timeBefore = cv::getTickCount();
         long i;
-        for (i = 0; i < 1000; i++)
+        for (i = 0; i < 10000; i++)
         {
             nn.determineOutput(x);
             nn.learnBackPropagation(z);

@@ -14,7 +14,7 @@ namespace NeuralNetworkGPU
 	{
 		if(INPUT_BUFFER_SIZE < t_size)
 		{
-			std::cout << t_size;
+			std::cout << t_size << "\n";
 			assert("CUDA input buffer to small");
 		}
 		size = t_size;
@@ -28,8 +28,6 @@ namespace NeuralNetworkGPU
 	 */
 	InputLayer::InputLayer(TensorSize t_size)
 	{
-		//TODO::Validate data
-
 		size = t_size.x;
 		tSize = t_size;
 		input = (float*) malloc(sizeof(float)*tSize.m);

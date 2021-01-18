@@ -17,57 +17,36 @@ namespace NeuralNetworkGPU
 			float *t_deltas,
 			float *d_b)
 	{
-//		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
-
-		//copy input to common buffer
-//		if(inputSize == blockDim.x)
-//		{
-//			inputBuff[threadIdx.x] = t_input[threadIdx.x];
-//		}
-//		else if(inputSize < blockDim.x)
-//		{
-//			if(threadIdx.x < inputSize) inputBuff[threadIdx.x] = t_input[threadIdx.x];
-//		}
-//		else if(inputSize > blockDim.x)
-//		{
-//			int index = inputSize-threadIdx.x-1;
-//			while(index >= 0)
-//			{
-//				inputBuff[index] = t_input[index];
-//				index -= blockDim.x;
-//			}
-//		}
-//		__syncthreads();
+		long index = blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y;
 
 		//sums x[i]*w[i]
-		int xHalfFilterSize = t_filterSize->x/2;
-		int yHalfFilterSize = t_filterSize->y/2;
+		int yFrame = t_inputSize->x*t_inputSize->y;
+		int yfFrame = t_filterSize->y*t_filterSize->x;
+		int yOffset = blockIdx.y*t_inputSize->x;
 		float sum = 0;
-		for(int x=-xHalfFilterSize; x<=xHalfFilterSize; x++)
-		{
-			for(int y=-yHalfFilterSize; y<=yHalfFilterSize; y++)
-			{
-				for(int z=0; z<t_inputSize->z; z++)
-				{
-					int fx = xHalfFilterSize+x;
-					int fy = yHalfFilterSize+y;
-					int tx = xHalfFilterSize+blockIdx.x+x;
-					int ty = yHalfFilterSize+blockIdx.y+y;
-					int tz = z;
 
-					sum += t_input[tx + ty*t_inputSize->x + tz*t_inputSize->x*t_inputSize->y] *
-								t_weights[fx + fy*t_filterSize->x + z*t_filterSize->x*t_filterSize->y];
+		for(int y=0,yf=0,yi=yOffset; y<t_filterSize->y; y++)
+		{
+			for(int x=0; x<t_filterSize->x; x++)
+			{
+				for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
+				{
+					sum += t_input[blockIdx.x+x + yi + zi] * t_weights[x + yf + zf];
+					zf+=yfFrame;
+					zi+=yFrame;
 				}
 			}
+			yf+=t_filterSize->x;
+			yi+=t_inputSize->y;
 		}
 
-		t_sums[blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y] = sum;
+		t_sums[index] = sum;
+		//reset delta
+		t_deltas[index] = 0;
 		//activation function
-		t_output[blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y] =
+		t_output[index] =
 //				1 / (1 + exp(-(*d_b)*sum) );	//sigmoid function
 				sum > 0 ? sum : sum*0.1; 					//RELU function
-		//reset delta
-		t_deltas[blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y] = 0;
 	}
 
 	/*
@@ -80,29 +59,6 @@ namespace NeuralNetworkGPU
 			float *t_deltas, float *t_prevDeltas,
 			float *d_n,float *d_b)
 	{
-//		int inputSize = 3;//*t_inputSize;
-
-		//copy input to common buffer
-//		__shared__ float inputBuff[INPUT_BUFFER_SIZE];
-//		if(inputSize == blockDim.x)
-//		{
-//			inputBuff[threadIdx.x] = t_input[threadIdx.x];
-//		}
-//		else if(inputSize < blockDim.x)
-//		{
-//			if(threadIdx.x < inputSize) inputBuff[threadIdx.x] = t_input[threadIdx.x];
-//		}
-//		else if(inputSize > blockDim.x)
-//		{
-//			int index = inputSize-threadIdx.x-1;
-//			while(index >= 0)
-//			{
-//				inputBuff[index] = t_input[index];
-//				index -= blockDim.x;
-//			}
-//		}
-//		__syncthreads();
-
 		long index = blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y;
 		float delta = t_deltas[index];
 
@@ -114,44 +70,43 @@ namespace NeuralNetworkGPU
 
 		float p = (*d_n)* delta * derivative;
 		//calculate new weights
-		int xHalfFilterSize = t_filterSize->x/2;
-		int yHalfFilterSize = t_filterSize->y/2;
-		for(int x=-xHalfFilterSize; x<=xHalfFilterSize; x++)
+		int yFrame = t_inputSize->x*t_inputSize->y;
+		int yfFrame = t_filterSize->y*t_filterSize->x;
+		int yOffset = blockIdx.y*t_inputSize->x;
+		for(int y=0,yf=0,yi=yOffset; y<t_filterSize->y; y++)
 		{
-			for(int y=-yHalfFilterSize; y<=yHalfFilterSize; y++)
+			for(int x=0; x<t_filterSize->x; x++)
 			{
-				for(int z=0; z<t_inputSize->z; z++)
+				for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
 				{
-					int fx = xHalfFilterSize+x;
-					int fy = yHalfFilterSize+y;
-					int tx = xHalfFilterSize+blockIdx.x+x;
-					int ty = yHalfFilterSize+blockIdx.y+y;
-					int tz = z;
-					t_weights[ fx + fy*t_filterSize->x + z*t_filterSize->x*t_filterSize->y ] -=
-				    		p*t_input[tx + ty*t_inputSize->x + tz*t_inputSize->x*t_inputSize->y];
+					t_weights[ x + yf + zf ] -= p*t_input[blockIdx.x+x + yi + zi];
+
+					zf+=yfFrame;
+					zi+=yFrame;
 				}
 			}
+			yf+=t_filterSize->x;
+			yi+=t_inputSize->y;
 		}
 
 		//set delta to deeper neurons
 		if(t_prevDeltas != nullptr)
 		{
-			for(int x=-xHalfFilterSize; x<=xHalfFilterSize; x++)
+			float dd = delta*derivative;
+			for(int y=0,yf=0,yi=yOffset; y<t_filterSize->y; y++)
 			{
-				for(int y=-yHalfFilterSize; y<=yHalfFilterSize; y++)
+				for(int x=0; x<t_filterSize->x; x++)
 				{
-					for(int z=0; z<t_inputSize->z; z++)
+					for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
 					{
-						int fx = xHalfFilterSize+x;
-						int fy = yHalfFilterSize+y;
-						int tx = xHalfFilterSize+blockIdx.x+x;
-						int ty = yHalfFilterSize+blockIdx.y+y;
-						int tz = z;
+						t_prevDeltas[blockIdx.x+x + yi + zi] += dd * t_weights[ x + yf + zf ];
 
-						t_prevDeltas[tx + ty*t_inputSize->x + tz*t_inputSize->x*t_inputSize->y] +=
-								delta * derivative * t_weights[ fx + fy*t_filterSize->x + z*t_filterSize->x*t_filterSize->y ];;
+						zf+=yfFrame;
+						zi+=yFrame;
 					}
 				}
+				yf+=t_filterSize->x;
+				yi+=t_inputSize->y;
 			}
 		}
 

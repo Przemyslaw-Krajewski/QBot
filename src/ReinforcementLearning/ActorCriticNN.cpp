@@ -39,19 +39,24 @@ ActorCriticNN::~ActorCriticNN()
  */
 void ActorCriticNN::resetNN()
 {
-    actorValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
+//    actorValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
+//    actorValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
+//    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3f,0.00008f, 2600, actorValues.getLastLayerNeuronRef()));
+//    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6f,0.00012f, numberOfActions, actorValues.getLastLayerNeuronRef()));
+//
+//    criticValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
+//    criticValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
+//    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3f, 0.00006f, 2600, criticValues.getLastLayerNeuronRef()));
+//    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6f, 0.00009f, 1, criticValues.getLastLayerNeuronRef()));
+
+    actorValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::SGD);
     actorValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
-//    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.2,0.025, 1600, actorValues.getLastLayerNeuronRef()));
-//    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.5,0.04, 1200, actorValues.getLastLayerNeuronRef()));
-//    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6,0.06, numberOfActions, actorValues.getLastLayerNeuronRef()));
     actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3f,0.00008f, 2600, actorValues.getLastLayerNeuronRef()));
-//    actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7f,0.000026f, 1200, actorValues.getLastLayerNeuronRef()));
     actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6f,0.00012f, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
-    criticValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
+    criticValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::SGD);
     criticValues.addLayer(new NeuralNetworkGPU::InputLayer(dimensionStatesSize));
     criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.3f, 0.00006f, 2600, criticValues.getLastLayerNeuronRef()));
-//    criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.7f, 0.00006f, 1200, criticValues.getLastLayerNeuronRef()));
     criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.6f, 0.00009f, 1, criticValues.getLastLayerNeuronRef()));
 
 }
