@@ -342,14 +342,11 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::FuseLayer(inputLayer1->getNeuronPtr(),inputLayer2->getNeuronPtr()));
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,0.01, 1, nn.getLastLayerNeuronRef()));
 
-        std::vector<std::vector<double>> in;
-		in.push_back({2});in.push_back({0});
+        std::vector<double> in;
+		in.push_back(2);in.push_back(0);
 
 		std::cout << "Input:\n";
-		for(std::vector<double> it : in)
-		{
-			for(double i : it) std::cout << "   " << i << "\n";
-		}
+		for(double i : in) std::cout << "   " << i << "\n";
 
 		nn.determineOutput(in);
 		std::vector<double> out = nn.getOutput();

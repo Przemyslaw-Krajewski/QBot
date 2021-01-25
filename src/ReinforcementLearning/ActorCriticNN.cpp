@@ -79,7 +79,7 @@ int ActorCriticNN::chooseAction(State& t_state)
 	std::cout << critic[0] << "   :    ";
 	for(int i=0; i<values.size(); i++) std::cout << values[i] << "  ";
 	std::cout << "\n";
-	return 0;
+//	return 0;
 
 	//sure action
 //	double maxValue = getMaxValue(values);

@@ -58,26 +58,20 @@ namespace NeuralNetworkGPU {
 	 */
 	std::vector<double> NeuralNetwork::determineOutput(std::vector<double> x)
 	{
-//		//Prepare input
-		(*layers.begin())->setInput(x);
-
-		//Calculate
-		for(auto it = layers.begin(); it != layers.end(); it++)
+		//Prepare input
+		int lastValueIndex = 0;
+		std::list<NNLayer*>::iterator layer = layers.begin();
+		while(x.size() > lastValueIndex && layer != layers.end())
 		{
-			(*it)->determineOutput();
-		}
+//			std::cout << x.size() << "   "  << lastValueIndex << "   "  << (*layer)->getNeuronPtr().size << "\n";
+			assert(x.size() >= lastValueIndex+(*layer)->getNeuronPtr().size && "Input size is not okie dokie (double)");
+			std::vector<double>::const_iterator first = x.begin() + lastValueIndex;
+			std::vector<double>::const_iterator last = x.begin() + lastValueIndex+(*layer)->getNeuronPtr().size;
+			std::vector<double> input(first,last);
+			(*layer)->setInput(input);
 
-		return (*layers.rbegin())->getOutput();
-	}
-
-	std::vector<double> NeuralNetwork::determineOutput(std::vector<std::vector<double>> t_x)
-	{
-//		//Prepare input
-		std::list<NNLayer*>::iterator it = layers.begin();
-		for(std::vector<double> x : t_x)
-		{
-			(*it)->setInput(x);
-			it++;
+			lastValueIndex += (*layer)->getNeuronPtr().size;
+			layer++;
 		}
 
 		//Calculate
@@ -95,28 +89,18 @@ namespace NeuralNetworkGPU {
 	std::vector<double> NeuralNetwork::determineOutput(std::vector<int> x)
 	{
 		//Prepare input
-		(*layers.begin())->setInput(x);
-
-		//Calculate
-		for(auto it = layers.begin(); it != layers.end(); it++)
+		int lastValueIndex = 0;
+		std::list<NNLayer*>::iterator layer = layers.begin();
+		while(x.size() > lastValueIndex && layer != layers.end())
 		{
-			(*it)->determineOutput();
-		}
+			assert(x.size() >= lastValueIndex+(*layer)->getNeuronPtr().size && "Input size is not okie dokie (int)");
+			std::vector<int>::const_iterator first = x.begin() + lastValueIndex;
+			std::vector<int>::const_iterator last = x.begin() + lastValueIndex+(*layer)->getNeuronPtr().size;
+			std::vector<int> input(first,last);
+			(*layer)->setInput(input);
 
-		return (*layers.rbegin())->getOutput();
-	}
-
-	/*
-	 *
-	 */
-	std::vector<double> NeuralNetwork::determineOutput(std::vector<std::vector<int>> t_x)
-	{
-		//Prepare input
-		std::list<NNLayer*>::iterator it = layers.begin();
-		for(std::vector<int> x : t_x)
-		{
-			(*it)->setInput(x);
-			it++;
+			lastValueIndex += (*layer)->getNeuronPtr().size;
+			layer++;
 		}
 
 		//Calculate

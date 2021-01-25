@@ -43,8 +43,6 @@ namespace NeuralNetworkGPU {
 			//basic
 			std::vector<double> determineOutput(std::vector<double> x);
 			std::vector<double> determineOutput(std::vector<int> x);
-			std::vector<double> determineOutput(std::vector<std::vector<double>> x);
-			std::vector<double> determineOutput(std::vector<std::vector<int>> x);
 			std::vector<double> getOutput();
 			void learnBackPropagation(std::vector<double>& z);
 

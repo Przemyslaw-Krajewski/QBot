@@ -48,6 +48,7 @@ public:
 private:
 	int numberOfActions;
 	int dimensionStatesSize;
+	int imageSize;
 
 	NeuralNetworkGPU::NeuralNetwork criticValues;
 	NeuralNetworkGPU::NeuralNetwork actorValues;
