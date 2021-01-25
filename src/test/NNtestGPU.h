@@ -332,6 +332,38 @@ namespace Test
         std::cout << "Done: " << iteration << "\n";
 	}
 
+	void testFuseLayersGPU()
+	{
+        NeuralNetworkGPU::NeuralNetwork nn;
+        NeuralNetworkGPU::InputLayer* inputLayer1 = new NeuralNetworkGPU::InputLayer(1);
+        NeuralNetworkGPU::InputLayer* inputLayer2 = new NeuralNetworkGPU::InputLayer(1);
+        nn.addLayer(inputLayer1);
+        nn.addLayer(inputLayer2);
+        nn.addLayer(new NeuralNetworkGPU::FuseLayer(inputLayer1->getNeuronPtr(),inputLayer2->getNeuronPtr()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,0.01, 1, nn.getLastLayerNeuronRef()));
+
+        std::vector<std::vector<double>> in;
+		in.push_back({2});in.push_back({0});
+
+		std::cout << "Input:\n";
+		for(std::vector<double> it : in)
+		{
+			for(double i : it) std::cout << "   " << i << "\n";
+		}
+
+		nn.determineOutput(in);
+		std::vector<double> out = nn.getOutput();
+		std::cout << "Output:\n";
+		for(double i : out) std::cout << "   " << i << "\n";
+
+		std::vector<double> z = {0.5};
+		nn.learnBackPropagation(z);
+
+		out = nn.determineOutput(in);
+		std::cout << "Output:\n";
+		for(double i : out) std::cout << "   " << i << "\n";
+	}
+
     void testConvNNSpeedGPU()
     {
         std::vector<double> x = std::vector<double>(20*20);

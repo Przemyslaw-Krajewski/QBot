@@ -11,10 +11,11 @@
  */
 int main()
 {
-	Bot bot;
+	Test::testFuseLayersGPU();
+//	Bot bot;
 	try
 	{
-		bot.execute();
+//		bot.execute();
 	}
 	catch(std::string& e)
 	{

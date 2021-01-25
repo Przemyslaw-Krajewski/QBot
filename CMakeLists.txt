@@ -42,7 +42,8 @@ add_executable(QBot
 			src/NeuralNetworkGPU/NeuralNetwork.cpp
 			src/NeuralNetworkGPU/Layer/InputLayer.cu
 			src/NeuralNetworkGPU/Layer/SigmoidLayer.cu
-			src/NeuralNetworkGPU/Layer/ConvolutionalLayer.cu)
+			src/NeuralNetworkGPU/Layer/ConvolutionalLayer.cu
+			src/NeuralNetworkGPU/Layer/FuseLayer.cu)
 			
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
 target_link_libraries( QBot ${OpenCV_LIBRARIES} ${X11_LIBRARIES} xdo pthread)

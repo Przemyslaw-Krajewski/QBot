@@ -20,6 +20,7 @@
 #include "Layer/InputLayer.h"
 #include "Layer/SigmoidLayer.h"
 #include "Layer/ConvolutionalLayer.h"
+#include "Layer/FuseLayer.h"
 
 #include "Layer/NNLayer.h"
 
@@ -42,6 +43,8 @@ namespace NeuralNetworkGPU {
 			//basic
 			std::vector<double> determineOutput(std::vector<double> x);
 			std::vector<double> determineOutput(std::vector<int> x);
+			std::vector<double> determineOutput(std::vector<std::vector<double>> x);
+			std::vector<double> determineOutput(std::vector<std::vector<int>> x);
 			std::vector<double> getOutput();
 			void learnBackPropagation(std::vector<double>& z);
 

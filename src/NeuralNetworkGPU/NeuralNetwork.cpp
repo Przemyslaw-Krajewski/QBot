@@ -70,6 +70,25 @@ namespace NeuralNetworkGPU {
 		return (*layers.rbegin())->getOutput();
 	}
 
+	std::vector<double> NeuralNetwork::determineOutput(std::vector<std::vector<double>> t_x)
+	{
+//		//Prepare input
+		std::list<NNLayer*>::iterator it = layers.begin();
+		for(std::vector<double> x : t_x)
+		{
+			(*it)->setInput(x);
+			it++;
+		}
+
+		//Calculate
+		for(auto it = layers.begin(); it != layers.end(); it++)
+		{
+			(*it)->determineOutput();
+		}
+
+		return (*layers.rbegin())->getOutput();
+	}
+
 	/*
 	 *
 	 */
@@ -77,6 +96,28 @@ namespace NeuralNetworkGPU {
 	{
 		//Prepare input
 		(*layers.begin())->setInput(x);
+
+		//Calculate
+		for(auto it = layers.begin(); it != layers.end(); it++)
+		{
+			(*it)->determineOutput();
+		}
+
+		return (*layers.rbegin())->getOutput();
+	}
+
+	/*
+	 *
+	 */
+	std::vector<double> NeuralNetwork::determineOutput(std::vector<std::vector<int>> t_x)
+	{
+		//Prepare input
+		std::list<NNLayer*>::iterator it = layers.begin();
+		for(std::vector<int> x : t_x)
+		{
+			(*it)->setInput(x);
+			it++;
+		}
 
 		//Calculate
 		for(auto it = layers.begin(); it != layers.end(); it++)
