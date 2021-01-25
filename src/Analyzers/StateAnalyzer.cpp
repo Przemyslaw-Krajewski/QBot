@@ -10,7 +10,7 @@
 StateAnalyzer::StateAnalyzer()
 {
 	game = Game::SuperMarioBros;
-	imageAnalyzer = new MetaDataAnalyzer(game);
+	imageAnalyzer = new RawImageAnalyzer(game);
 }
 
 StateAnalyzer::~StateAnalyzer()

@@ -76,26 +76,27 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 		ControllerInput& controllerInput, Point& position, Point& velocity)
 {
 	State sceneState;
-
-	for(int x=0; x<image.cols; x++)
+	for(int z=0; z<image.channels(); z++)
 	{
-		for(int y=0; y<image.rows; y++)
+		for(int x=0; x<image.cols; x++)
 		{
-			uchar* ptrSrc = image.ptr(y)+(3*(x));
-			sceneState.push_back(ptrSrc[0]);
-			sceneState.push_back(ptrSrc[1]);
-			sceneState.push_back(ptrSrc[2]);
+			for(int y=0; y<image.rows; y++)
+			{
+				uchar* ptrSrc = image.ptr(y)+(3*(x));
+				sceneState.push_back(ptrSrc[z]);
+			}
 		}
 	}
 
-	for(int x=0; x<imagePast.cols; x++)
+	for(int z=0; z<imagePast.channels(); z++)
 	{
-		for(int y=0; y<imagePast.rows; y++)
+		for(int x=0; x<imagePast.cols; x++)
 		{
-			uchar* ptrSrc = imagePast.ptr(y)+(3*(x));
-			sceneState.push_back(ptrSrc[0]);
-			sceneState.push_back(ptrSrc[1]);
-			sceneState.push_back(ptrSrc[2]);
+			for(int y=0; y<imagePast.rows; y++)
+			{
+				uchar* ptrSrc = imagePast.ptr(y)+(3*(x));
+				sceneState.push_back(ptrSrc[z]);
+			}
 		}
 	}
 
