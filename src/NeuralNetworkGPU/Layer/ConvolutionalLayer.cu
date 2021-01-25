@@ -23,13 +23,14 @@ namespace NeuralNetworkGPU
 		int yFrame = t_inputSize->x*t_inputSize->y;
 		int yfFrame = t_filterSize->y*t_filterSize->x;
 		int yOffset = blockIdx.y*t_inputSize->x;
+		int zfOffset = yfFrame*t_inputSize->z*threadIdx.x;
 		float sum = 0;
 
 		for(int y=0,yf=0,yi=yOffset; y<t_filterSize->y; y++)
 		{
 			for(int x=0; x<t_filterSize->x; x++)
 			{
-				for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
+				for(int z=0,zf=zfOffset,zi=0; z<t_inputSize->z; z++)
 				{
 					sum += t_input[blockIdx.x+x + yi + zi] * t_weights[x + yf + zf];
 					zf+=yfFrame;
@@ -73,11 +74,12 @@ namespace NeuralNetworkGPU
 		int yFrame = t_inputSize->x*t_inputSize->y;
 		int yfFrame = t_filterSize->y*t_filterSize->x;
 		int yOffset = blockIdx.y*t_inputSize->x;
+		int zfOffset = yfFrame*t_inputSize->z*threadIdx.x;
 		for(int y=0,yf=0,yi=yOffset; y<t_filterSize->y; y++)
 		{
 			for(int x=0; x<t_filterSize->x; x++)
 			{
-				for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
+				for(int z=0,zf=zfOffset,zi=0; z<t_inputSize->z; z++)
 				{
 					t_weights[ x + yf + zf ] -= p*t_input[blockIdx.x+x + yi + zi];
 
@@ -147,7 +149,7 @@ namespace NeuralNetworkGPU
 		cudaMalloc( (void **) &d_filterSize, sizeof(MatrixSize));
 		cudaMemcpy(d_filterSize, &t_filterSize, sizeof(MatrixSize), cudaMemcpyHostToDevice);
 		//weights
-		cudaMalloc( (void **) &d_weights, sizeof(float)*t_filterSize.m*t_prevLayerReference.tSize.z);
+		cudaMalloc( (void **) &d_weights, sizeof(float)*t_filterSize.m*t_prevLayerReference.tSize.z*convLayers);
 		initWeights();
 
 		//sums
@@ -185,7 +187,7 @@ namespace NeuralNetworkGPU
 	 */
 	void ConvolutionalLayer::initWeights()
 	{
-		long weightsSize = filterSize.m*inputSize.z;
+		long weightsSize = filterSize.m*inputSize.z*size.z;
 
 		float *randomValues = (float*) malloc(sizeof(float)*weightsSize);
 
