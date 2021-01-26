@@ -49,9 +49,6 @@ private:
 
 	int holdButtonCounter;
 
-	const int MAX_INPUT_VALUE = 1;
-	const int MIN_INPUT_VALUE = 0;
-
 };
 
 #endif /* SRC_ANALYZERS_IMAGEANALYZER_METADATAANALYZER_H_ */

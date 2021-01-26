@@ -54,6 +54,9 @@ protected:
 
 	cv::Point imageSize;
 	Game game;
+
+	const int MAX_INPUT_VALUE = 1;
+	const int MIN_INPUT_VALUE = 0;
 };
 
 

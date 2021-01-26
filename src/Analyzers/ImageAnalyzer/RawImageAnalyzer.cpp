@@ -12,6 +12,7 @@
  */
 RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 {
+	holdButtonCounter = 0;
 
 	deadImage = cv::imread("graphics/dead.bmp", cv::IMREAD_COLOR);
 	winImage = cv::imread("graphics/win.bmp", cv::IMREAD_COLOR);
@@ -110,11 +111,21 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 //	}
 
 	//Controller
-//	for(bool ci : controllerInput)
-//	{
-//		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
-//		else sceneState.push_back(MIN_INPUT_VALUE);
-//	}
+	for(bool ci : controllerInput)
+	{
+		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+		else sceneState.push_back(MIN_INPUT_VALUE);
+	}
+
+	//AdditionalInfo
+	sceneState.push_back(velocity.x/4);
+	sceneState.push_back(velocity.y/2);
+
+	if(velocity.y == 0 && controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
+	else holdButtonCounter = 0;
+
+	sceneState.push_back(velocity.y == 0);
+	sceneState.push_back(holdButtonCounter >= 2 ? MAX_INPUT_VALUE : MIN_INPUT_VALUE);
 	return sceneState;
 }
 

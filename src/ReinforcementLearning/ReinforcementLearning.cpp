@@ -48,25 +48,42 @@ double ReinforcementLearning::getMaxValue(std::vector<double> t_array)
  */
 State ReinforcementLearning::reduceSceneState(const State& t_state, double action)
 {
+//	int reduceLevel = 8;
+//	int xSize = 32;
+//	int ySize = 56;
+//
+//	std::vector<int> result;
+//	for(int x=0;x<32;x+=reduceLevel)
+//	{
+//		for(int y=0;y<56;y+=reduceLevel)
+//		{
+//			int value=0;
+//			for(int xx=0;xx<reduceLevel;xx++)
+//			{
+//				for(int yy=0;yy<reduceLevel;yy++)
+//				{
+//					if(t_state[(x+xx)*56+y+yy] > value) value = t_state[+(x+xx)*56+y+yy];
+//					if(t_state[32*56+(x+xx)*56+y+yy]*2 > value) value = t_state[32*56+(x+xx)*56+y+yy]*2;
+//				}
+//			}
+//			result.push_back(value);
+//		}
+//	}
+
 	int reduceLevel = 8;
 	int xSize = 32;
-	int ySize = 56;
+	int ySize = 20;
+	int zSize = 3;
 
 	std::vector<int> result;
-	for(int x=0;x<32;x+=reduceLevel)
+	for(int z=0; z<zSize; z++)
 	{
-		for(int y=0;y<56;y+=reduceLevel)
+		for(int x=0;x<xSize;x+=reduceLevel)
 		{
-			int value=0;
-			for(int xx=0;xx<reduceLevel;xx++)
+			for(int y=0;y<ySize;y+=reduceLevel)
 			{
-				for(int yy=0;yy<reduceLevel;yy++)
-				{
-					if(t_state[(x+xx)*56+y+yy] > value) value = t_state[+(x+xx)*56+y+yy];
-					if(t_state[32*56+(x+xx)*56+y+yy]*2 > value) value = t_state[32*56+(x+xx)*56+y+yy]*2;
-				}
+				result.push_back(t_state[x + y*xSize + z*ySize*xSize]);
 			}
-			result.push_back(value);
 		}
 	}
 	result.push_back(t_state[t_state.size()-4]/3);

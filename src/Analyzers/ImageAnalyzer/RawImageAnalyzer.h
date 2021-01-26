@@ -46,6 +46,8 @@ private:
 	//BT
 	cv::Mat emptyHealth;
 	cv::Mat hair;
+
+	int holdButtonCounter;
 };
 
 #endif /* SRC_ANALYZERS_IMAGEANALYZER_RAWIMAGEANALYZER_H_ */

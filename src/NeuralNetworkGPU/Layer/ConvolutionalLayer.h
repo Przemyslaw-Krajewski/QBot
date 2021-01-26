@@ -50,6 +50,9 @@ namespace NeuralNetworkGPU
 		float *d_deltas, *deltas, *de_prevDeltas;
 
 		float *d_n, *d_b;
+
+		float *d_m, *d_v;  	// 1st moment vector, 2nd moment vector
+		float *d_B1, *d_B2; 	// Decay rates for moment vectors
 	};
 }
 

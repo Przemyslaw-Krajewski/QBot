@@ -8,6 +8,9 @@
 #ifndef SRC_ACTORCRITIC_ACTORCRITICNN_H_
 #define SRC_ACTORCRITIC_ACTORCRITICNN_H_
 
+#define ACTORCRITICNN_LOG
+//#define ACTORCRITICNN_ONE_ACTION
+
 #include <vector>
 #include <string>
 

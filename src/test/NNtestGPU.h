@@ -384,6 +384,19 @@ namespace Test
         std::cout << (timeAfter - timeBefore) / cv::getTickFrequency() << "\n";
     }
 
+	void testConv2LayersAdamGPU()
+	{
+		NeuralNetworkGPU::NeuralNetwork nn(NeuralNetworkGPU::LearnMode::Adam);
+		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(5,5,1)));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.4,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.1,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5, 0.1, 0.2, 0.3, 0.4, 0.5},
+        									{0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.5, 0.4, 0.3, 0.2, 0.1}},
+                                           {40,100}, &nn);
+        std::cout << "Done: " << iteration << "\n";
+	}
+
 }
 
 #endif //QBOT_NNTESTGPU_H
