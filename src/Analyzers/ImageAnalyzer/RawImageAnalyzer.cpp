@@ -62,6 +62,8 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 	cv::Mat firstPhaseImage;
 	getMostFrequentInBlock(2, smallerImage, firstPhaseImage);
 	getLeastFrequentInImage(4, firstPhaseImage, result->processedImage);
+//	cv::medianBlur 	( 	smallerImage,firstPhaseImage,3);
+//	cv::resize(firstPhaseImage, result->processedImage, cv::Size(), 0.5, 0.5,CV_INTER_LINEAR);
 	oldImages.push_back(result->processedImage);
 
 	viewImage(16,"proc", result->processedImage);

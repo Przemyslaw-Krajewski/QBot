@@ -197,32 +197,8 @@ ControllerInput Bot::determineControllerInput(int t_action)
 	ControllerInput w;
 	for(int i=0; i<numberOfControllerInputs; i++) w.push_back(false);
 
-//	w[ 2+(t_action%4) ] = true;
-//	w[0] = t_action>3;
-
-	switch(t_action)
-	{
-	case 0: //Right
-		w[4] = true;
-		break;
-	case 1: //Right jump
-		w[0] = true;
-		w[4] = true;
-		break;
-	case 2: //Left
-		w[2] = true;
-		break;
-	case 3: //Jump
-		w[0] = true;
-		break;
-	case 4: //Left Jump
-		w[0] = true;
-		w[2] = true;
-		break;
-	default:
-		std::cout << t_action << "\n";
-		assert("No such action!" && false);
-	}
+	w[ 2+(t_action%4) ] = true;
+	w[0] = t_action>3;
 
 	return w;
 }
@@ -232,26 +208,9 @@ ControllerInput Bot::determineControllerInput(int t_action)
  */
 int Bot::determineControllerInputInt(int t_action)
 {
-//	int direction = (1<<(4+t_action%4));
-//	int jump = t_action>3?1:0;
-//	return direction+jump;
-	switch(t_action)
-	{
-	case 0: //Right
-		return 128;
-	case 1: //Right jump
-		return 128+1;
-	case 2: //Left
-		return 64;
-	case 3: //Jump
-		return 1;
-	case 4: //Left Jump
-		return 64+1;
-	default:
-		std::cout << t_action << "\n";
-		assert("No such action!" && false);
-	}
-	return 0;
+	int direction = (1<<(4+t_action%4));
+	int jump = t_action>3?1:0;
+	return direction+jump;
 }
 
 /*
