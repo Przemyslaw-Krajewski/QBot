@@ -64,10 +64,10 @@ namespace NeuralNetworkGPU
 		float delta = t_deltas[index];
 
 		//determine common multiplier
-//		float e = exp(-(*d_b)*t_sums[index]);
-//		float m = 1 + e;
-//		float derivative = ((*d_b)*e/(m*m));
-		float derivative = t_sums[index] > 0 ? 1 : 0.1;
+		float e = exp(-(*d_b)*t_sums[index]);
+		float m = 1 + e;
+		float derivative = ((*d_b)*e/(m*m));
+//		float derivative = t_sums[index] > 0 ? 1 : 0.1;
 
 		float p = (*d_n)* delta * derivative;
 		//calculate new weights
@@ -133,10 +133,11 @@ namespace NeuralNetworkGPU
 		float delta = t_deltas[index];
 
 		//determine derivative and gradients
-//		float e = exp(-(*d_b)*t_sums[index]);
-//		float m = 1 + e;
-//		float derivative = ((*d_b)*e/(m*m));
-		float derivative = t_sums[index] > 0 ? 1 : 0.1;
+		float e = exp(-(*t_b)*t_sums[index]);
+		float m = 1 + e;
+		float derivative = ((*t_b)*e/(m*m));
+//		float sum = t_sums[index];
+//		float derivative = sum > 0 && sum < 4080 ? 1 : 0.1;
 		float grad = delta*derivative; // gradient without x factor
 		float grad2 = grad*grad;
 

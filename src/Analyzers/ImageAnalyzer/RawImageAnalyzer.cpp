@@ -41,13 +41,13 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 	else if(game == Game::SuperMarioBros) calculateSituationSMB(colorImage,result);
 	else throw std::string("RawImageAnalyzer::Not such game");
 
-	if(oldImages.size() >3)
+	if(oldImages.size() >2)
 	{
 		result->processedImagePast = *oldImages.begin();
 		oldImages2.push_back(result->processedImagePast.clone());
 		oldImages.erase(oldImages.begin());
 	}
-	else result->processedImagePast = cv::Mat(20, 32, CV_8UC3);
+	else result->processedImagePast = cv::Mat(40, 64, CV_8UC3);
 
 //	if(oldImages2.size() >6)
 //	{
@@ -60,14 +60,14 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 	int blockSize = 16;
 	reduceColors(0b11000000,&smallerImage);
 	cv::Mat firstPhaseImage;
-	getMostFrequentInBlock(2, smallerImage, firstPhaseImage);
-	getLeastFrequentInImage(4, firstPhaseImage, result->processedImage);
-//	cv::medianBlur 	( 	smallerImage,firstPhaseImage,3);
-//	cv::resize(firstPhaseImage, result->processedImage, cv::Size(), 0.5, 0.5,CV_INTER_LINEAR);
+//	getMostFrequentInBlock(2, smallerImage, firstPhaseImage);
+	getLeastFrequentInImage(2, smallerImage, firstPhaseImage);
+//	cv::medianBlur(	smallerImage,smallerImage,3);
+	cv::resize(firstPhaseImage, result->processedImage, cv::Size(), 0.5, 0.5,CV_INTER_CUBIC);
 	oldImages.push_back(result->processedImage);
 
-	viewImage(16,"proc", result->processedImage);
-	viewImage(16,"past1", result->processedImagePast);
+	viewImage(8,"proc", result->processedImage);
+	viewImage(8,"past1", result->processedImagePast);
 //	viewImage(32,"past2", result->processedImagePast2);
 	result->playerFound = true;
 }
@@ -128,6 +128,9 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 
 	sceneState.push_back(velocity.y == 0);
 	sceneState.push_back(holdButtonCounter >= 2 ? MAX_INPUT_VALUE : MIN_INPUT_VALUE);
+
+	for(int i=0;i<6;i++) sceneState.push_back(0);
+
 	return sceneState;
 }
 

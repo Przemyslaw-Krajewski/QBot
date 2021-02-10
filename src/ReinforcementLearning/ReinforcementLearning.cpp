@@ -70,20 +70,22 @@ State ReinforcementLearning::reduceSceneState(const State& t_state, double actio
 //		}
 //	}
 
-	int reduceLevel = 8;
-	int xSize = 32;
-	int ySize = 20;
+	int reduceLevel = 16;
+	int xSize = 64;
+	int ySize = 40;
 	int zSize = 3;
 
 	std::vector<int> result;
-	for(int z=0; z<zSize; z++)
+	for(int x=0;x<xSize;x+=reduceLevel)
 	{
-		for(int x=0;x<xSize;x+=reduceLevel)
+		for(int y=0;y<ySize;y+=reduceLevel)
 		{
-			for(int y=0;y<ySize;y+=reduceLevel)
+			int value = 0;
+			for(int z=0; z<zSize; z++)
 			{
-				result.push_back(t_state[x + y*xSize + z*ySize*xSize]);
+				value += (t_state[x + y*xSize + z*ySize*xSize] >> 5);
 			}
+			result.push_back(value);
 		}
 	}
 	result.push_back(t_state[t_state.size()-4]/3);

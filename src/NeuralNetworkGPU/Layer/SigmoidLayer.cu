@@ -258,7 +258,7 @@ namespace NeuralNetworkGPU
 			if(numberOfThreads<=800 && numberOfThreads*numberOfBlocks==size) break;
 			numberOfBlocks++;
 
-			assert(numberOfBlocks < 10 && "Could not match thread/block size");
+			assert(numberOfBlocks < 20 && "Could not match thread/block size");
 		}
 
 	}

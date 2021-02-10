@@ -36,9 +36,6 @@ namespace NeuralNetworkGPU
 	{
 		long index = threadIdx.x +  blockIdx.x*blockDim.x;
 
-		//reset delta
-		t_deltas[index] = 0;
-
 		//set delta to deeper neurons
 		if(index < *t_inputSize1)
 		{
@@ -48,6 +45,9 @@ namespace NeuralNetworkGPU
 		{
 			if(t_prevDeltas2 != nullptr) t_prevDeltas2[index-*t_inputSize1] = t_deltas[index];
 		}
+
+		//reset delta
+		t_deltas[index] = 0;
 	}
 
 	/*
@@ -84,7 +84,7 @@ namespace NeuralNetworkGPU
 			if(numberOfThreads<=800 && numberOfThreads*numberOfBlocks==size) break;
 			numberOfBlocks++;
 
-			assert(numberOfBlocks < 10 && "Could not match thread/block size");
+			assert(numberOfBlocks < 20 && "Could not match thread/block size");
 		}
 
 	}
