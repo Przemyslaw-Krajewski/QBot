@@ -122,6 +122,7 @@ void Bot::execute()
 														analyzeResult.playerCoords,
 														analyzeResult.playerVelocity);
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
+			reinforcementLearning->drawReducedSceneState(sceneState);
 
 			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
 

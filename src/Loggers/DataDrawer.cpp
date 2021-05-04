@@ -108,7 +108,7 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_time, ControllerInput t_keys, bool pressedKey)
 {
 	int blockSize = 15;
-	int barWidth = 100;
+	int barWidth = 300;
 	cv::Mat map = cv::Mat(blockSize*8, blockSize*2+barWidth, CV_8UC3);
 	for(int x=0; x<map.cols; x++)
 	{

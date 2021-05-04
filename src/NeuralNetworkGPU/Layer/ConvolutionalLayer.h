@@ -31,6 +31,9 @@ namespace NeuralNetworkGPU
 		NeuronsPtr getNeuronPtr() override;
 		void initWeights();
 
+		//visualization
+		virtual void drawLayer();
+
 		//save load
 //		void saveToFile(std::ofstream &t_file) override;
 //		void loadFromFile(std::ifstream &t_file) override;

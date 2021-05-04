@@ -42,12 +42,14 @@ namespace NeuralNetworkGPU
 		}
 
 		t_sums[index] = sum;
+//		sum = sum > 255 ? 255 : sum;
+//		sum = sum < -255 ? -255 : sum;
 		//reset delta
 		t_deltas[index] = 0;
 		//activation function
 		t_output[index] =
 //				1 / (1 + exp(-(*d_b)*sum) );	//sigmoid function
-				sum > 0 ? sum : sum*0.1; 					//RELU function
+				sum > 0 ? sum : sum*0.05; 		//RELU function
 	}
 
 	/*
@@ -64,10 +66,10 @@ namespace NeuralNetworkGPU
 		float delta = t_deltas[index];
 
 		//determine common multiplier
-		float e = exp(-(*d_b)*t_sums[index]);
-		float m = 1 + e;
-		float derivative = ((*d_b)*e/(m*m));
-//		float derivative = t_sums[index] > 0 ? 1 : 0.1;
+//		float e = exp(-(*d_b)*t_sums[index]);
+//		float m = 1 + e;
+//		float derivative = ((*d_b)*e/(m*m));
+		float derivative = t_sums[index] > 0 ? 1 : 0.05;
 
 		float p = (*d_n)* delta * derivative;
 		//calculate new weights
@@ -133,11 +135,11 @@ namespace NeuralNetworkGPU
 		float delta = t_deltas[index];
 
 		//determine derivative and gradients
-		float e = exp(-(*t_b)*t_sums[index]);
-		float m = 1 + e;
-		float derivative = ((*t_b)*e/(m*m));
-//		float sum = t_sums[index];
-//		float derivative = sum > 0 && sum < 4080 ? 1 : 0.1;
+//		float e = exp(-(*t_b)*t_sums[index]);
+//		float m = 1 + e;
+//		float derivative = ((*t_b)*e/(m*m));
+		float sum = t_sums[index];
+		float derivative = sum > 0 && sum < 65536 && sum > -65536 ? 1 : 0.05;
 		float grad = delta*derivative; // gradient without x factor
 		float grad2 = grad*grad;
 
@@ -198,6 +200,45 @@ namespace NeuralNetworkGPU
 		//reset delta
 		t_deltas[index] = 0;
 
+	}
+
+	/*
+	 *
+	 */
+	__global__ void scaleWeightsConv(TensorSize *t_inputSize,
+			float *t_weights, MatrixSize *t_filterSize)
+	{
+		//calculate new weights
+		int yfFrame = t_filterSize->y*t_filterSize->x;
+		int zfOffset = yfFrame*t_inputSize->z*threadIdx.x;
+		float sum = 0;
+		for(int y=0,yf=0; y<t_filterSize->y; y++)
+		{
+			for(int x=0; x<t_filterSize->x; x++)
+			{
+				for(int z=0,zf=zfOffset; z<t_inputSize->z; z++)
+				{
+					sum = abs(t_weights[ x + yf + zf ]) > sum ? abs(t_weights[ x + yf + zf ]) : sum;
+
+					zf+=yfFrame;
+				}
+			}
+			yf+=t_filterSize->x;
+		}
+		__fdiv_rd(sum,100);
+		for(int y=0,yf=0; y<t_filterSize->y; y++)
+		{
+			for(int x=0; x<t_filterSize->x; x++)
+			{
+				for(int z=0,zf=zfOffset; z<t_inputSize->z; z++)
+				{
+					t_weights[ x + yf + zf ] = __fdiv_rd(t_weights[ x + yf + zf ],sum);
+
+					zf+=yfFrame;
+				}
+			}
+			yf+=t_filterSize->x;
+		}
 	}
 
 	/*
@@ -385,5 +426,32 @@ namespace NeuralNetworkGPU
 	NeuronsPtr ConvolutionalLayer::getNeuronPtr()
 	{
 		return NeuronsPtr(d_output,size, d_deltas);
+	}
+
+	/*
+	 *
+	 */
+	void ConvolutionalLayer::drawLayer()
+	{
+		std::vector<double> output = getOutput();
+		for(int z=0; z<size.z; z++)
+		{
+			cv::Mat image = cv::Mat(size.y, size.x, CV_8UC3);
+			for(int y=0; y<size.y; y++)
+			{
+				for(int x=0; x<size.x; x++)
+				{
+					uchar* ptrDst = image.ptr(y)+(x+x+x);
+					int src = output[z*size.x*size.y + y*size.x + x]*255;
+					ptrDst[0] = src;
+					ptrDst[1] = src;
+					ptrDst[2] = src;
+				}
+			}
+			cv::resize(image, image, cv::Size(), 4, 4,CV_INTER_CUBIC);
+			//Print
+			imshow(std::to_string(z), image);
+			cv::waitKey(3);
+		}
 	}
 }
