@@ -137,6 +137,98 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 /*
  *
  */
+State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
+{
+	int reduceLevel = 8;
+	int xSize = 64;
+	int ySize = 40;
+	int zSize = 3;
+
+	std::vector<int> edges = std::vector<int>(xSize*ySize,0);
+	std::vector<int> erosion = std::vector<int>(xSize*ySize,0);
+
+	//Find edges and threshold
+	for(int x=1; x<xSize-1; x++)
+	{
+		for(int y=1; y<ySize-1; y++)
+		{
+			int value = 0;
+			for(int z=0; z<zSize; z++)
+			{
+				value += abs((t_state[ x +     y   *xSize + z*ySize*xSize]>> 0)*4 -
+							 (t_state[(x-1) +  y   *xSize + z*ySize*xSize]>> 0) -
+							 (t_state[(x+1) +  y   *xSize + z*ySize*xSize]>> 0) -
+							 (t_state[ x    + (y-1)*xSize + z*ySize*xSize]>> 0) -
+							 (t_state[ x    + (y+1)*xSize + z*ySize*xSize]>> 0));
+			}
+			if(value > 15) edges[x+y*xSize] = 255;
+//			else if(value > 20) edges[x+y*xSize] = 128;
+//			else edges[x+y*xSize] = 0;
+//			edges[x+y*xSize] = value;
+		}
+	}
+
+	for(int x=2; x<xSize-2; x++)
+	{
+		for(int y=2; y<ySize-2; y++)
+		{
+			int value = 0;
+			value = edges[x-1+(y-1)*xSize] + edges[x+(y-1)*xSize] + edges[x+1+(y-1)*xSize] +
+					edges[x-1+y*xSize] + 					+ edges[x+1+y*xSize] +
+					edges[x-1+(y+1)*xSize] + edges[x+(y+1)*xSize] + edges[x+1+(y+1)*xSize];
+//			value = edges[x-2+(y-2)*xSize] + edges[x-1+(y-2)*xSize] + edges[x+(y-2)*xSize] + edges[x+1+(y-2)*xSize] + edges[x+2+(y-2)*xSize] +
+//								edges[x-2+(y-1)*xSize] + edges[x-1+(y-1)*xSize] + edges[x+(y-1)*xSize] + edges[x+1+(y-1)*xSize] + edges[x+2+(y-1)*xSize] +
+//								edges[x-2+y*xSize] + edges[x-1+y*xSize] + 					+ edges[x+1+y*xSize] + edges[x+2+y*xSize] +
+//								edges[x-2+(y+1)*xSize] + edges[x-1+(y+1)*xSize] + edges[x+(y+1)*xSize] + edges[x+1+(y+1)*xSize] + edges[x+2+(y+1)*xSize] +
+//								edges[x-2+(y+2)*xSize] + edges[x-1+(y+2)*xSize] + edges[x+(y+2)*xSize] + edges[x+1+(y+2)*xSize] + edges[x+2+(y+2)*xSize];
+			if(value >= 255*8) erosion[x+y*xSize] = 255;
+		}
+	}
+
+	std::vector<int> result;
+	for(int x=0;x<xSize;x+=reduceLevel)
+	{
+		for(int y=0;y<ySize;y+=reduceLevel)
+		{
+			int value=0;
+			for(int xx=0;xx<reduceLevel;xx++)
+			{
+				for(int yy=0;yy<reduceLevel;yy++)
+				{
+					value += erosion[x+xx+(y+yy)*xSize];
+//					if(edges[x+xx+(y+yy)*xSize] > value) value = erosion[x+xx+(y+yy)*xSize];
+				}
+			}
+			if(value > reduceLevel*64) result.push_back(255);
+			else result.push_back(0);
+		}
+	}
+
+	//Old raw image
+//	std::vector<int> result;
+//	for(int x=0;x<xSize;x+=reduceLevel)
+//	{
+//		for(int y=0;y<ySize;y+=reduceLevel)
+//		{
+//			for(int z=0; z<zSize; z++)
+//			{
+//				int value = (t_state[x + y*xSize + z*ySize*xSize] >> 7);
+//				result.push_back(value);
+//			}
+//		}
+//	}
+	result.push_back(t_state[t_state.size()-4-6]/4);
+	result.push_back(t_state[t_state.size()-3-6]/2);
+//	result.push_back(t_state[t_state.size()-1-6]);
+
+//	result.push_back(action);
+
+	return result;
+}
+
+/*
+ *
+ */
 void RawImageAnalyzer::calculateSituationSMB(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult)
 {
 	//Player death

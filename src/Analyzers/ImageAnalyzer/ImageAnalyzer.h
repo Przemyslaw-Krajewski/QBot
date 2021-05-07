@@ -41,6 +41,7 @@ public:
 	virtual std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
 											  ControllerInput& controllerInput, Point& position, Point& velocity) = 0;
 	virtual void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo);
+	virtual State reduceSceneState(const State& t_state, double action);
 protected:
 
 	void viewImage(int blockSize, std::string name, cv::Mat &image);

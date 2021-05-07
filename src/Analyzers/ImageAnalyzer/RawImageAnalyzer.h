@@ -20,7 +20,7 @@ public:
 	void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result);
 	virtual std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
 												  ControllerInput& controllerInput, Point& position, Point& velocity) override;
-
+	virtual State reduceSceneState(const State& t_state, double action) override;
 protected:
 
 	void calculateSituationSMB(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult);

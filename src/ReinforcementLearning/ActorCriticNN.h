@@ -20,11 +20,13 @@
 #include "../NeuralNetwork/NeuralNetwork.h"
 #include "../NeuralNetworkGPU/NeuralNetwork.h"
 
+#include "../Analyzers/StateAnalyzer.h"
+
 class ActorCriticNN : public ReinforcementLearning
 {
 
 public:
-	ActorCriticNN(int t_nActions, int t_dimensionStatesSize);
+	ActorCriticNN(int t_nActions, int t_dimensionStatesSize, StateAnalyzer *t_stateAnalyzer);
 	virtual ~ActorCriticNN();
 
 	//Basic methods
@@ -58,12 +60,13 @@ private:
 
 	std::map<State, SARS> memorizedSARS;
 
+	StateAnalyzer *stateAnalyzer;
 	NeuralNetworkGPU::NNLayer* layerToDraw;
 
 public:
 	static constexpr double UPPER_REWARD_CUP = 0.70;
 	static constexpr double LOWER_REWARD_CUP = 0.20;
-	static constexpr double MEMORIZE_SARS_CUP = 0.65;
+	static constexpr double MEMORIZE_SARS_CUP = 0.85;
 
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;

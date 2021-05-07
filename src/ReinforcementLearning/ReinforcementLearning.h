@@ -32,11 +32,6 @@ protected:
 //	NNInput convertState2NNInput(const State &t_state);
 	int getIndexOfMaxValue(std::vector<double> t_array);
 	double getMaxValue(std::vector<double> t_array);
-	State reduceSceneState(const State& t_state, double action);
-
-public:
-	//Debug
-	void drawReducedSceneState(const State& t_state);
 };
 
 #endif /* SRC_REINFORCEMENTLEARNING_REINFORCEMENTLEARNING_H_ */

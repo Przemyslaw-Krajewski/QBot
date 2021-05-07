@@ -44,7 +44,7 @@ Bot::Bot()
 	cv::waitKey(1000);
 
 	//Initialize acLearning
-	reinforcementLearning = new ActorCriticNN(numberOfActions, (int) sceneState.size());
+	reinforcementLearning = new ActorCriticNN(numberOfActions, (int) sceneState.size(), &stateAnalyzer);
 
 	playsBeforeNNLearning = PLAYS_BEFORE_NEURAL_NETWORK_LEARNING;
 }
@@ -122,8 +122,8 @@ void Bot::execute()
 														analyzeResult.playerCoords,
 														analyzeResult.playerVelocity);
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
-			reinforcementLearning->drawReducedSceneState(sceneState);
 
+			DataDrawer::drawReducedState(sceneState, &stateAnalyzer);
 			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
 
 			//add learning info to history

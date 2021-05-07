@@ -148,6 +148,42 @@ void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_
 /*
  *
  */
+void DataDrawer::drawReducedState(State t_state, StateAnalyzer *stateAnalyzer)
+{
+	int reduce = 8;
+	int blockSize = 8*reduce;
+	int xSize = 64/reduce;
+	int ySize = 40/reduce;
+
+	State result = stateAnalyzer->reduceSceneState(t_state,0);
+
+	cv::Mat viewImage = cv::Mat(ySize*blockSize, xSize*blockSize, CV_8UC3);
+	for(int x=0; x<xSize; x++)
+	{
+		for(int y=0; y<ySize; y++)
+		{
+			cv::Scalar color;
+			int ptrSrc = result[x*ySize+y];
+			for(int yy=0; yy<blockSize; yy++)
+			{
+				for(int xx=0; xx<blockSize; xx++)
+				{
+					uchar* ptr = viewImage.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
+					ptr[0] = ptrSrc;
+					ptr[1] = ptrSrc;
+					ptr[2] = ptrSrc;
+				}
+			}
+		}
+	}
+	//Print
+	imshow("ReducedState", viewImage);
+	cv::waitKey(1);
+}
+
+/*
+ *
+ */
 void DataDrawer::drawBar(cv::Mat *mat, int t_barHeight, int t_barWidth, double progress, cv::Point t_point, cv::Scalar t_color)
 {
 	int progressBar = progress*t_barWidth;

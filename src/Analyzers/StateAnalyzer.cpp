@@ -25,7 +25,7 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze()
 	else throw std::string("StateAnalyzer::No such game");
 }
 
-std::vector<int> StateAnalyzer::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
+State StateAnalyzer::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
 											  ControllerInput& controllerInput, Point& position, Point& velocity)
 {
 	return imageAnalyzer->createSceneState(image, imagePast, imagePast2, controllerInput, position, velocity);

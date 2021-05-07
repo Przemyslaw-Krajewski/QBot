@@ -20,6 +20,7 @@ private:
 public:
 	static void drawAnalyzedData(StateAnalyzer::AnalyzeResult& t_sceneData, ControllerInput t_keys, double reward, double change);
 	static void drawAdditionalInfo(double t_reward, double t_maxTime, double t_time, ControllerInput t_keys, bool pressedKey);
+	static void drawReducedState(State t_state, StateAnalyzer *stateAnalyzer);
 private:
 	inline static void drawBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);
 	inline static void drawBorderedBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color);

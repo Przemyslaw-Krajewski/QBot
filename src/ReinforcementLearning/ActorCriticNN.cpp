@@ -10,7 +10,7 @@
 /*
  *
  */
-ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize)
+ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize, StateAnalyzer *t_stateAnalyzer)
 {
 #ifdef ACTORCRITICNN_LOG
 	std::cout << "ACTORCRITICNN_LOG active\n";
@@ -21,6 +21,7 @@ ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize)
 
 	dimensionStatesSize = t_dimensionStatesSize;
 	numberOfActions = t_nActions;
+	stateAnalyzer = t_stateAnalyzer;
 
     resetNN();
 }
@@ -214,7 +215,7 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 		sarsPointers.push_back(&(*sarsIterator));
 
 		//put state to memory
-		State rs = reduceSceneState(sarsIterator->oldState,sarsIterator->action);
+		State rs = stateAnalyzer->reduceSceneState(sarsIterator->oldState,sarsIterator->action);
 		bool exists = memorizedSARS.find(rs) != memorizedSARS.end();
 		if(exists && memorizedSARS[rs].action == sarsIterator->action && sarsIterator->reward < MEMORIZE_SARS_CUP)
 		{
