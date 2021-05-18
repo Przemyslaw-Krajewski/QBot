@@ -36,18 +36,16 @@ public:
 	virtual double learnFromScenario(std::list<SARS> &t_history) override;
 	virtual double learnFromMemory() override;
 
+	//Additional methods
 	virtual void handleParameters();
-
 	void resetNN();
 
+	//Debug
 	double getCriticValue(State t_state) {return criticValues.determineOutput(t_state)[0];}
 //	void drawCriticValues() {criticValues.drawNeuralNetwork();}
 
-public:
-	//Debug methods
-//	void setQValue(State t_state, int t_action, double t_value) {qValues.setValue(t_state, t_action, t_value);}
-//	double getQValue(State t_state, int t_action) { return qValues.getValue(t_state,t_action);}
-//	double getQChange(State t_state) { return qValues.getChange(t_state);}
+protected:
+	double getExp(double value) {return exp(6*value);}
 
 
 private:

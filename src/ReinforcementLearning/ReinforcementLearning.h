@@ -32,6 +32,7 @@ protected:
 //	NNInput convertState2NNInput(const State &t_state);
 	int getIndexOfMaxValue(std::vector<double> t_array);
 	double getMaxValue(std::vector<double> t_array);
+	int getWeightedRandom(std::vector<double> t_array);
 };
 
 #endif /* SRC_REINFORCEMENTLEARNING_REINFORCEMENTLEARNING_H_ */

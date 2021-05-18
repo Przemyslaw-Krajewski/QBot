@@ -139,7 +139,7 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
  */
 State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 {
-	int reduceLevel = 8;
+	int reduceLevel = 4;
 	int xSize = 64;
 	int ySize = 40;
 	int zSize = 3;
@@ -161,13 +161,14 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 							 (t_state[ x    + (y-1)*xSize + z*ySize*xSize]>> 0) -
 							 (t_state[ x    + (y+1)*xSize + z*ySize*xSize]>> 0));
 			}
-			if(value > 15) edges[x+y*xSize] = 255;
+			if(value > 0) edges[x+y*xSize] = 255;
 //			else if(value > 20) edges[x+y*xSize] = 128;
 //			else edges[x+y*xSize] = 0;
 //			edges[x+y*xSize] = value;
 		}
 	}
 
+	//Erosion
 	for(int x=2; x<xSize-2; x++)
 	{
 		for(int y=2; y<ySize-2; y++)
@@ -185,6 +186,7 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 		}
 	}
 
+	//Reduce
 	std::vector<int> result;
 	for(int x=0;x<xSize;x+=reduceLevel)
 	{
@@ -219,7 +221,7 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 //	}
 	result.push_back(t_state[t_state.size()-4-6]/4);
 	result.push_back(t_state[t_state.size()-3-6]/2);
-//	result.push_back(t_state[t_state.size()-1-6]);
+	result.push_back(t_state[t_state.size()-1-6]);
 
 //	result.push_back(action);
 
