@@ -221,7 +221,7 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 //	}
 	result.push_back(t_state[t_state.size()-4-6]/4);
 	result.push_back(t_state[t_state.size()-3-6]/2);
-	result.push_back(t_state[t_state.size()-1-6]);
+	result.push_back(10*t_state[t_state.size()-1-6]);
 
 //	result.push_back(action);
 

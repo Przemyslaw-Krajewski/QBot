@@ -157,7 +157,7 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 	{
 		if(i!=t_action)
 		{
-			actorZ[i] -= change/(3);
+			actorZ[i] -= change/(2);
 		}
 		else
 		{
@@ -199,8 +199,8 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 		bool exists = memorizedSARS.find(rs) != memorizedSARS.end();
 		if(exists && memorizedSARS[rs].action == sarsIterator->action && sarsIterator->reward < MEMORIZE_SARS_CUP)
 		{
-			memorizedSARS.erase(rs);
-			std::cout << "Erase state\n";
+//			memorizedSARS.erase(rs);
+//			std::cout << "Erase state\n";
 		}
 		else if((exists && (memorizedSARS[rs].reward < sarsIterator->reward))
 				|| (!exists && sarsIterator->reward > MEMORIZE_SARS_CUP))
