@@ -133,7 +133,7 @@ void Bot::execute()
 			changeController--;
 			if(changeController < 1)
 			{
-				changeController = 2;
+				changeController = 1;
 				action = reinforcementLearning->chooseAction(sceneState);
 				controllerInput = determineControllerInput(action);
 				MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
@@ -198,8 +198,10 @@ ControllerInput Bot::determineControllerInput(int t_action)
 	ControllerInput w;
 	for(int i=0; i<numberOfControllerInputs; i++) w.push_back(false);
 
-	w[ 2+(t_action%4) ] = true;
-	w[0] = t_action>3;
+//	w[ 2+(t_action%4) ] = true;
+//	w[0] = t_action>3;
+	w[0] = t_action == 1;
+	w[3] = true;
 
 	return w;
 }
@@ -209,9 +211,9 @@ ControllerInput Bot::determineControllerInput(int t_action)
  */
 int Bot::determineControllerInputInt(int t_action)
 {
-	int direction = (1<<(4+t_action%4));
-	int jump = t_action>3?1:0;
-	return direction+jump;
+//	int direction = (1<<(4+t_action%4));
+//	int jump = t_action>3?1:0;
+	return (1<<7)+t_action;
 }
 
 /*

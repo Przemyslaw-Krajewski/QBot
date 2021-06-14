@@ -45,7 +45,7 @@ public:
 //	void drawCriticValues() {criticValues.drawNeuralNetwork();}
 
 protected:
-	double getExp(double value) {return exp(6*value);}
+	double getExp(double value) {return exp(8*value);}
 
 
 private:
@@ -59,12 +59,11 @@ private:
 	std::map<State, SARS> memorizedSARS;
 
 	StateAnalyzer *stateAnalyzer;
-	NeuralNetworkGPU::NNLayer* layerToDraw;
 
 public:
-	static constexpr double UPPER_REWARD_CUP = 0.70;
-	static constexpr double LOWER_REWARD_CUP = 0.20;
-	static constexpr double MEMORIZE_SARS_CUP = 0.85;
+	static constexpr double UPPER_REWARD_CUP = 0.80;
+	static constexpr double LOWER_REWARD_CUP = 0.10;
+	static constexpr double MEMORIZE_SARS_CUP = 0.81;
 
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;

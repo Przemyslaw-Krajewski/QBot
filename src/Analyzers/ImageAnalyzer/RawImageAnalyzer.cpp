@@ -120,14 +120,14 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 	}
 
 	//AdditionalInfo
-	sceneState.push_back(velocity.x/4);
-	sceneState.push_back(velocity.y/2);
+	sceneState.push_back(velocity.x);
+	sceneState.push_back(velocity.y);
 
 	if(velocity.y == 0 && controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
 	else holdButtonCounter = 0;
 
 	sceneState.push_back(velocity.y == 0);
-	sceneState.push_back(holdButtonCounter >= 2 ? MAX_INPUT_VALUE : MIN_INPUT_VALUE);
+	sceneState.push_back(holdButtonCounter >= 2 ? 32 : -32);
 
 	for(int i=0;i<6;i++) sceneState.push_back(0);
 
@@ -139,7 +139,7 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
  */
 State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 {
-	int reduceLevel = 4;
+	int reduceLevel = 8;
 	int xSize = 64;
 	int ySize = 40;
 	int zSize = 3;
@@ -161,7 +161,7 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 							 (t_state[ x    + (y-1)*xSize + z*ySize*xSize]>> 0) -
 							 (t_state[ x    + (y+1)*xSize + z*ySize*xSize]>> 0));
 			}
-			if(value > 0) edges[x+y*xSize] = 255;
+			if(value > 15) edges[x+y*xSize] = 255;
 //			else if(value > 20) edges[x+y*xSize] = 128;
 //			else edges[x+y*xSize] = 0;
 //			edges[x+y*xSize] = value;
@@ -219,9 +219,9 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 //			}
 //		}
 //	}
-	result.push_back(t_state[t_state.size()-4-6]/4);
-	result.push_back(t_state[t_state.size()-3-6]/2);
-	result.push_back(10*t_state[t_state.size()-1-6]);
+	result.push_back(t_state[t_state.size()-4-6]/16);
+	result.push_back(t_state[t_state.size()-3-6]/4);
+	result.push_back(t_state[t_state.size()-1-6]);
 
 //	result.push_back(action);
 

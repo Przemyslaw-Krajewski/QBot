@@ -332,7 +332,7 @@ namespace Test
         std::cout << "Done: " << iteration << "\n";
 	}
 
-	void testFuseLayersGPU()
+	void testFuseLayersGPUSmokeTest()
 	{
         NeuralNetworkGPU::NeuralNetwork nn;
         NeuralNetworkGPU::InputLayer* inputLayer1 = new NeuralNetworkGPU::InputLayer(1);
@@ -343,7 +343,7 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,0.01, 1, nn.getLastLayerNeuronRef()));
 
         std::vector<double> in;
-		in.push_back(2);in.push_back(0);
+		in.push_back(0);in.push_back(2);
 
 		std::cout << "Input:\n";
 		for(double i : in) std::cout << "   " << i << "\n";
@@ -359,6 +359,22 @@ namespace Test
 		out = nn.determineOutput(in);
 		std::cout << "Output:\n";
 		for(double i : out) std::cout << "   " << i << "\n";
+	}
+
+	void testFuseLayersGPU()
+	{
+        NeuralNetworkGPU::NeuralNetwork nn(NeuralNetworkGPU::LearnMode::Adam);
+        NeuralNetworkGPU::InputLayer* inputLayer1 = new NeuralNetworkGPU::InputLayer(1);
+        NeuralNetworkGPU::InputLayer* inputLayer2 = new NeuralNetworkGPU::InputLayer(1);
+        nn.addLayer(inputLayer1);
+        nn.addLayer(inputLayer2);
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(11.2,0.0006, 30, inputLayer1->getNeuronPtr()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(9.2,0.0008, 20, nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::FuseLayer(nn.getLastLayerNeuronRef(),inputLayer2->getNeuronPtr()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.0012, 1, nn.getLastLayerNeuronRef()));
+
+        long iteration = testNeuralNetwork({{0,1.6}, {0,2.8}},
+                                           {0.4, 0.9}, &nn);
 	}
 
     void testConvNNSpeedGPU()

@@ -150,7 +150,7 @@ void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_
  */
 void DataDrawer::drawReducedState(State t_state, StateAnalyzer *stateAnalyzer)
 {
-	int reduce = 4;
+	int reduce = 8;
 	int blockSize = 8*reduce;
 	int xSize = 64/reduce;
 	int ySize = 40/reduce;

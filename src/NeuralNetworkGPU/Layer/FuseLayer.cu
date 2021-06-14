@@ -84,7 +84,12 @@ namespace NeuralNetworkGPU
 			if(numberOfThreads<=800 && numberOfThreads*numberOfBlocks==size) break;
 			numberOfBlocks++;
 
-			assert(numberOfBlocks < 20 && "Could not match thread/block size");
+			if(numberOfBlocks > 20 )
+			{
+				std::cout << "1 Layer size: "<< t_prevLayerReference1.size << "\n";
+				std::cout << "2 Layer size: "<< t_prevLayerReference2.size << "\n";
+				assert(numberOfBlocks < 20 && "Could not match thread/block size");
+			}
 		}
 
 	}
