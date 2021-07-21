@@ -242,7 +242,7 @@ void RawImageAnalyzer::calculateSituationSMB(cv::Mat *image, ImageAnalyzer::Anal
 		analyzeResult->playerIsDead = true;
 		analyzeResult->killedByEnemy = true;
 	}
-	if(!findObject(*image,winImage,cv::Point(10,4),cv::Scalar(0,148,0),cv::Rect(0,0,250,250)).empty())
+	if(!findObject(*image,winImage,cv::Point(10,5),cv::Scalar(0,148,0),cv::Rect(0,0,250,250)).empty())
 	{	//Win
 		analyzeResult->playerWon = true;
 	}

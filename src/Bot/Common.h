@@ -58,10 +58,10 @@ class ParameterFileHandler
 public:
 	static bool checkParameter(const char* t_parameterName, std::string t_communiaction)
 	{
-		std::ifstream hybridFile (t_parameterName);
-		if (hybridFile.is_open())
+		std::ifstream file (t_parameterName);
+		if (file.is_open())
 		{
-			hybridFile.close();
+			file.close();
 			std::remove(t_parameterName);
 			std::cout << "Parameter handler: " << t_communiaction << "\n";
 			return true;
@@ -73,6 +73,14 @@ public:
 class LogFileHandler
 {
 public:
+	static void logValue(const char* t_fileName, double t_value)
+	{
+		std::ofstream file;
+		file.open(t_fileName, std::ios_base::app);
+		file << t_value << "\n";
+		file.close();
+	}
+
 	static void printState(State &t_state)
 	{
 		int xSize = 32;

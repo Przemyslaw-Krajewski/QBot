@@ -123,8 +123,8 @@ void Bot::execute()
 														analyzeResult.playerVelocity);
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 
-			DataDrawer::drawReducedState(sceneState, &stateAnalyzer);
-			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
+			//DataDrawer::drawReducedState(sceneState, &stateAnalyzer);
+			//DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
 
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
@@ -167,6 +167,7 @@ void Bot::execute()
 		}
 
 		std::cout << score << "\n";
+		LogFileHandler::logValue("score.log",score);
 
 		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
