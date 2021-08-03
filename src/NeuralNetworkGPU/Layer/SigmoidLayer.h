@@ -22,7 +22,6 @@ namespace NeuralNetworkGPU
 
 		//learn
 		void setDelta(std::vector<double> t_z) override;
-		void setValues(std::vector<double> t_z) override;
 		void learnSGD() override;
 		void learnAdam() override;
 

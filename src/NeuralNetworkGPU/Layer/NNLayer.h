@@ -95,7 +95,6 @@ namespace NeuralNetworkGPU
 
 		//learn
 		virtual void setDelta(std::vector<double> t_z) {};
-		virtual void setValues(std::vector<double> t_z) {};
 		virtual void learnSGD() = 0;
 		virtual void learnAdam() = 0;
 

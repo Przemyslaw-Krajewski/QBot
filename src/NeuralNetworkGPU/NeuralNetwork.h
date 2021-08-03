@@ -45,9 +45,9 @@ namespace NeuralNetworkGPU {
 			std::vector<double> determineOutput(std::vector<double> x);
 			std::vector<double> determineOutput(std::vector<int> x);
 			std::vector<double> getOutput();
-			void learnBackPropagation(std::vector<double>& z);
 			void learnBackPropagation();
 			void setSoftMaxDelta(std::vector<double> &z, double diff, int chosen);
+			void setMeanSquareDelta(std::vector<double> &z);
 
 			//save load
 			void saveToFile();

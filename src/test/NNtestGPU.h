@@ -31,7 +31,8 @@ namespace Test
 		for(double i : out) std::cout << "   " << i << "\n";
 
 		std::vector<double> z = {0.5};
-		nn.learnBackPropagation(z);
+        nn.setMeanSquareDelta(z);
+        nn.learnBackPropagation();
 
 		out = nn.determineOutput(in);
 		std::cout << "Output:\n";
@@ -58,7 +59,8 @@ namespace Test
 		for(double i : out) std::cout << "   " << i << "\n";
 
 		std::vector<double> z = {300};
-		nn.learnBackPropagation(z);
+		nn.setMeanSquareDelta(z);
+        nn.learnBackPropagation();
 
 		out = nn.determineOutput(in);
 		std::cout << "Output:\n";
@@ -87,7 +89,8 @@ namespace Test
             for (int i = 0; i < x.size(); i++)
             {
                 nn->determineOutput(x[i]);
-                nn->learnBackPropagation(z[i]);
+                nn->setMeanSquareDelta(z[i]);
+                nn->learnBackPropagation();
                 double value = nn->determineOutput(x[i])[0];
                 double miss = value - z[i][0];
                 missSum += fabs(miss);
@@ -223,7 +226,8 @@ namespace Test
         for (i = 0; i < 1000; i++)
         {
             nn.determineOutput(x);
-            nn.learnBackPropagation(z);
+            nn.setMeanSquareDelta(z);
+            nn.learnBackPropagation();
             nn.determineOutput(z);
         }
 
@@ -245,7 +249,8 @@ namespace Test
         for (i = 0; i < 1000; i++)
         {
             nn.determineOutput(x);
-            nn.learnBackPropagation(z);
+            nn.setMeanSquareDelta(z);
+            nn.learnBackPropagation();
             nn.determineOutput(z);
         }
 
@@ -354,7 +359,8 @@ namespace Test
 		for(double i : out) std::cout << "   " << i << "\n";
 
 		std::vector<double> z = {0.5};
-		nn.learnBackPropagation(z);
+        nn.setMeanSquareDelta(z);
+        nn.learnBackPropagation();
 
 		out = nn.determineOutput(in);
 		std::cout << "Output:\n";
@@ -392,7 +398,8 @@ namespace Test
         for (i = 0; i < 10000; i++)
         {
             nn.determineOutput(x);
-            nn.learnBackPropagation(z);
+            nn.setMeanSquareDelta(z);
+            nn.learnBackPropagation();
             nn.determineOutput(x);
         }
 

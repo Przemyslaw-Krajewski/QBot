@@ -378,19 +378,6 @@ namespace NeuralNetworkGPU
 																  d_b);
 	}
 
-	void ConvolutionalLayer::setDelta(std::vector<double> t_z)
-	{
-		assert(t_z.size() == size.multiply() && "learning values size not match");
-
-		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
-		for(int i=0; i<size.multiply(); i++ )
-		{
-			deltas[i] = (float) output[i] - t_z[i];
-		}
-
-		cudaMemcpy(d_deltas, deltas, sizeof(float)*size.multiply(), cudaMemcpyHostToDevice);
-	}
-
 	void ConvolutionalLayer::learnSGD()
 	{
 //		int64 timeBefore = cv::getTickCount();

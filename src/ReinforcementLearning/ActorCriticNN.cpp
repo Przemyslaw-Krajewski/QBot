@@ -205,7 +205,8 @@ double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action
 	std::vector<double> stateValue = criticValues.determineOutput(t_state);
 	std::vector<double> criticZ = std::vector<double>();
 	criticZ.push_back(t_reward);
-	criticValues.learnBackPropagation(criticZ);
+	criticValues.setMeanSquareDelta(criticZ);
+	criticValues.learnBackPropagation();
 
 	//Actor
 	std::vector<double> prevStateValue = criticValues.determineOutput(t_prevState);

@@ -123,19 +123,6 @@ namespace NeuralNetworkGPU
 																	    d_deltas);
 	}
 
-	void PoolingLayer::setDelta(std::vector<double> t_z)
-	{
-		assert(t_z.size() == size.m && "learning values size not match");
-
-		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
-		for(int i=0; i<size.m; i++ )
-		{
-			deltas[i] = (float) output[i] - t_z[i];
-		}
-
-		cudaMemcpy(d_deltas, deltas, sizeof(float)*size.m, cudaMemcpyHostToDevice);
-	}
-
 	void PoolingLayer::learnSGD()
 	{
 //		int64 timeBefore = cv::getTickCount();

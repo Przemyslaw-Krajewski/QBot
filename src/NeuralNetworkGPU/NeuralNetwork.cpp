@@ -123,8 +123,24 @@ namespace NeuralNetworkGPU {
 	/*
 	 *
 	 */
+	void NeuralNetwork::setMeanSquareDelta(std::vector<double> &z)
+	{
+		std::vector<double> delta = getOutput();
+
+		assert(z.size() == delta.size() && "learning values size not match");
+
+		for(int i=0; i<delta.size(); i++) delta[i] = delta[i] - z[i];
+
+		(*layers.rbegin())->setDelta(delta);
+	}
+
+	/*
+	 *
+	 */
 	void NeuralNetwork::setSoftMaxDelta(std::vector<double> &z, double diff, int chosen)
 	{
+		assert(z.size() == getOutput().size() && "learning values size not match");
+
 		std::vector<double> delta = std::vector<double>(z.size(),0);
 
 		//calculate some things
@@ -148,7 +164,7 @@ namespace NeuralNetworkGPU {
 //			if(z[i] < 0.1 && delta[i] > 0) delta[i] = 0;
 		}
 
-		(*layers.rbegin())->setValues(delta);
+		(*layers.rbegin())->setDelta(delta);
 
 	}
 
@@ -171,15 +187,6 @@ namespace NeuralNetworkGPU {
 				(*it)->learnAdam();
 			}
 		}
-	}
-
-	/*
-	 *
-	 */
-	void NeuralNetwork::learnBackPropagation(std::vector<double> &z)
-	{
-		(*layers.rbegin())->setDelta(z);
-		learnBackPropagation();
 	}
 
 	/*

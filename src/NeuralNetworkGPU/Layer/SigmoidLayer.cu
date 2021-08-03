@@ -328,22 +328,7 @@ namespace NeuralNetworkGPU
 
 	void SigmoidLayer::setDelta(std::vector<double> t_z)
 	{
-		assert(t_z.size() == size && "learning values size not match");
-
-		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
-		for(int i=0; i<size; i++ )
-		{
-			deltas[i] = (float) output[i] - t_z[i];
-		}
-
-		cudaMemcpy(d_deltas, deltas, sizeof(float)*size, cudaMemcpyHostToDevice);
-	}
-
-	void SigmoidLayer::setValues(std::vector<double> t_z)
-	{
-		assert(t_z.size() == size && "learning values size not match");
-
-		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
+//		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
 		for(int i=0; i<size; i++ )
 		{
 			deltas[i] = (float) t_z[i];
