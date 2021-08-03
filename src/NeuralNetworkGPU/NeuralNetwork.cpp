@@ -123,10 +123,40 @@ namespace NeuralNetworkGPU {
 	/*
 	 *
 	 */
-	void NeuralNetwork::learnBackPropagation(std::vector<double> &z)
+	void NeuralNetwork::setSoftMaxDelta(std::vector<double> &z, double diff, int chosen)
 	{
-		(*layers.rbegin())->setDelta(z);
+		std::vector<double> delta = std::vector<double>(z.size(),0);
 
+		//calculate some things
+		std::vector<double> s;
+		for(int i=0; i<z.size(); i++) s.push_back(exp(6*z[i]));
+		double sSum = 0;
+		for(int i=0; i<s.size(); i++) sSum += s[i];
+		for(int i=0; i<s.size(); i++) s[i] = s[i]/sSum;
+
+		for(int i=0; i<z.size(); i++)
+		{
+			if(i==chosen) delta[i] = -diff*(1-s[i]);
+			else 		  delta[i] =  diff*s[i];
+		}
+
+		for(int i=0; i<z.size(); i++)
+		{
+			if(z[i]-delta[i] > 0.9) delta[i] = z[i]-0.9;
+			if(z[i]-delta[i] < 0.1) delta[i] = z[i]-0.1;
+//			if(z[i] > 0.9 && delta[i] < 0) delta[i] = 0;
+//			if(z[i] < 0.1 && delta[i] > 0) delta[i] = 0;
+		}
+
+		(*layers.rbegin())->setValues(delta);
+
+	}
+
+	/*
+	 *
+	 */
+	void NeuralNetwork::learnBackPropagation()
+	{
 		if(learnMode == LearnMode::SGD)
 		{
 			for(auto it=layers.rbegin(); it!=layers.rend(); it++)
@@ -141,6 +171,15 @@ namespace NeuralNetworkGPU {
 				(*it)->learnAdam();
 			}
 		}
+	}
+
+	/*
+	 *
+	 */
+	void NeuralNetwork::learnBackPropagation(std::vector<double> &z)
+	{
+		(*layers.rbegin())->setDelta(z);
+		learnBackPropagation();
 	}
 
 	/*

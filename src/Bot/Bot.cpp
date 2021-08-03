@@ -40,7 +40,7 @@ Bot::Bot()
 													  controllerInput,
 													  analyzeResult.playerCoords,
 													  analyzeResult.playerVelocity);
-//	DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
+	DataDrawer::drawAnalyzedData(analyzeResult,determineControllerInput(0),0,0);
 	cv::waitKey(1000);
 
 	//Initialize acLearning
@@ -123,8 +123,8 @@ void Bot::execute()
 														analyzeResult.playerVelocity);
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 
-			//DataDrawer::drawReducedState(sceneState, &stateAnalyzer);
-			//DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
+			DataDrawer::drawReducedState(sceneState, &stateAnalyzer);
+			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
 
 			//add learning info to history
 			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));

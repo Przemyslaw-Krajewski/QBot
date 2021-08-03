@@ -139,7 +139,7 @@ namespace NeuralNetworkGPU
 //		float m = 1 + e;
 //		float derivative = ((*t_b)*e/(m*m));
 		float sum = t_sums[index];
-		float derivative = sum > 0 && sum < 65536 && sum > -65536 ? 1 : 0.05;
+		float derivative = sum > 0 && sum < 65536 ? 1 : 0.05;
 		float grad = delta*derivative; // gradient without x factor
 		float grad2 = grad*grad;
 

@@ -95,6 +95,7 @@ namespace NeuralNetworkGPU
 
 		//learn
 		virtual void setDelta(std::vector<double> t_z) {};
+		virtual void setValues(std::vector<double> t_z) {};
 		virtual void learnSGD() = 0;
 		virtual void learnAdam() = 0;
 
@@ -110,7 +111,7 @@ namespace NeuralNetworkGPU
 		virtual void loadFromFile(std::ifstream &t_file) {assert("loadFromFile() Not implemented" && 0);}
 
 	public:
-		static double getRandomWeight() { return 0.25*((double)((rand()%100000))/100000-0.5); }
+		static double getRandomWeight() { return 0.2*((double)((rand()%100000))/100000-0.5); }
 
 	};
 }

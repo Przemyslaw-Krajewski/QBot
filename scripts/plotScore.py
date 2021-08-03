@@ -8,9 +8,11 @@ import matplotlib.pyplot as pyplot
 def plotFigure(fileName, figure,block=True):
     score=np.loadtxt(fileName)
     average=score.copy()
-    
-    for i in range(len(average)-1,9,-1):
-        average[i]=sum(average[i-10:i])/10
+   
+    av=score[0]
+    for i,v in enumerate(score):
+        av=av+(v-av)*0.1
+        average[i]=av
 
     pyplot.figure(figure)
     pyplot.title(fileName)
