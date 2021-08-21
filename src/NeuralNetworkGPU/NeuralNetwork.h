@@ -20,6 +20,7 @@
 #include "Layer/InputLayer.h"
 #include "Layer/SigmoidLayer.h"
 #include "Layer/ConvolutionalLayer.h"
+#include "Layer/ConvSeparateWeightsLayer.h"
 #include "Layer/PoolingLayer.h"
 #include "Layer/FuseLayer.h"
 
@@ -58,6 +59,7 @@ namespace NeuralNetworkGPU {
 			std::vector<double> determineY();
 		public:
 			//debug
+			void drawLayer(int layer);
 //			void drawNeuralNetwork() {for(auto it : layers) it->drawLayer();}
 
 		protected:

@@ -31,6 +31,8 @@ namespace NeuralNetworkGPU
 //		void saveToFile(std::ofstream &t_file) override;
 //		void loadFromFile(std::ifstream &t_file) override;
 
+		virtual void drawLayer() {assert("FuseLayer::drawLayer() not implemented" && 0);};
+
 	protected:
 		float *de_input1,*de_input2;
 		int *d_inputSize1, inputSize1;

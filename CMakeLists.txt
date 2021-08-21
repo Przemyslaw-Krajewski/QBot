@@ -43,6 +43,7 @@ add_executable(QBot
 			src/NeuralNetworkGPU/Layer/InputLayer.cu
 			src/NeuralNetworkGPU/Layer/SigmoidLayer.cu
 			src/NeuralNetworkGPU/Layer/ConvolutionalLayer.cu
+			src/NeuralNetworkGPU/Layer/ConvSeparateWeightsLayer.cu
 			src/NeuralNetworkGPU/Layer/PoolingLayer.cu
 			src/NeuralNetworkGPU/Layer/FuseLayer.cu)
 			

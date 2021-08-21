@@ -100,10 +100,10 @@ namespace NeuralNetworkGPU
 
 		//configuration
 		virtual NeuronsPtr getNeuronPtr() = 0;
-		virtual TensorSize getTensorOutputSize() {assert("getTensorOutputSize() Not implemented" && 0); return TensorSize(0,0,0);}
+		virtual TensorSize getTensorOutputSize() {assert("NNLayer::getTensorOutputSize() Not implemented" && 0); return TensorSize(0,0,0);}
 
 		//visualization
-		virtual void drawLayer() {};
+		virtual void drawLayer() {assert("NNLayer::drawLayer() not implemented" && 0);};
 
 		//save load
 		virtual void saveToFile(std::ofstream &t_file) {assert("saveToFile() Not implemented" && 0);}

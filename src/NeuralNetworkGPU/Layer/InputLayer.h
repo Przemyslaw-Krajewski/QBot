@@ -38,6 +38,8 @@ namespace NeuralNetworkGPU
 		//save load
 //		void saveToFile(std::ofstream &t_file) override;
 
+		virtual void drawLayer() override {std::cout << "InputLayer::Drawing not implemented\n";};
+
 	protected:
 		float *d_input;
 		float *input;

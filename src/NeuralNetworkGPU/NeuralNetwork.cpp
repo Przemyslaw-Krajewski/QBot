@@ -192,6 +192,18 @@ namespace NeuralNetworkGPU {
 	/*
 	 *
 	 */
+	void NeuralNetwork::drawLayer(int layerNumber)
+	{
+		std::list<NNLayer*>::iterator layer = layers.begin();
+		for(int i=0;i<layerNumber;i++) layer++;
+
+		(*layer)->drawLayer();
+
+	}
+
+	/*
+	 *
+	 */
 	void NeuralNetwork::saveToFile()
 	{
 //		std::remove("NeuralNetwork.dat");

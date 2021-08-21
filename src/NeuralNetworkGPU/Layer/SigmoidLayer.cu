@@ -411,4 +411,49 @@ namespace NeuralNetworkGPU
 //			}
 //		}
 //	}
+	void SigmoidLayer::drawLayer()
+	{
+		int blockSize=20;
+		int spaceSize=2;
+		std::vector<double> output = getOutput();
+
+		cv::Mat mat = cv::Mat(1500, 1500, CV_8UC3);
+
+		for(int x=0; x<mat.cols; x++)
+		{
+			for(int y=0; y<mat.rows; y++)
+			{
+				uchar* ptr = mat.ptr(y)+(x)*3;
+				ptr[0] = 0;
+				ptr[1] = 0;
+				ptr[2] = 0;
+			}
+		}
+
+		int x=spaceSize,y=spaceSize;
+		for(double i : output)
+		{
+			for(int xx=0; xx<blockSize; xx++)
+			{
+				for(int yy=0; yy<blockSize; yy++)
+				{
+					uchar* ptr = mat.ptr(y+yy)+(x+xx)*3;
+					ptr[2] = i < 0.5 ? 255-i*512 : 0;
+					ptr[1] = i < 0.5 ? i*512 : 255-(i-0.5)*512;
+					ptr[0] = i < 0.5 ? 0 : (i-0.5)*512;
+					if(xx == 0 || yy == 0 || xx == blockSize-1 || yy == blockSize-1) {ptr[0] = ptr[1] = ptr[2] = 255;}
+				}
+			}
+			x+=blockSize+spaceSize;
+			if(x>mat.cols-blockSize-spaceSize)
+			{
+				y+=blockSize+spaceSize;
+				x=spaceSize;
+			}
+		}
+
+		//Print
+		imshow("SigmoidLayer", mat);
+		cv::waitKey(10);
+	}
 }
