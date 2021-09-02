@@ -9,7 +9,7 @@
 #define SRC_ACTORCRITIC_ACTORCRITICNN_H_
 
 #define ACTORCRITICNN_LOG
-#define ACTORCRITICNN_ONE_ACTION
+//#define ACTORCRITICNN_ONE_ACTION
 
 #include <vector>
 #include <string>
@@ -43,6 +43,7 @@ public:
 	void createNNA();
 	void createNNB();
 	void createNNC();
+	void createNND();
 
 
 	//Debug

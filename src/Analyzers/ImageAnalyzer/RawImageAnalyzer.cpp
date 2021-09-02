@@ -129,7 +129,7 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 	sceneState.push_back(velocity.y == 0);
 	sceneState.push_back(holdButtonCounter >= 2 ? 2 : -2);
 
-	for(int i=0;i<6;i++) sceneState.push_back(0);
+	for(int i=0;i<2;i++) sceneState.push_back(0);
 
 	return sceneState;
 }

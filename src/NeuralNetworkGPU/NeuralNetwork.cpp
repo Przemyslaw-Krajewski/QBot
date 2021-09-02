@@ -145,7 +145,7 @@ namespace NeuralNetworkGPU {
 
 		//calculate some things
 		std::vector<double> s;
-		for(int i=0; i<z.size(); i++) s.push_back(exp(6*z[i]));
+		for(int i=0; i<z.size(); i++) s.push_back(exp(z[i]));
 		double sSum = 0;
 		for(int i=0; i<s.size(); i++) sSum += s[i];
 		for(int i=0; i<s.size(); i++) s[i] = s[i]/sSum;

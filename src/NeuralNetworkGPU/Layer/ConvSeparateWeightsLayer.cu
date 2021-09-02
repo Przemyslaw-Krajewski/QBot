@@ -166,7 +166,7 @@ namespace NeuralNetworkGPU
 					t_v[x + yf + zf] = vNew;
 
 					//update weights
-					t_weights[x + yf + zf] -= __fdiv_rd ((*t_n)*mNew , (__fsqrt_rd(vNew)+0.00001));
+					t_weights[x + yf + zf] -= __fdiv_rd ((*t_n)*mNew , (__fsqrt_rd(vNew)+0.0000001));
 
 					zf+=yfFrame;
 					zi+=yFrame;
@@ -184,7 +184,7 @@ namespace NeuralNetworkGPU
 			{
 				for(int x=0; x<t_filterSize->x; x++)
 				{
-					for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
+					for(int z=0,zf=zfOffset,zi=0; z<t_inputSize->z; z++)
 					{
 						t_prevDeltas[blockIdx.x+x + yi + zi] += dd * t_weights[ x + yf + zf ];
 

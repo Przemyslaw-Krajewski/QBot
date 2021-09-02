@@ -101,7 +101,7 @@ namespace NeuralNetworkGPU
 			{
 				for(int x=0; x<t_filterSize->x; x++)
 				{
-					for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
+					for(int z=0,zf=zfOffset,zi=0; z<t_inputSize->z; z++)
 					{
 						t_prevDeltas[blockIdx.x+x + yi + zi] += dd * t_weights[ x + yf + zf ];
 
@@ -184,7 +184,7 @@ namespace NeuralNetworkGPU
 			{
 				for(int x=0; x<t_filterSize->x; x++)
 				{
-					for(int z=0,zf=0,zi=0; z<t_inputSize->z; z++)
+					for(int z=0,zf=zfOffset,zi=0; z<t_inputSize->z; z++)
 					{
 						t_prevDeltas[blockIdx.x+x + yi + zi] += dd * t_weights[ x + yf + zf ];
 
@@ -341,7 +341,7 @@ namespace NeuralNetworkGPU
 
 		for(int i=0; i< weightsSize; i++)
 		{
-			float randomValue = getRandomWeight();
+			float randomValue = 2*getRandomWeight();
 			randomValues[i] = randomValue;
 		}
 		cudaMemcpy(d_weights, randomValues, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
@@ -429,10 +429,26 @@ namespace NeuralNetworkGPU
 				for(int x=0; x<size.x; x++)
 				{
 					uchar* ptrDst = image.ptr(y)+(x+x+x);
-					int src = output[z*size.x*size.y + y*size.x + x]*255;
-					ptrDst[0] = src;
-					ptrDst[1] = src;
-					ptrDst[2] = src;
+					int src = output[z*size.x*size.y + y*size.x + x];
+
+					if(src > 255)
+					{
+						ptrDst[0] = 255;
+						ptrDst[1] = 255;
+						ptrDst[2] = 255;
+					}
+					else if (src < -255)
+					{
+						ptrDst[0] = 0;
+						ptrDst[1] = 0;
+						ptrDst[2] = 0;
+					}
+					else
+					{
+						ptrDst[2] = src < 0 ? -src : 0;
+						ptrDst[1] = src < 0 ? src+255 : 255-src;
+						ptrDst[0] = src < 0 ? 0 : src;
+					}
 				}
 			}
 			cv::resize(image, image, cv::Size(), 4, 4,CV_INTER_CUBIC);
