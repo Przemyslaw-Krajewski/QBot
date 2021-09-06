@@ -152,8 +152,8 @@ namespace NeuralNetworkGPU {
 
 		for(int i=0; i<z.size(); i++)
 		{
-			if(i==chosen) delta[i] = -diff*(1-s[i]);
-			else 		  delta[i] =  diff*s[i];
+			if(i==chosen) delta[i] = -diff*(1-s[i])*s[chosen];
+			else 		  delta[i] =  diff*s[i]*s[chosen];
 		}
 
 		for(int i=0; i<z.size(); i++)

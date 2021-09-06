@@ -107,7 +107,7 @@ void Bot::execute()
 #ifdef PRINT_PROCESSING_TIME
 			int64 timeBefore = cv::getTickCount();
 #endif
-			cv::waitKey(50);
+			cv::waitKey(80);
 			State oldSceneState = sceneState;
 			int oldAction = action;
 
