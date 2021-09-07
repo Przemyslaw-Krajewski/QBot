@@ -170,7 +170,6 @@ namespace NeuralNetworkGPU
 	void FuseLayer::saveToFile(std::ofstream &t_file)
 	{
 		t_file << (float) getLayerTypeId() << ' ';
-		t_file << (float) size << ' '; // TODO unused parameter
 		t_file << (float) idFusedLayer1 << ' ';
 		t_file << (float) idFusedLayer2 << ' ';
 	}
@@ -182,7 +181,6 @@ namespace NeuralNetworkGPU
 	{
 		float size, idFusedLayer1, idFusedLayer2;
 
-		t_file >> size;
 		t_file >> idFusedLayer1;
 		t_file >> idFusedLayer2;
 

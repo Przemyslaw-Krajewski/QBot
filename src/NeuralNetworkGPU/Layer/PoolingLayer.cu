@@ -161,10 +161,6 @@ namespace NeuralNetworkGPU
 	void PoolingLayer::saveToFile(std::ofstream & t_file)
 	{
 		t_file << (float) getLayerTypeId() << ' ';
-		t_file << size.x << ' '; // TODO unused parameter
-		t_file << size.y << ' ';
-		t_file << size.z << ' ';
-
 	}
 
 	/*
@@ -172,10 +168,6 @@ namespace NeuralNetworkGPU
 	 */
 	PoolingLayer* PoolingLayer::loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference)
 	{
-		float sizeX,sizeY,sizeZ;
-		t_file >> sizeX;
-		t_file >> sizeY;
-		t_file >> sizeZ;
 		return new PoolingLayer(t_prevLayerReference);
 	}
 }

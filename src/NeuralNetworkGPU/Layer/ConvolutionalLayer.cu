@@ -435,8 +435,6 @@ namespace NeuralNetworkGPU
 		t_file << (float) inputSize.y << ' ';
 		t_file << (float) inputSize.z << ' ';
 
-		t_file << (float) size.x << ' ';
-		t_file << (float) size.y << ' ';
 		t_file << (float) size.z << ' ';
 
 		t_file << (float) filterSize.x << ' ';
@@ -465,25 +463,23 @@ namespace NeuralNetworkGPU
 
 	ConvolutionalLayer* ConvolutionalLayer::loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference)
 	{
-		float filterSize[2], size[3], inputSize[3];
+		float filterSize[2], convSize, inputSize[3];
 		float learnRate;
 
 		t_file >> inputSize[0];
 		t_file >> inputSize[1];
 		t_file >> inputSize[2];
 
-		t_file >> size[0];
-		t_file >> size[1];
-		t_file >> size[2];
+		t_file >> convSize;
 
 		t_file >> filterSize[0];
 		t_file >> filterSize[1];
 
 		t_file >> learnRate;
 
-		ConvolutionalLayer* layer = new ConvolutionalLayer(0,learnRate,size[2],MatrixSize(filterSize[0],filterSize[1]),t_prevLayerReference);
+		ConvolutionalLayer* layer = new ConvolutionalLayer(0,learnRate,convSize,MatrixSize(filterSize[0],filterSize[1]),t_prevLayerReference);
 
-		long weightsSize =filterSize[0]*filterSize[1]*inputSize[2]*size[2];
+		long weightsSize =filterSize[0]*filterSize[1]*inputSize[2]*convSize;
 		float *weights = (float*) malloc(sizeof(float)*weightsSize);
 		for(int i=0; i<weightsSize; i++)
 		{
