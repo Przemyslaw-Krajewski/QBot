@@ -119,17 +119,17 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 		else sceneState.push_back(MIN_INPUT_VALUE);
 	}
 
-	//AdditionalInfo
-	sceneState.push_back(velocity.x);
-	sceneState.push_back(velocity.y);
+//	//AdditionalInfo
+//	sceneState.push_back(velocity.x);
+//	sceneState.push_back(velocity.y);
+//
+//	if(velocity.y == 0 && controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
+//	else holdButtonCounter = 0;
+//
+//	sceneState.push_back(velocity.y == 0);
+//	sceneState.push_back(holdButtonCounter >= 2 ? 2 : -2);
 
-	if(velocity.y == 0 && controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
-	else holdButtonCounter = 0;
-
-	sceneState.push_back(velocity.y == 0);
-	sceneState.push_back(holdButtonCounter >= 2 ? 2 : -2);
-
-	for(int i=0;i<2;i++) sceneState.push_back(0);
+//	for(int i=0;i<2;i++) sceneState.push_back(0);
 
 	return sceneState;
 }
@@ -219,9 +219,9 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 //			}
 //		}
 //	}
-	result.push_back(t_state[t_state.size()-4-6]/16);
-	result.push_back(t_state[t_state.size()-3-6]/4);
-	result.push_back(t_state[t_state.size()-1-6]);
+//	result.push_back(t_state[t_state.size()-4-6]/16);
+//	result.push_back(t_state[t_state.size()-3-6]/4);
+//	result.push_back(t_state[t_state.size()-1-6]);
 
 //	result.push_back(action);
 

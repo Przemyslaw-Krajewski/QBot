@@ -109,7 +109,6 @@ namespace NeuralNetworkGPU
 	void InputLayer::determineOutput()
 	{
 		//Do nothing
-//		funkcja3<<<1,size>>>(d_input);
 	}
 
 	/*
@@ -133,16 +132,41 @@ namespace NeuralNetworkGPU
 	 */
 	NeuronsPtr InputLayer::getNeuronPtr()
 	{
-		if(tSize.m != 0) return NeuronsPtr(d_input,tSize, nullptr);
-		else return NeuronsPtr(d_input,size, nullptr);
+		if(tSize.m != 0) return NeuronsPtr(layerId, d_input,tSize, nullptr);
+		else return NeuronsPtr(layerId, d_input,size, nullptr);
 	}
 
 	/*
 	 *
 	 */
-//	void InputLayer::saveToFile(std::ofstream &t_file)
-//	{
-//		t_file << (double) 0 << ' '; //Signature of InputLayer
-//		t_file << (double) neurons.size() << ' ';
-//	}
+	void InputLayer::saveToFile(std::ofstream &t_file)
+	{
+		t_file << (float) getLayerTypeId() << ' ';
+		t_file << (float) size << ' ';
+		t_file << (float) tSize.x << ' ';
+		t_file << (float) tSize.y << ' ';
+		t_file << (float) tSize.z << ' ';
+	}
+
+	/*
+	 *
+	 */
+	InputLayer* InputLayer::loadFromFile(std::ifstream & t_file)
+	{
+		float size, tSize[3];
+		t_file >> size;
+		t_file >> tSize[0];
+		t_file >> tSize[1];
+		t_file >> tSize[2];
+
+		if(tSize[0] == 0 || tSize[1] == 0 || tSize[2] == 0)
+		{
+			return new NeuralNetworkGPU::InputLayer(size);
+		}
+		else
+		{
+			return new NeuralNetworkGPU::InputLayer(TensorSize(tSize[0],tSize[1],tSize[2]));
+		}
+
+	}
 }

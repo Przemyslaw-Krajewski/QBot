@@ -37,6 +37,8 @@ namespace NeuralNetworkGPU
 //		void saveToFile(std::ofstream &t_file) override;
 //		void loadFromFile(std::ifstream &t_file) override;
 
+		virtual int getLayerTypeId() {return 5;}
+
 	protected:
 		float *de_input;
 		TensorSize *d_inputSize,inputSize;

@@ -351,6 +351,15 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
+	void ConvolutionalLayer::setWeights(float* t_weights)
+	{
+		long weightsSize = filterSize.m*inputSize.z*size.z;
+		cudaMemcpy(d_weights, t_weights, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
 	std::vector<double> ConvolutionalLayer::getOutput()
 	{
 		cudaMemcpy(output, d_output, sizeof(float)*size.m, cudaMemcpyDeviceToHost);
@@ -412,7 +421,78 @@ namespace NeuralNetworkGPU
 	 */
 	NeuronsPtr ConvolutionalLayer::getNeuronPtr()
 	{
-		return NeuronsPtr(d_output,size, d_deltas);
+		return NeuronsPtr(layerId, d_output,size, d_deltas);
+	}
+
+	/*
+	 *
+	 */
+	void ConvolutionalLayer::saveToFile(std::ofstream &t_file)
+	{
+		t_file << (float) getLayerTypeId() << ' '; //Signature of SigmoidLayer
+
+		t_file << (float) inputSize.x << ' ';
+		t_file << (float) inputSize.y << ' ';
+		t_file << (float) inputSize.z << ' ';
+
+		t_file << (float) size.x << ' ';
+		t_file << (float) size.y << ' ';
+		t_file << (float) size.z << ' ';
+
+		t_file << (float) filterSize.x << ' ';
+		t_file << (float) filterSize.y << ' ';
+
+		float learnRate;
+		cudaMemcpy(&learnRate, d_n, sizeof(float), cudaMemcpyDeviceToHost);
+		t_file << learnRate << ' ';
+
+		//Weights
+		long weightsSize = filterSize.m*inputSize.z*size.z;
+
+		float *weights = (float*) malloc(sizeof(float)*weightsSize);
+		cudaMemcpy(weights, d_weights, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
+
+		for(int i=0; i< weightsSize; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+		free(weights);
+	}
+
+	/*
+	 *
+	 */
+
+	ConvolutionalLayer* ConvolutionalLayer::loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference)
+	{
+		float filterSize[2], size[3], inputSize[3];
+		float learnRate;
+
+		t_file >> inputSize[0];
+		t_file >> inputSize[1];
+		t_file >> inputSize[2];
+
+		t_file >> size[0];
+		t_file >> size[1];
+		t_file >> size[2];
+
+		t_file >> filterSize[0];
+		t_file >> filterSize[1];
+
+		t_file >> learnRate;
+
+		ConvolutionalLayer* layer = new ConvolutionalLayer(0,learnRate,size[2],MatrixSize(filterSize[0],filterSize[1]),t_prevLayerReference);
+
+		long weightsSize =filterSize[0]*filterSize[1]*inputSize[2]*size[2];
+		float *weights = (float*) malloc(sizeof(float)*weightsSize);
+		for(int i=0; i<weightsSize; i++)
+		{
+			t_file >> weights[i];
+		}
+		layer->setWeights(weights);
+		free(weights);
+
+		return layer;
 	}
 
 	/*

@@ -34,6 +34,7 @@ namespace NeuralNetworkGPU {
 	 */
 	void NeuralNetwork::addLayer(NNLayer *t_newLayer)
 	{
+		t_newLayer->setLayerId(layers.size());
 		layers.push_back(t_newLayer);
 	}
 
@@ -204,58 +205,70 @@ namespace NeuralNetworkGPU {
 	/*
 	 *
 	 */
-	void NeuralNetwork::saveToFile()
+	void NeuralNetwork::saveToFile(std::string t_name)
 	{
-//		std::remove("NeuralNetwork.dat");
-//		std::ofstream file("NeuralNetwork.dat");
-//
-//		file << layers.size() << ' ';
-//		for(auto it : layers)
-//		{
-//			it->saveToFile(file);
-//		}
-//
-//		file.close();
+		std::ofstream file(t_name);
+
+		file << layers.size() << ' ';
+		for(auto it : layers)
+		{
+			it->saveToFile(file);
+		}
+
+		file.close();
 	}
 
 	/*
 	 *
 	 */
-	void NeuralNetwork::loadFromFile()
+	void NeuralNetwork::loadFromFile(std::string t_name)
 	{
-//		std::ifstream file("NeuralNetwork.dat");
-//
-//		for(auto it = layers.begin(); it != layers.end(); it++)
-//		{
-//			delete (*it);
-//		}
-//		layers.clear();
-//
-//		int numberOfLayers,layerId;
-//		file >> numberOfLayers;
-//
-//		while(file >> layerId)
-//		{
-//			if(layerId == 0) // InputLayer
-//			{
-//				int size;
-//				file >> size;
-//				addLayer(new InputLayer(size));
-//			}
-//			else if (layerId == 1) //Sigmoid Layer
-//			{
-//				int size;
-//				double learnRate, b;
-//				file >> size;
-//				file >> learnRate;
-//				file >> b;
-//
-//				SigmoidLayer::configure(b);
-//				addLayer(new SigmoidLayer(learnRate, size, getLastLayerNeuronRef()));
-//			}
-//		}
-//
-//		file.close();
+		std::ifstream file(t_name);
+
+		for(auto it = layers.begin(); it != layers.end(); it++)
+		{
+			delete (*it);
+		}
+		layers.clear();
+
+		std::vector<NeuronsPtr> neuronPtrs; // TODO to list
+		neuronPtrs.clear();
+
+		int numberOfLayers,layerId;
+		file >> numberOfLayers;
+
+		while(file >> layerId)
+		{
+			NNLayer* layer;
+			if(layerId == InputLayer::getLayerTypeId())
+			{
+				layer = InputLayer::loadFromFile(file);
+				addLayer(layer);
+			}
+			else if(layerId == SigmoidLayer::getLayerTypeId())
+			{
+				layer = SigmoidLayer::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
+				addLayer(layer);
+			}
+			else if(layerId == FuseLayer::getLayerTypeId())
+			{
+				layer = FuseLayer::loadFromFile(file,neuronPtrs);
+				addLayer(layer);
+			}
+			else if(layerId == ConvolutionalLayer::getLayerTypeId())
+			{
+				layer = ConvolutionalLayer::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
+				addLayer(layer);
+			}
+			else if(layerId == PoolingLayer::getLayerTypeId())
+			{
+				layer = PoolingLayer::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
+				addLayer(layer);
+			}
+			neuronPtrs.push_back(layer->getNeuronPtr());
+		}
+
+		file.close();
 	}
 
 } /* namespace NeuralNetworkGPU */

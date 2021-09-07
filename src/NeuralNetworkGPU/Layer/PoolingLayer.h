@@ -28,8 +28,10 @@ namespace NeuralNetworkGPU
 		NeuronsPtr getNeuronPtr() override;
 
 		//save load
-//		void saveToFile(std::ofstream &t_file) override;
-//		void loadFromFile(std::ifstream &t_file) override;
+		void saveToFile(std::ofstream &t_file) override;
+		static PoolingLayer* loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference);
+
+		static int getLayerTypeId() {return 4;}
 
 	protected:
 		float *de_input;

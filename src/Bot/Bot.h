@@ -23,7 +23,6 @@
 #include "../Loggers/DataDrawer.h"
 #include "../ReinforcementLearning/QLearning.h"
 #include "../ReinforcementLearning/GeneralizedQL.h"
-#include "../ReinforcementLearning/ActorCritic.h"
 #include "../ReinforcementLearning/ActorCriticNN.h"
 
 class Bot {

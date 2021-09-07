@@ -58,6 +58,8 @@ namespace NeuralNetworkGPU
 		size = t_prevLayerReference1.size + t_prevLayerReference2.size;
 		de_input1 = t_prevLayerReference1.inputPtr;
 		de_input2 = t_prevLayerReference2.inputPtr;
+		idFusedLayer1 = t_prevLayerReference1.id;
+		idFusedLayer2 = t_prevLayerReference2.id;
 
 		//Input/output
 		cudaMalloc( (void **) &d_inputSize1, sizeof(int));
@@ -159,6 +161,31 @@ namespace NeuralNetworkGPU
 	 */
 	NeuronsPtr FuseLayer::getNeuronPtr()
 	{
-		return NeuronsPtr(d_output,size, d_deltas);
+		return NeuronsPtr(layerId, d_output,size, d_deltas);
+	}
+
+	/*
+	 *
+	 */
+	void FuseLayer::saveToFile(std::ofstream &t_file)
+	{
+		t_file << (float) getLayerTypeId() << ' ';
+		t_file << (float) size << ' '; // TODO unused parameter
+		t_file << (float) idFusedLayer1 << ' ';
+		t_file << (float) idFusedLayer2 << ' ';
+	}
+
+	/*
+	 *
+	 */
+	FuseLayer* FuseLayer::loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences)
+	{
+		float size, idFusedLayer1, idFusedLayer2;
+
+		t_file >> size;
+		t_file >> idFusedLayer1;
+		t_file >> idFusedLayer2;
+
+		return new FuseLayer(t_prevLayerReferences[idFusedLayer1], t_prevLayerReferences[idFusedLayer2]);
 	}
 }

@@ -58,24 +58,27 @@ namespace NeuralNetworkGPU
 
 	struct NeuronsPtr
 	{
-		NeuronsPtr(float* t_inputPtr, int t_size, float* t_deltaPtr)
+		NeuronsPtr(int t_id, float* t_inputPtr, int t_size, float* t_deltaPtr)
 		{
 			inputPtr = t_inputPtr;
 			size = t_size;
 			deltaPtr = t_deltaPtr;
 			tSize = TensorSize(-1,-1,-1);
+			id = t_id;
 		}
-		NeuronsPtr(float* t_inputPtr, TensorSize t_tSize, float* t_deltaPtr)
+		NeuronsPtr(int t_id, float* t_inputPtr, TensorSize t_tSize, float* t_deltaPtr)
 		{
 			inputPtr = t_inputPtr;
 			size = t_tSize.m;
 			deltaPtr = t_deltaPtr;
 			tSize = t_tSize;
+			id = t_id;
 		}
 		float* inputPtr;
 		float* deltaPtr;
 		int size;
 		TensorSize tSize;
+		int id;
 	};
 
 	class NNLayer
@@ -107,10 +110,15 @@ namespace NeuralNetworkGPU
 
 		//save load
 		virtual void saveToFile(std::ofstream &t_file) {assert("saveToFile() Not implemented" && 0);}
-		virtual void loadFromFile(std::ifstream &t_file) {assert("loadFromFile() Not implemented" && 0);}
+
+		//Layer Id used for load and save
+		int getLayerId() {return layerId;}
+		void setLayerId(int id) {layerId = id;}
 
 	public:
 		static double getRandomWeight() { return 0.2*((double)((rand()%100000))/100000-0.5); }
+
+		int layerId{-1};
 
 	};
 }

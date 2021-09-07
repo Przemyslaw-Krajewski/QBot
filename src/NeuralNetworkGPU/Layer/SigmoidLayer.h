@@ -28,12 +28,15 @@ namespace NeuralNetworkGPU
 		//configuration
 		NeuronsPtr getNeuronPtr() override;
 		void initWeights();
+		void setWeights(float* t_weights);
 
 		//save load
-//		void saveToFile(std::ofstream &t_file) override;
-//		void loadFromFile(std::ifstream &t_file) override;
+		void saveToFile(std::ofstream &t_file) override;
+		static SigmoidLayer* loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference);
 
 		virtual void drawLayer();
+
+		static int getLayerTypeId() {return 1;}
 
 	protected:
 		float *de_input;

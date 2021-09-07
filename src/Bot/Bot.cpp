@@ -171,13 +171,13 @@ void Bot::execute()
 		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
 		loadParameters();
-		reinforcementLearning->handleParameters();
 		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
 
 		//Learn
 		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
 		double sumErrMem = reinforcementLearning->learnFromMemory();
-//		std::cout << "Learn result: " << sumErrHist << "  " << sumErrMem << "\n";
+
+		reinforcementLearning->handleParameters();
 	}
 }
 
@@ -186,7 +186,7 @@ void Bot::execute()
  */
 void Bot::loadParameters()
 {
-	if(ParameterFileHandler::checkParameter("quit.param","Exit program"))
+	if(ParameterFileHandler::checkParameter("quit.param","Bot::Exit program"))
 		throw std::string("Exit program");
 }
 

@@ -51,8 +51,8 @@ namespace NeuralNetworkGPU {
 			void setMeanSquareDelta(std::vector<double> &z);
 
 			//save load
-			void saveToFile();
-			void loadFromFile();
+			void saveToFile(std::string t_name);
+			void loadFromFile(std::string t_name);
 
 			//helping
 		protected:

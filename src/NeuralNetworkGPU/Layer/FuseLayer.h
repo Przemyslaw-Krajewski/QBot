@@ -28,10 +28,12 @@ namespace NeuralNetworkGPU
 		NeuronsPtr getNeuronPtr() override;
 
 		//save load
-//		void saveToFile(std::ofstream &t_file) override;
-//		void loadFromFile(std::ifstream &t_file) override;
+		void saveToFile(std::ofstream &t_file) override;
+		static FuseLayer* loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences);
 
 		virtual void drawLayer() {assert("FuseLayer::drawLayer() not implemented" && 0);};
+
+		static int getLayerTypeId() {return 2;}
 
 	protected:
 		float *de_input1,*de_input2;
@@ -44,6 +46,8 @@ namespace NeuralNetworkGPU
 		int numberOfThreads;
 
 		float *d_deltas, *deltas, *de_prevDeltas1, *de_prevDeltas2;
+
+		int idFusedLayer1,idFusedLayer2;
 	};
 }
 

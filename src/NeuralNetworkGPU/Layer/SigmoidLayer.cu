@@ -307,6 +307,14 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
+	void SigmoidLayer::setWeights(float* t_weights)
+	{
+		cudaMemcpy(d_weights, t_weights, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
 	std::vector<double> SigmoidLayer::getOutput()
 	{
 		cudaMemcpy(output, d_output, sizeof(float)*size, cudaMemcpyDeviceToHost);
@@ -371,46 +379,56 @@ namespace NeuralNetworkGPU
 	 */
 	NeuronsPtr SigmoidLayer::getNeuronPtr()
 	{
-		return NeuronsPtr(d_output,size, d_deltas);
+		return NeuronsPtr(layerId, d_output,size, d_deltas);
 	}
 
 	/*
 	 *
 	 */
-//	void SigmoidLayer::saveToFile(std::ofstream & t_file)
-//	{
-//		t_file << (double) 1 << ' '; //Signature of SigmoidLayer
-//		t_file << (double) neurons.size() << ' ';
-//		t_file << learnRate << ' ';
-//		t_file << b << ' ';
-//
-//		for( auto it = neurons.begin(); it != neurons.end(); it++)
-//		{
-//			std::vector<double> *weights = it->getWeights();
-//			for(int i=0; i<weights->size(); i++)
-//			{
-//				t_file << (*weights)[i] << ' ';
-//			}
-//		}
-//	}
+	void SigmoidLayer::saveToFile(std::ofstream & t_file)
+	{
+		t_file << (float) getLayerTypeId() << ' '; //Signature of SigmoidLayer
+		t_file << (float) size << ' ';
+		t_file << (float) inputSize << ' ';
+		t_file << (float) learnRate << ' ';
+		float b;
+		cudaMemcpy(&b, d_b, sizeof(float), cudaMemcpyDeviceToHost);
+		t_file << b << ' ';
+
+		float *weights = (float*) malloc(sizeof(float)*size*(inputSize+1));
+		cudaMemcpy(weights, d_weights, sizeof(float)*size*(inputSize+1), cudaMemcpyDeviceToHost);
+
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+		free(weights);
+	}
 
 	/*
 	 *
 	 */
-//	void SigmoidLayer::loadFromFile(std::ifstream & t_file)
-//	{
-//		for( auto it = neurons.begin(); it != neurons.end(); it++)
-//		{
-//			double buff;
-//			std::vector<double> *weights = it->getWeights();
-//			for(int i=0; i<weights->size(); i++)
-//			{
-//				if(t_file.eof()) {assert("SigmoidLayer LoadFromFile: unexpected end of file");}
-//				t_file >> buff;
-//				(*weights)[i] = buff;
-//			}
-//		}
-//	}
+	SigmoidLayer* SigmoidLayer::loadFromFile(std::ifstream & t_file, NeuronsPtr t_prevLayerReference)
+	{
+		float size, inputSize, learnRate, b;
+		t_file >> size;
+		t_file >> inputSize;
+		t_file >> learnRate;
+		t_file >> b;
+
+		SigmoidLayer* layer = new SigmoidLayer(b,learnRate,size,t_prevLayerReference);
+
+		float *weights = (float*) malloc(sizeof(float)*size*(inputSize+1));
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			t_file >> weights[i];
+		}
+		layer->setWeights(weights);
+		free(weights);
+
+		return layer;
+	}
+
 	void SigmoidLayer::drawLayer()
 	{
 		int blockSize=20;

@@ -36,9 +36,12 @@ namespace NeuralNetworkGPU
 		NeuronsPtr getNeuronPtr() override;
 
 		//save load
-//		void saveToFile(std::ofstream &t_file) override;
+		void saveToFile(std::ofstream &t_file) override;
+		static InputLayer* loadFromFile(std::ifstream &t_file);
 
 		virtual void drawLayer() override {std::cout << "InputLayer::Drawing not implemented\n";};
+
+		static int getLayerTypeId() {return 0;}
 
 	protected:
 		float *d_input;

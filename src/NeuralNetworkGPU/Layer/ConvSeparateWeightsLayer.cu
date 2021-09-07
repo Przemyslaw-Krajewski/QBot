@@ -412,7 +412,7 @@ namespace NeuralNetworkGPU
 	 */
 	NeuronsPtr ConvSeparateWeightsLayer::getNeuronPtr()
 	{
-		return NeuronsPtr(d_output,size, d_deltas);
+		return NeuronsPtr(layerId, d_output,size, d_deltas);
 	}
 
 	/*
