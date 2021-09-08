@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
-#include <assert.h>
+#include <string>
 
 //#define PRINT_FETCHED_SCREEN
 

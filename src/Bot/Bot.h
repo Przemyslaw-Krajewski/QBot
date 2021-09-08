@@ -32,7 +32,6 @@ public:
 	virtual ~Bot();
 
 	void execute();
-	void testStateAnalyzer();
 
 private:
 	void loadParameters();
@@ -42,21 +41,14 @@ private:
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData, int xScreenSize=32, int yScreenSize=56);
 
 private:
-	//
 	StateAnalyzer stateAnalyzer;
 	ReinforcementLearning *reinforcementLearning;
-
-	int playsBeforeNNLearning;
-
-	ControlMode controlMode;
-	bool reset;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 
 	const int TIME_LIMIT = 150;
-	const int PLAYS_BEFORE_NEURAL_NETWORK_LEARNING =0;
 };
 
 #endif /* SRC_BOT_H_ */

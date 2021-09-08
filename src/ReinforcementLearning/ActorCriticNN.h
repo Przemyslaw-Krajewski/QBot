@@ -53,6 +53,9 @@ public:
 protected:
 	double getExp(double value) {return exp(8*value);}
 
+private:
+	void processLearningFromSARS(std::vector<SARS*> t_sars);
+	void putStateToMemory(State oldState, State state, int action, double reward);
 
 private:
 	int numberOfActions;

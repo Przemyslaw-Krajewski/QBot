@@ -44,31 +44,19 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 	if(oldImages.size() >2)
 	{
 		result->processedImagePast = *oldImages.begin();
-		oldImages2.push_back(result->processedImagePast.clone());
 		oldImages.erase(oldImages.begin());
 	}
 	else result->processedImagePast = cv::Mat(40, 64, CV_8UC3);
 
-//	if(oldImages2.size() >6)
-//	{
-//		result->processedImagePast2 = *oldImages2.begin();
-//		oldImages2.erase(oldImages2.begin());
-//	}
-//	else result->processedImagePast2 = cv::Mat(10, 16, CV_8UC3);
-//	reduceColors(0b10000000,&(result->processedImagePast));
-
 	int blockSize = 16;
 	reduceColors(0b11000000,&smallerImage);
 	cv::Mat firstPhaseImage;
-//	getMostFrequentInBlock(2, smallerImage, firstPhaseImage);
 	getLeastFrequentInImage(2, smallerImage, firstPhaseImage);
-//	cv::medianBlur(	smallerImage,smallerImage,3);
 	cv::resize(firstPhaseImage, result->processedImage, cv::Size(), 0.5, 0.5,CV_INTER_CUBIC);
 	oldImages.push_back(result->processedImage);
 
 	viewImage(8,"proc", result->processedImage);
 	viewImage(8,"past1", result->processedImagePast);
-//	viewImage(32,"past2", result->processedImagePast2);
 	result->playerFound = true;
 }
 
@@ -103,15 +91,6 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 		}
 	}
 
-//	for(int x=0; x<imagePast2.cols; x++)
-//	{
-//		for(int y=0; y<imagePast2.rows; y++)
-//		{
-//			uchar* ptrSrc = imagePast2.ptr(y)+(3*(x));
-//			sceneState.push_back((ptrSrc[0] >> 7) + (ptrSrc[1] >> 6) + (ptrSrc[2] >> 5));
-//		}
-//	}
-
 	//Controller
 	for(bool ci : controllerInput)
 	{
@@ -120,16 +99,16 @@ std::vector<int> RawImageAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 	}
 
 //	//AdditionalInfo
-//	sceneState.push_back(velocity.x);
-//	sceneState.push_back(velocity.y);
-//
-//	if(velocity.y == 0 && controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
-//	else holdButtonCounter = 0;
-//
-//	sceneState.push_back(velocity.y == 0);
-//	sceneState.push_back(holdButtonCounter >= 2 ? 2 : -2);
+	sceneState.push_back(velocity.x);
+	sceneState.push_back(velocity.y);
 
-//	for(int i=0;i<2;i++) sceneState.push_back(0);
+	if(velocity.y == 0 && controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
+	else holdButtonCounter = 0;
+
+	sceneState.push_back(velocity.y == 0);
+	sceneState.push_back(holdButtonCounter >= 2 ? 2 : -2);
+
+	for(int i=0;i<2;i++) sceneState.push_back(0);
 
 	return sceneState;
 }

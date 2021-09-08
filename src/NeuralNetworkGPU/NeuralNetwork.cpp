@@ -161,8 +161,6 @@ namespace NeuralNetworkGPU {
 		{
 			if(z[i]-delta[i] > 0.9) delta[i] = z[i]-0.9;
 			if(z[i]-delta[i] < 0.1) delta[i] = z[i]-0.1;
-//			if(z[i] > 0.9 && delta[i] < 0) delta[i] = 0;
-//			if(z[i] < 0.1 && delta[i] > 0) delta[i] = 0;
 		}
 
 		(*layers.rbegin())->setDelta(delta);

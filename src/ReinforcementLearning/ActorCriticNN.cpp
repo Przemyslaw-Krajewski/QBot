@@ -253,57 +253,15 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 		cumulatedReward = sarsIterator->reward + ActorCriticNN::LAMBDA_PARAMETER*cumulatedReward;
 		sarsIterator->reward = cumulatedReward;
 		sarsPointers.push_back(&(*sarsIterator));
-		//put state to memory
-		State rs = stateAnalyzer->reduceSceneState(sarsIterator->oldState,sarsIterator->action);
-		bool exists = memorizedSARS.find(rs) != memorizedSARS.end();
-		if(exists && memorizedSARS[rs].action == sarsIterator->action && sarsIterator->reward < MEMORIZE_SARS_CUP)
-		{
-			if(memorizedSARS[rs].state == sarsIterator->state && memorizedSARS[rs].oldState == sarsIterator->oldState)
-			{
-				memorizedSARS.erase(rs);
-				std::cout << "Erase state\n";
-			}
-		}
-		else if((exists && (memorizedSARS[rs].reward < sarsIterator->reward))
-				|| (!exists && sarsIterator->reward > MEMORIZE_SARS_CUP))
-		{
-			memorizedSARS[rs] = SARS(sarsIterator->oldState,
-									 sarsIterator->state,
-									 sarsIterator->action,
-									 sarsIterator->reward);
-		}
+		putStateToMemory(sarsIterator->oldState,sarsIterator->state, sarsIterator->action, sarsIterator->reward);
 	}
 
+	//Learning
 	double sumErr = 0;
 	for(int i=0 ;i< LEARN_FROM_HISTORY_ITERATIONS ; i++ )
 	{
-		std::random_shuffle(sarsPointers.begin(),sarsPointers.end());
-
-		std::vector<double> changesp = std::vector<double>(numberOfActions,0);
-		std::vector<double> changesm = std::vector<double>(numberOfActions,0);
-
-		for(std::vector<SARS*>::iterator sarsIterator = sarsPointers.begin(); sarsIterator!=sarsPointers.end(); sarsIterator++)
-		{
-			double change = learnSARS((*sarsIterator)->oldState,
-									  (*sarsIterator)->state,
-									  (*sarsIterator)->action,
-									  (*sarsIterator)->reward);
-
-			if(change >0) changesp[(*sarsIterator)->action] += change;
-			else 		  changesm[(*sarsIterator)->action] += change;
-
-			cv::waitKey(40);
-		}
-#ifdef ACTORCRITICNN_LOG
-		std::cout << "Scenario Learn Actions:\n";
-		for(int i=0; i<numberOfActions; i++)
-		{
-			std::cout << i << ":     " << changesp[i] << "  " << changesm[i] << "\n";
-		}
-#endif
+		processLearningFromSARS(sarsPointers);
 	}
-
-//	actorValues.drawLayer(4);
 
 	return sumErr/t_history.size();
 }
@@ -313,13 +271,9 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
  */
 double ActorCriticNN::learnFromMemory()
 {
-//	layerToDraw->drawLayer();
 #ifdef ACTORCRITICNN_ONE_ACTION
 	return 0;
 #endif
-	int skipStep = memorizedSARS.size()/1000;
-	if(skipStep < 1) skipStep = 1;
-
 #ifdef ACTORCRITICNN_LOG
 	std::cout << "Memory size: " << memorizedSARS.size() << "\n";
 #endif
@@ -333,34 +287,10 @@ double ActorCriticNN::learnFromMemory()
 	std::vector<SARS*> shuffledSARS;
 	for(std::map<State, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++) shuffledSARS.push_back(&(i->second));
 
+	//Learning
 	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
 	{
-
-		std::random_shuffle(shuffledSARS.begin(),shuffledSARS.end());
-
-		std::vector<double> changesp = std::vector<double>(numberOfActions,0);
-		std::vector<double> changesm = std::vector<double>(numberOfActions,0);
-
-		for(int j=0; j<shuffledSARS.size(); j+=skipStep)
-		{
-			double change = learnSARS((shuffledSARS[j])->oldState,
-							  		  (shuffledSARS[j])->state,
-									  (shuffledSARS[j])->action,
-									  (shuffledSARS[j])->reward);
-
-			if(change >0) changesp[(shuffledSARS[j])->action] += change;
-			else 		  changesm[(shuffledSARS[j])->action] += change;
-
-			cv::waitKey(40);
-		}
-
-#ifdef ACTORCRITICNN_LOG
-		std::cout << "Memory Learn Actions:\n";
-		for(int i=0; i<numberOfActions; i++)
-		{
-			std::cout << i << ":     " << changesp[i] << "  " << changesm[i] << "\n";
-		}
-#endif
+		processLearningFromSARS(shuffledSARS);
 	}
 	return sumErr/count;
 }
@@ -381,5 +311,52 @@ void ActorCriticNN::handleParameters()
 	{
 		criticValues.loadFromFile("CriticNN.dat");
 		actorValues.loadFromFile("ActorNN.dat");
+	}
+}
+
+void ActorCriticNN::processLearningFromSARS(std::vector<SARS*> t_sars)
+{
+	std::random_shuffle(t_sars.begin(),t_sars.end());
+
+	std::vector<double> changesp = std::vector<double>(numberOfActions,0);
+	std::vector<double> changesm = std::vector<double>(numberOfActions,0);
+
+	for(std::vector<SARS*>::iterator sarsIterator = t_sars.begin(); sarsIterator!=t_sars.end(); sarsIterator++)
+	{
+		double change = learnSARS((*sarsIterator)->oldState,
+								  (*sarsIterator)->state,
+								  (*sarsIterator)->action,
+								  (*sarsIterator)->reward);
+
+		if(change >0) changesp[(*sarsIterator)->action] += change;
+		else 		  changesm[(*sarsIterator)->action] += change;
+
+		cv::waitKey(40);
+	}
+#ifdef ACTORCRITICNN_LOG
+	std::cout << "Scenario Learn Actions:\n";
+	for(int i=0; i<numberOfActions; i++)
+	{
+		std::cout << i << ":     " << changesp[i] << "  " << changesm[i] << "\n";
+	}
+#endif
+}
+
+void ActorCriticNN::putStateToMemory(State oldState, State state, int action, double reward)
+{
+	State rs = stateAnalyzer->reduceSceneState(oldState,action);
+	bool exists = memorizedSARS.find(rs) != memorizedSARS.end();
+	if(exists && memorizedSARS[rs].action == action && reward < MEMORIZE_SARS_CUP)
+	{
+		if(memorizedSARS[rs].state == state && memorizedSARS[rs].oldState == oldState)
+		{
+			memorizedSARS.erase(rs);
+			std::cout << "Erase state\n";
+		}
+	}
+	else if((exists && (memorizedSARS[rs].reward < reward))
+			|| (!exists && reward > MEMORIZE_SARS_CUP))
+	{
+		memorizedSARS[rs] = SARS(oldState, state, action, reward);
 	}
 }

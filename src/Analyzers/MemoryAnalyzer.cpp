@@ -29,12 +29,12 @@ MemoryAnalyzer::MemoryAnalyzer() {
 	pidFile.open ("pid.txt");
 
 	if(pidFile.is_open() && !pidFile.eof())	pidFile >> pid;
-	else assert("pid.txt management error" && 0);
+	else throw std::string("pid.txt management error");
 
 	pidFile.close();
 	system("rm pid.txt");
 
-	if(pid == -1) assert("FCEU pid not found" && 0);
+	if(pid == -1) throw std::string("FCEU pid not found");
 
 	char memCommand[64];
 	sprintf(memCommand, "cat /proc/%ld/maps | grep heap | cut -c -12 > mem.txt", (long)pid);
@@ -44,12 +44,12 @@ MemoryAnalyzer::MemoryAnalyzer() {
 
 	MEM_ADDR = 0x0;
 	if(memFile.is_open() && !memFile.eof()) memFile >> std::hex >> MEM_ADDR;
-	else assert("mem.txt management error" && 0);
+	else throw std::string("mem.txt management error");
 
 	memFile.close();
 	system("rm mem.txt");
 
-	if(MEM_ADDR == 0x0) assert("FCEU mem not found" && 0);
+	if(MEM_ADDR == 0x0) throw std::string("FCEU mem not found");
 
 	RAM_ADDR = getMemValue(MEM_ADDR+RAMPTR_ADDR_OFFSET,sizeof(size_t));
 	XBUFF_ADDR = getMemValue(MEM_ADDR+XBUFFPTR_ADDR_OFFSET,sizeof(size_t));
