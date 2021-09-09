@@ -175,10 +175,18 @@ ControllerInput Bot::determineControllerInput(int t_action)
 	ControllerInput w;
 	for(int i=0; i<numberOfControllerInputs; i++) w.push_back(false);
 
+	//8 actions
 //	w[ 2+(t_action%4) ] = true;
 //	w[0] = t_action>3;
+
+	//3 actions
 	w[0] = t_action == 1;
-	w[3] = true;
+	w[3] = t_action != 2;
+	w[4] = t_action == 2;
+
+	//2 actions
+//	w[0] = t_action == 1;
+//	w[3] = true;
 
 	return w;
 }
@@ -188,7 +196,17 @@ ControllerInput Bot::determineControllerInput(int t_action)
  */
 int Bot::determineControllerInputInt(int t_action)
 {
+	//8 actions
 //	int direction = (1<<(4+t_action%4));
 //	int jump = t_action>3?1:0;
-	return (1<<7)+t_action;
+
+	//2 actions
+	int direction = t_action == 2 ? (1<<6) : (1<<7);
+	int jump = t_action;
+
+	//2 actions
+//	int direction = (1<<7);
+//	int jump = t_action;
+
+	return direction+jump;
 }

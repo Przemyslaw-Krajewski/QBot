@@ -57,7 +57,7 @@ int ReinforcementLearning::getWeightedRandom(std::vector<double> t_array)
 
 	//Choose random
 	if(sum == 0) return rand()%t_array.size();
-	double randomValue = ((double)(rand()%((int)1000000)))/1000000;
+	double randomValue = ((double)(rand()%((int)100000000)))/100000000;
 	for(int i=0; i<t_array.size(); i++)
 	{
 		randomValue -= t_array[i]/sum;
