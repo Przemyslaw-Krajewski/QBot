@@ -20,7 +20,7 @@ public:
 
 	//Basic methods
 	virtual int chooseAction(State& t_state) = 0;
-	virtual double learnSARS(State &t_prevState, State &t_state, int t_action, double t_reward) = 0;
+	virtual double learnSARS(SARS &t_sars) = 0;
 
 	virtual double learnFromScenario(std::list<SARS> &t_history) = 0;
 	virtual double learnFromMemory() = 0;

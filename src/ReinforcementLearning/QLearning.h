@@ -26,7 +26,7 @@ public:
 
 	//Basic methods
 	virtual int chooseAction(State& t_state) override;
-	virtual double learnSARS(State &t_prevState, State &t_state, int t_action, double t_reward) override;
+	virtual double learnSARS(SARS &t_sars) override;
 
 	virtual double learnFromScenario(std::list<SARS> &t_history) override;
 	virtual double learnFromMemory() override;

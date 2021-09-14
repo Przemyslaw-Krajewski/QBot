@@ -209,30 +209,30 @@ int ActorCriticNN::chooseAction(State& t_state)
 /*
  *
  */
-double ActorCriticNN::learnSARS(State &t_prevState, State &t_state, int t_action, double t_reward)
+double ActorCriticNN::learnSARS(SARS &t_sars)
 {
-	if(t_prevState.size() == 0 || t_reward == 0)
+	if(t_sars.oldState.size() == 0 || t_sars.reward == 0)
 	{
-		std::cout << t_prevState.size() << "  " << t_reward << "INVALID STATE!\n";
+		std::cout << t_sars.oldState.size() << "  " << t_sars.reward << "INVALID STATE!\n";
 		return 0;
 	}
 
 	//Critic
-	std::vector<double> stateValue = criticValues.determineOutput(t_state);
+	std::vector<double> stateValue = criticValues.determineOutput(t_sars.state);
 	std::vector<double> criticZ = std::vector<double>();
-	criticZ.push_back(t_reward);
+	criticZ.push_back(t_sars.reward);
 	criticValues.setMeanSquareDelta(criticZ);
 	criticValues.learnBackPropagation();
 
 	//Actor
-	std::vector<double> prevStateValue = criticValues.determineOutput(t_prevState);
-	std::vector<double> actorZ = actorValues.determineOutput(t_prevState);
+	std::vector<double> prevStateValue = criticValues.determineOutput(t_sars.oldState);
+	std::vector<double> actorZ = actorValues.determineOutput(t_sars.oldState);
 
 	double previousReward = UPPER_REWARD_CUP > prevStateValue[0] ? prevStateValue[0] : UPPER_REWARD_CUP;
 	previousReward = LOWER_REWARD_CUP < previousReward ? previousReward : LOWER_REWARD_CUP;
-	double change = t_reward-previousReward;
+	double change = t_sars.reward-previousReward;
 
-	actorValues.setSoftMaxDelta(actorZ, change, t_action);
+	actorValues.setSoftMaxDelta(actorZ, change, t_sars.action);
 	actorValues.learnBackPropagation();
 
 	return change;
@@ -253,17 +253,17 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 		cumulatedReward = sarsIterator->reward + ActorCriticNN::LAMBDA_PARAMETER*cumulatedReward;
 		sarsIterator->reward = cumulatedReward;
 		sarsPointers.push_back(&(*sarsIterator));
-		putStateToMemory(sarsIterator->oldState,sarsIterator->state, sarsIterator->action, sarsIterator->reward);
+
+		putStateToMemory(*sarsIterator);
 	}
 
 	//Learning
-	double sumErr = 0;
 	for(int i=0 ;i< LEARN_FROM_HISTORY_ITERATIONS ; i++ )
 	{
 		processLearningFromSARS(sarsPointers);
 	}
 
-	return sumErr/t_history.size();
+	return 0;
 }
 
 /*
@@ -278,8 +278,6 @@ double ActorCriticNN::learnFromMemory()
 	std::cout << "Memory size: " << memorizedSARS.size() << "\n";
 #endif
 
-	double sumErr = 0;
-	long count = 0;
 	if(LEARN_FROM_MEMORY_ITERATIONS == 0) return 0;
 	if(memorizedSARS.size() <= 0) return 0;
 
@@ -292,7 +290,7 @@ double ActorCriticNN::learnFromMemory()
 	{
 		processLearningFromSARS(shuffledSARS);
 	}
-	return sumErr/count;
+	return 0;
 }
 
 
@@ -323,10 +321,7 @@ void ActorCriticNN::processLearningFromSARS(std::vector<SARS*> t_sars)
 
 	for(std::vector<SARS*>::iterator sarsIterator = t_sars.begin(); sarsIterator!=t_sars.end(); sarsIterator++)
 	{
-		double change = learnSARS((*sarsIterator)->oldState,
-								  (*sarsIterator)->state,
-								  (*sarsIterator)->action,
-								  (*sarsIterator)->reward);
+		double change = learnSARS(*(*sarsIterator));
 
 		if(change >0) changesp[(*sarsIterator)->action] += change;
 		else 		  changesm[(*sarsIterator)->action] += change;
@@ -342,21 +337,21 @@ void ActorCriticNN::processLearningFromSARS(std::vector<SARS*> t_sars)
 #endif
 }
 
-void ActorCriticNN::putStateToMemory(State oldState, State state, int action, double reward)
+void ActorCriticNN::putStateToMemory(SARS &t_sars)
 {
-	State rs = stateAnalyzer->reduceSceneState(oldState,action);
+	State rs = stateAnalyzer->reduceSceneState(t_sars.oldState,t_sars.action);
 	bool exists = memorizedSARS.find(rs) != memorizedSARS.end();
-	if(exists && memorizedSARS[rs].action == action && reward < MEMORIZE_SARS_CUP)
+	if(exists && memorizedSARS[rs].action == t_sars.action && t_sars.reward < MEMORIZE_SARS_CUP)
 	{
-		if(memorizedSARS[rs].state == state && memorizedSARS[rs].oldState == oldState)
+		if(memorizedSARS[rs].state == t_sars.state && memorizedSARS[rs].oldState == t_sars.oldState)
 		{
-			std::cout << "Erase state:" << action << "  " << memorizedSARS[rs].action << "  " << reward << "\n";
+			std::cout << "Erase state:" << t_sars.action << "  " << memorizedSARS[rs].action << "  " << t_sars.reward << "\n";
 			memorizedSARS.erase(rs);
 		}
 	}
-	else if((exists && (memorizedSARS[rs].reward < reward))
-			|| (!exists && reward > MEMORIZE_SARS_CUP))
+	else if((exists && (memorizedSARS[rs].reward < t_sars.reward))
+			|| (!exists && t_sars.reward > MEMORIZE_SARS_CUP))
 	{
-		memorizedSARS[rs] = SARS(oldState, state, action, reward);
+		memorizedSARS[rs] = t_sars;
 	}
 }

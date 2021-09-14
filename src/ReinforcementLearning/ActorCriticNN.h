@@ -31,7 +31,7 @@ public:
 
 	//Basic methods
 	virtual int chooseAction(State& t_state) override;
-	virtual double learnSARS(State &t_prevState, State &t_state, int t_action, double t_reward) override;
+	virtual double learnSARS(SARS &t_sars) override;
 
 	virtual double learnFromScenario(std::list<SARS> &t_history) override;
 	virtual double learnFromMemory() override;
@@ -55,7 +55,7 @@ protected:
 
 private:
 	void processLearningFromSARS(std::vector<SARS*> t_sars);
-	void putStateToMemory(State oldState, State state, int action, double reward);
+	void putStateToMemory(SARS &t_sars);
 
 private:
 	int numberOfActions;
@@ -70,8 +70,8 @@ private:
 	StateAnalyzer *stateAnalyzer;
 
 public:
-	static constexpr double UPPER_REWARD_CUP = 0.75;
-	static constexpr double LOWER_REWARD_CUP = 0.15;
+	static constexpr double UPPER_REWARD_CUP = 0.80;
+	static constexpr double LOWER_REWARD_CUP = 0.10;
 	static constexpr double MEMORIZE_SARS_CUP = 0.70;
 
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;

@@ -82,20 +82,20 @@ int GeneralizedQL::chooseAction(State& t_state)
 /*
  *
  */
-double GeneralizedQL::learnSARS(State &t_prevState, State &t_state, int t_action, double t_reward)
+double GeneralizedQL::learnSARS(SARS &t_sars)
 {
-	double maxValue = qValues.getValue(t_state,0);
+	double maxValue = qValues.getValue(t_sars.state,0);
 	for(int i_action=1; i_action<numberOfActions; i_action++)
 	{
-		double value = qValues.getValue(t_state,i_action);
+		double value = qValues.getValue(t_sars.state,i_action);
 		if(maxValue < value) maxValue = value;
 	}
 
-	double prevValue = qValues.getValue(t_prevState,t_action);
-	double value = prevValue + alpha*(t_reward+gamma*maxValue - prevValue);
-	qValues.setValue(t_prevState, t_action, value);
+	double prevValue = qValues.getValue(t_sars.oldState,t_sars.action);
+	double value = prevValue + alpha*(t_sars.reward+gamma*maxValue - prevValue);
+	qValues.setValue(t_sars.oldState, t_sars.action, value);
 
-	return qValues.getChange(t_prevState);
+	return qValues.getChange(t_sars.oldState);
 }
 
 /*
@@ -138,10 +138,8 @@ double GeneralizedQL::learnFromScenario(std::list<SARS> &t_history)
 	double cumulatedReward = 0;
 	for(std::list<SARS>::iterator sarsIterator = t_history.begin(); sarsIterator!=t_history.end(); sarsIterator++)
 	{
-		sumErr += abs(learnSARS(sarsIterator->oldState,
-				  			    sarsIterator->state,
-								sarsIterator->action,
-								sarsIterator->reward + cumulatedReward));
+		sarsIterator->reward = sarsIterator->reward + cumulatedReward;
+		sumErr += abs(learnSARS(*sarsIterator));
 		cumulatedReward = LAMBDA_PARAMETER*(sarsIterator->reward + cumulatedReward);
 	}
 
