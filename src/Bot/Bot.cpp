@@ -41,6 +41,7 @@ Bot::Bot()
 
 	//Initialize acLearning
 	reinforcementLearning = new ActorCriticNN(numberOfActions, (int) sceneState.size(), &stateAnalyzer);
+	reinforcementLearning->handleParameters();
 }
 
 /*
@@ -180,13 +181,13 @@ ControllerInput Bot::determineControllerInput(int t_action)
 //	w[0] = t_action>3;
 
 	//3 actions
-	w[0] = t_action == 1;
-	w[3] = t_action != 2;
-	w[4] = t_action == 2;
+//	w[0] = t_action == 1;
+//	w[3] = t_action != 2;
+//	w[4] = t_action == 2;
 
 	//2 actions
-//	w[0] = t_action == 1;
-//	w[3] = true;
+	w[0] = t_action == 1;
+	w[3] = true;
 
 	return w;
 }
@@ -200,13 +201,13 @@ int Bot::determineControllerInputInt(int t_action)
 //	int direction = (1<<(4+t_action%4));
 //	int jump = t_action>3?1:0;
 
-	//2 actions
-	int direction = t_action == 2 ? (1<<6) : (1<<7);
-	int jump = t_action;
+	//3 actions
+//	int direction = t_action == 2 ? (1<<6) : (1<<7);
+//	int jump = t_action;
 
 	//2 actions
-//	int direction = (1<<7);
-//	int jump = t_action;
+	int direction = (1<<7);
+	int jump = t_action;
 
 	return direction+jump;
 }

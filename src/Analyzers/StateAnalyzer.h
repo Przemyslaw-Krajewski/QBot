@@ -53,7 +53,7 @@ private:
 	Game game;
 
 public:
-	static constexpr double WIN_REWARD     = 0.9;
+	static constexpr double WIN_REWARD     = 0.85;
 	static constexpr double ADVANCE_REWARD = 0.07;
 	static constexpr double LITTLE_ADVANCE_REWARD = 0.05;
 	static constexpr double NOTHING_REWARD = 0.04;

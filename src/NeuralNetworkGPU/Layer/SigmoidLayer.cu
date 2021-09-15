@@ -419,9 +419,11 @@ namespace NeuralNetworkGPU
 		SigmoidLayer* layer = new SigmoidLayer(b,learnRate,size,t_prevLayerReference);
 
 		float *weights = (float*) malloc(sizeof(float)*size*(inputSize+1));
+		float buff;
 		for(int i=0; i<(inputSize+1)*size; i++)
 		{
-			t_file >> weights[i];
+			t_file >> buff;
+			weights[i] = buff;
 		}
 		layer->setWeights(weights);
 		free(weights);

@@ -12,7 +12,7 @@
 
 #include <vector>
 
-const int numberOfActions = 3;
+const int numberOfActions = 2;
 const int numberOfControllerInputs = 6;
 
 using State = std::vector<int>;

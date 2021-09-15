@@ -70,8 +70,8 @@ private:
 	StateAnalyzer *stateAnalyzer;
 
 public:
-	static constexpr double UPPER_REWARD_CUP = 0.80;
-	static constexpr double LOWER_REWARD_CUP = 0.10;
+	static constexpr double UPPER_REWARD_CUP = 0.75;
+	static constexpr double LOWER_REWARD_CUP = 0.15;
 	static constexpr double MEMORIZE_SARS_CUP = 0.70;
 
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;

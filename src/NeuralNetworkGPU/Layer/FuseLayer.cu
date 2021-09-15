@@ -179,7 +179,7 @@ namespace NeuralNetworkGPU
 	 */
 	FuseLayer* FuseLayer::loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences)
 	{
-		float size, idFusedLayer1, idFusedLayer2;
+		float idFusedLayer1, idFusedLayer2;
 
 		t_file >> idFusedLayer1;
 		t_file >> idFusedLayer2;

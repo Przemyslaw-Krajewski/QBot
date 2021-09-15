@@ -477,13 +477,15 @@ namespace NeuralNetworkGPU
 
 		t_file >> learnRate;
 
-		ConvolutionalLayer* layer = new ConvolutionalLayer(0,learnRate,convSize,MatrixSize(filterSize[0],filterSize[1]),t_prevLayerReference);
+		ConvolutionalLayer* layer = new ConvolutionalLayer(0.01f,learnRate,convSize,MatrixSize(filterSize[0],filterSize[1]),t_prevLayerReference);
 
 		long weightsSize =filterSize[0]*filterSize[1]*inputSize[2]*convSize;
 		float *weights = (float*) malloc(sizeof(float)*weightsSize);
+		float buff;
 		for(int i=0; i<weightsSize; i++)
 		{
-			t_file >> weights[i];
+			t_file >> buff;
+			weights[i] = buff;
 		}
 		layer->setWeights(weights);
 		free(weights);
