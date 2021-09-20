@@ -17,6 +17,8 @@
 #include "../NeuralNetwork/NeuralNetwork.h"
 #include "../NeuralNetworkGPU/NeuralNetwork.h"
 
+enum class ControlMode {QL, NN, Hybrid, NNNoLearn};
+
 class GeneralizedQL : public ReinforcementLearning
 {
 

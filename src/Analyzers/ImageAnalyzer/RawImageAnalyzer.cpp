@@ -123,8 +123,31 @@ State RawImageAnalyzer::reduceSceneState(const State& t_state, double action)
 	int ySize = 40;
 	int zSize = 3;
 
+	std::vector<int> median = std::vector<int>(xSize*ySize*zSize,0);
 	std::vector<int> edges = std::vector<int>(xSize*ySize,0);
 	std::vector<int> erosion = std::vector<int>(xSize*ySize,0);
+
+	//median filter
+//	for(int x=1; x<xSize-1; x++)
+//	{
+//		for(int y=1; y<ySize-1; y++)
+//		{
+//			int value = 0;
+//			for(int z=0; z<zSize; z++)
+//			{
+//				std::vector<int> v;
+//				for(int i=-1;i<=1;i++)
+//				{
+//					for(int j=-1;j<=1;j++)
+//					{
+//						v.push_back(t_state[ x+i + (y+j) *xSize + z*ySize*xSize]);
+//					}
+//				}
+//				std::sort(v.begin(),v.end());
+//				median[x+ y*xSize + z*xSize*ySize] = v[4];
+//			}
+//		}
+//	}
 
 	//Find edges and threshold
 	for(int x=1; x<xSize-1; x++)

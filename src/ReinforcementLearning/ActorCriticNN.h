@@ -22,6 +22,8 @@
 
 #include "../Analyzers/StateAnalyzer.h"
 
+#include "../Loggers/ParameterFIleHandler.h"
+
 class ActorCriticNN : public ReinforcementLearning
 {
 
@@ -44,11 +46,6 @@ public:
 	void createNNB();
 	void createNNC();
 	void createNND();
-
-
-	//Debug
-	double getCriticValue(State t_state) {return criticValues.determineOutput(t_state)[0];}
-//	void drawCriticValues() {criticValues.drawNeuralNetwork();}
 
 protected:
 	double getExp(double value) {return exp(8*value);}

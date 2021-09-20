@@ -8,12 +8,24 @@
 #ifndef SRC_ANALYZERS_IMAGEANALYZER_IMAGEANALYZER_H_
 #define SRC_ANALYZERS_IMAGEANALYZER_IMAGEANALYZER_H_
 
-//#define PRINT_ANALYZED_IMAGE
+#define PRINT_ANALYZED_IMAGE
 
 #include <opencv2/opencv.hpp>
 #include <map>
 
 #include "../../Bot/Common.h"
+#include "../../Bot/Controller.h"
+
+struct Point
+{
+	Point() {x=y=0;}
+	Point(int t_x, int t_y) {x=t_x;y=t_y;}
+	Point& operator=(const cv::Point& t_p ) {x=t_p.x;y=t_p.y;return *this;}
+	Point& operator=(const Point & t_p ) {x=t_p.x;y=t_p.y;return *this;}
+	bool operator==(const Point & t_p ) {return (x==t_p.x && y==t_p.y);}
+	int x;
+	int y;
+};
 
 class ImageAnalyzer
 {
@@ -49,7 +61,6 @@ protected:
 			                          cv::Rect searchBounds=cv::Rect(-1,-1,-1,-1));
 	bool compareMat(cv::Mat &image, cv::Mat &pattern, cv::Point offset);
 	cv::Mat cutFragment(cv::Mat* image, cv::Point leftUp, cv::Point rightDown);
-	std::vector<int> toVector(cv::Mat *image);
 
 protected:
 

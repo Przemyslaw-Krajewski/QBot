@@ -17,10 +17,13 @@
 #include <fstream>
 
 #include "Common.h"
+#include "Controller.h"
+#include "../Loggers/ParameterFIleHandler.h"
 #include "../Analyzers/StateAnalyzer.h"
 
 #include "../Analyzers/MemoryAnalyzer.h"
 #include "../Loggers/DataDrawer.h"
+#include "../Loggers/LogFileHandler.h"
 #include "../ReinforcementLearning/QLearning.h"
 #include "../ReinforcementLearning/GeneralizedQL.h"
 #include "../ReinforcementLearning/ActorCriticNN.h"
@@ -34,15 +37,18 @@ public:
 	void execute();
 
 private:
-	void loadParameters();
-
-	ControllerInput determineControllerInput(int t_action);
-	int determineControllerInputInt(int t_action);
+	void handleParameters();
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData, int xScreenSize=32, int yScreenSize=56);
 
 private:
 	StateAnalyzer stateAnalyzer;
 	ReinforcementLearning *reinforcementLearning;
+
+	State state;
+	State prevState;
+	Controller controller;
+	Controller prevController;
+	std::list<SARS> historyScenario;
 
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;

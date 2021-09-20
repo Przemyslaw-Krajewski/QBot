@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "../Bot/Common.h"
+#include "../Bot/Controller.h"
 #include "ImageAnalyzer/RawImageAnalyzer.h"
 #include "ImageAnalyzer/MetaDataAnalyzer.h"
 #include "MemoryAnalyzer.h"

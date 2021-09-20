@@ -13,7 +13,7 @@
 Bot::Bot()
 {
 	/*  Initialize */
-	cv::waitKey(3000);
+	cv::waitKey(1000);
 	//Load game in order to avoid not finding player during initializing
 	MemoryAnalyzer::getPtr()->setController(0);
 	MemoryAnalyzer::getPtr()->loadState();
@@ -30,15 +30,13 @@ Bot::Bot()
 	if(analyzeResult.additionalInfo == ScenarioAdditionalInfo::notFound)
 				throw std::string("Could not initialize, check player visibility");
 
-	ControllerInput controllerInput = determineControllerInput(0);
+	Controller controller = Controller(0);
 	State sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
 													  analyzeResult.processedImagePast,
 													  analyzeResult.processedImagePast2,
-													  controllerInput,
+													  controller.getInput(),
 													  analyzeResult.playerCoords,
 													  analyzeResult.playerVelocity);
-	cv::waitKey(1000);
-
 	//Initialize acLearning
 	reinforcementLearning = new ActorCriticNN(numberOfActions, (int) sceneState.size(), &stateAnalyzer);
 	reinforcementLearning->handleParameters();
@@ -59,71 +57,57 @@ void Bot::execute()
 {
 	while(1)
 	{
+		//Reset variables
+		historyScenario.clear();
 		double score = 0;
-
-		//State variables
-		std::list<SARS> historyScenario;
-		State sceneState;
-		ControllerInput controllerInput = determineControllerInput(0);
-		int changeController = 3;
-		int action = 0;
-		ScenarioAdditionalInfo scenarioResult = ScenarioAdditionalInfo::noInfo;
 		int time = TIME_LIMIT;
-
+		ScenarioAdditionalInfo scenarioResult = ScenarioAdditionalInfo::noInfo;
 
 		//Reload game
 		MemoryAnalyzer::getPtr()->setController(0);
 		MemoryAnalyzer::getPtr()->loadState();
 		cv::waitKey(100);
 
-		//Get first scene state
+		//Get first state
 		StateAnalyzer::AnalyzeResult analyzeResult = stateAnalyzer.analyze();
-		sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
+		state = stateAnalyzer.createSceneState(analyzeResult.processedImage,
 													analyzeResult.processedImagePast,
 													analyzeResult.processedImagePast2,
-													controllerInput,
+													controller.getInput(),
 													analyzeResult.playerCoords,
 													analyzeResult.playerVelocity);
-		action = reinforcementLearning->chooseAction(sceneState);
-		controllerInput = determineControllerInput(action);
-		MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
+
+		controller = Controller(reinforcementLearning->chooseAction(state));
+		MemoryAnalyzer::getPtr()->setController(controller.getCode());
 
 		while(1)
 		{
-			//Persist info
 #ifdef PRINT_PROCESSING_TIME
 			int64 timeBefore = cv::getTickCount();
 #endif
-			cv::waitKey(80);
-			State oldSceneState = sceneState;
-			int oldAction = action;
+			//Persist info
+			prevState = state;
+			prevController=controller;
 
 			//Analyze situation
 			StateAnalyzer::AnalyzeResult analyzeResult = stateAnalyzer.analyze();
-			if(analyzeResult.processedImage.cols == 0) continue;
-			sceneState = stateAnalyzer.createSceneState(analyzeResult.processedImage,
+			state = stateAnalyzer.createSceneState(analyzeResult.processedImage,
 														analyzeResult.processedImagePast,
 														analyzeResult.processedImagePast2,
-														controllerInput,
+														prevController.getInput(),
 														analyzeResult.playerCoords,
 														analyzeResult.playerVelocity);
 			if(analyzeResult.reward >= StateAnalyzer::LITTLE_ADVANCE_REWARD ) score++ ;
 
 //			DataDrawer::drawReducedState(sceneState, &stateAnalyzer);
-//			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controllerInput, sceneState[sceneState.size()-1]);
+			DataDrawer::drawAdditionalInfo(analyzeResult.reward, TIME_LIMIT, time, controller.getInput(), state[state.size()-1]);
 
 			//add learning info to history
-			historyScenario.push_front(SARS(oldSceneState, sceneState, oldAction, analyzeResult.reward));
+			historyScenario.push_front(SARS(prevState, state, prevController.getAction(), analyzeResult.reward));
 
 			//Determine new controller input
-			changeController--;
-			if(changeController < 1)
-			{
-				changeController = 1;
-				action = reinforcementLearning->chooseAction(sceneState);
-				controllerInput = determineControllerInput(action);
-				MemoryAnalyzer::getPtr()->setController(determineControllerInputInt(action));
-			}
+			controller = Controller(reinforcementLearning->chooseAction(state));
+			MemoryAnalyzer::getPtr()->setController(controller.getCode());
 
 #ifdef PRINT_PROCESSING_TIME
 			int64 afterBefore = cv::getTickCount();
@@ -141,6 +125,8 @@ void Bot::execute()
 				scenarioResult = analyzeResult.additionalInfo;
 				break;
 			}
+
+			cv::waitKey(60);
 		}
 
 		std::cout << score << "\n";
@@ -148,10 +134,10 @@ void Bot::execute()
 
 		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
-		loadParameters();
-		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
+		handleParameters();
 
 		//Learn
+		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
 		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
 		double sumErrMem = reinforcementLearning->learnFromMemory();
 
@@ -162,52 +148,8 @@ void Bot::execute()
 /*
  *
  */
-void Bot::loadParameters()
+void Bot::handleParameters()
 {
 	if(ParameterFileHandler::checkParameter("quit.param","Bot::Exit program"))
 		throw std::string("Exit program");
-}
-
-/*
- *
- */
-ControllerInput Bot::determineControllerInput(int t_action)
-{
-	ControllerInput w;
-	for(int i=0; i<numberOfControllerInputs; i++) w.push_back(false);
-
-	//8 actions
-//	w[ 2+(t_action%4) ] = true;
-//	w[0] = t_action>3;
-
-	//3 actions
-//	w[0] = t_action == 1;
-//	w[3] = t_action != 2;
-//	w[4] = t_action == 2;
-
-	//2 actions
-	w[0] = t_action == 1;
-	w[3] = true;
-
-	return w;
-}
-
-/*
- *
- */
-int Bot::determineControllerInputInt(int t_action)
-{
-	//8 actions
-//	int direction = (1<<(4+t_action%4));
-//	int jump = t_action>3?1:0;
-
-	//3 actions
-//	int direction = t_action == 2 ? (1<<6) : (1<<7);
-//	int jump = t_action;
-
-	//2 actions
-	int direction = (1<<7);
-	int jump = t_action;
-
-	return direction+jump;
 }

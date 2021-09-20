@@ -31,15 +31,7 @@ ActorCriticNN::ActorCriticNN(int t_nActions, int t_dimensionStatesSize, StateAna
  */
 ActorCriticNN::~ActorCriticNN()
 {
-	std::remove("Memento.dat");
-	std::ofstream file("Memento.dat");
-
 	std::cout << memorizedSARS.size() << "\n";
-
-	for(std::map<State, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++)
-		LogFileHandler::printSARStoFile(file, i->second);
-
-	file.close();
 }
 
 /*

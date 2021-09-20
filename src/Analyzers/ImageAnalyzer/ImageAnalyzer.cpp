@@ -154,21 +154,3 @@ cv::Mat ImageAnalyzer::cutFragment(cv::Mat* image, cv::Point leftUp, cv::Point r
 	return result;
 }
 
-/*
- *
- */
-std::vector<int> ImageAnalyzer::toVector(cv::Mat *image)
-{
-	std::vector<int> result;
-	for(int x=0; x<image->cols; x++)
-	{
-		for(int y=0; y<image->rows; y++)
-		{
-			uchar* ptrSrc = image->ptr(y)+(3*(x));
-			result.push_back((ptrSrc[0] >> 6) + (ptrSrc[1] >> 4) + (ptrSrc[2] >> 2));
-		}
-	}
-
-	return result;
-}
-
