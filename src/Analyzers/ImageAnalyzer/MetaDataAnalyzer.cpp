@@ -9,6 +9,34 @@
 
 MetaDataAnalyzer::MetaDataAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 {
+	reducedStateMethod = [](State & t_state) -> State
+		{
+			//Metadata
+			int reduceLevel = 8;
+			int xSize = 32;
+			int ySize = 56;
+
+			std::vector<int> result;
+			for(int x=0;x<32;x+=reduceLevel)
+			{
+				for(int y=0;y<56;y+=reduceLevel)
+				{
+					int value=0;
+					for(int xx=0;xx<reduceLevel;xx++)
+					{
+						for(int yy=0;yy<reduceLevel;yy++)
+						{
+							if(t_state[(x+xx)*56+y+yy] > value) value = t_state[+(x+xx)*56+y+yy];
+							if(t_state[32*56+(x+xx)*56+y+yy]*2 > value) value = t_state[32*56+(x+xx)*56+y+yy]*2;
+						}
+					}
+					result.push_back(value);
+				}
+			}
+
+			return result;
+		};
+
 	holdButtonCounter = 0;
 	imageSize = cv::Point(512,448);
 
@@ -154,7 +182,8 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 		cv::waitKey(10);
 	#endif
 
-	analyzeResult->processedImage = fael;
+	analyzeResult->processedImages.clear();
+	analyzeResult->processedImages.push_back(fael);
 	analyzeResult->playerIsDead = playerIsDead;
 	analyzeResult->killedByEnemy = killedByEnemy;
 	analyzeResult->playerFound = true;
@@ -164,32 +193,32 @@ void MetaDataAnalyzer::processSMBImage(cv::Mat* image, ImageAnalyzer::AnalyzeRes
 /*
  *
  */
-std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2, ControllerInput& controllerInput, Point& position, Point& velocity)
+std::vector<int> MetaDataAnalyzer::createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity)
 {
 	State sceneState;
 
 	//Terrain
-	for(int x=0; x<image.cols; x++)
+	for(int x=0; x<t_images[0].cols; x++)
 	{
-		for(int y=0; y<image.rows; y++)
+		for(int y=0; y<t_images[0].rows; y++)
 		{
-			uchar* ptr = image.ptr(y)+x*3;
+			uchar* ptr = t_images[0].ptr(y)+x*3;
 			if(ptr[0]==100 && ptr[1]==100 && ptr[2]==100) sceneState.push_back(MAX_INPUT_VALUE);
 			else sceneState.push_back(MIN_INPUT_VALUE);
 		}
 	}
 	//Enemies
-	for(int x=0; x<image.cols; x++)
+	for(int x=0; x<t_images[0].cols; x++)
 	{
-		for(int y=0; y<image.rows; y++)
+		for(int y=0; y<t_images[0].rows; y++)
 		{
-			uchar* ptr = image.ptr(y)+x*3;
+			uchar* ptr = t_images[0].ptr(y)+x*3;
 			if(ptr[0]==0 && ptr[1]==0 && ptr[2]==220) sceneState.push_back(MAX_INPUT_VALUE);
 			else sceneState.push_back(MIN_INPUT_VALUE);
 		}
 	}
 	//Controller
-	for(bool ci : controllerInput)
+	for(bool ci : t_controllerInput)
 	{
 		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
 		else sceneState.push_back(MIN_INPUT_VALUE);
@@ -198,13 +227,13 @@ std::vector<int> MetaDataAnalyzer::createSceneState(cv::Mat& image, cv::Mat& ima
 	//AdditionalInfo
 //	sceneState.push_back(position.x);
 //	sceneState.push_back(position.y);
-	sceneState.push_back(velocity.x/4);
-	sceneState.push_back(velocity.y/2);
+	sceneState.push_back(t_velocity.x/4);
+	sceneState.push_back(t_velocity.y/2);
 
-	if(velocity.y == 0 && controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
+	if(t_velocity.y == 0 && t_controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
 	else holdButtonCounter = 0;
 
-	sceneState.push_back(velocity.y == 0);
+	sceneState.push_back(t_velocity.y == 0);
 	sceneState.push_back(holdButtonCounter >= 2 ? MAX_INPUT_VALUE : MIN_INPUT_VALUE);
 
 	return sceneState;
@@ -236,37 +265,6 @@ void MetaDataAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, Scenar
 
 //		std::cout << "Erased: " << counter << "\n";
 	}
-}
-
-/*
- *
- */
-State MetaDataAnalyzer::reduceSceneState(const State& t_state, double action)
-{
-	//Metadata
-	int reduceLevel = 8;
-	int xSize = 32;
-	int ySize = 56;
-
-	std::vector<int> result;
-	for(int x=0;x<32;x+=reduceLevel)
-	{
-		for(int y=0;y<56;y+=reduceLevel)
-		{
-			int value=0;
-			for(int xx=0;xx<reduceLevel;xx++)
-			{
-				for(int yy=0;yy<reduceLevel;yy++)
-				{
-					if(t_state[(x+xx)*56+y+yy] > value) value = t_state[+(x+xx)*56+y+yy];
-					if(t_state[32*56+(x+xx)*56+y+yy]*2 > value) value = t_state[32*56+(x+xx)*56+y+yy]*2;
-				}
-			}
-			result.push_back(value);
-		}
-	}
-
-	return result;
 }
 
 /*

@@ -16,10 +16,8 @@ public:
 	virtual ~MetaDataAnalyzer();
 
 	virtual void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result) override;
-	virtual std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
-												  ControllerInput& controllerInput, Point& position, Point& velocity) override;
+	virtual std::vector<int> createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity) override;
 	virtual void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo) override;
-	virtual State reduceSceneState(const State& t_state, double action) override;
 private:
 
 	void processSMBImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result);

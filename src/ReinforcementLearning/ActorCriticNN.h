@@ -15,12 +15,12 @@
 #include <string>
 
 #include "ReinforcementLearning.h"
-#include "../Bot/Common.h"
+#include "../Bot/State.h"
 #include "../HashMap/HashMap.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
 #include "../NeuralNetworkGPU/NeuralNetwork.h"
 
-#include "../Analyzers/StateAnalyzer.h"
+#include "../Analyzers/ImageAnalyzer/ImageAnalyzer.h"
 
 #include "../Loggers/ParameterFIleHandler.h"
 
@@ -28,7 +28,7 @@ class ActorCriticNN : public ReinforcementLearning
 {
 
 public:
-	ActorCriticNN(int t_nActions, int t_dimensionStatesSize, StateAnalyzer *t_stateAnalyzer);
+	ActorCriticNN(int t_nActions, int t_dimensionStatesSize, ReduceStateMethod t_reduceStateMethod);
 	virtual ~ActorCriticNN();
 
 	//Basic methods
@@ -47,9 +47,6 @@ public:
 	void createNNC();
 	void createNND();
 
-protected:
-	double getExp(double value) {return exp(8*value);}
-
 private:
 	void processLearningFromSARS(std::vector<SARS*> t_sars);
 	void putStateToMemory(SARS &t_sars);
@@ -64,7 +61,7 @@ private:
 
 	std::map<State, SARS> memorizedSARS;
 
-	StateAnalyzer *stateAnalyzer;
+	ReduceStateMethod reduceStateMethod;
 
 public:
 	static constexpr double UPPER_REWARD_CUP = 0.75;

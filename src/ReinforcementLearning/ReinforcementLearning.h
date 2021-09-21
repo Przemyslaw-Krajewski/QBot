@@ -9,8 +9,10 @@
 #define SRC_REINFORCEMENTLEARNING_REINFORCEMENTLEARNING_H_
 
 #include <vector>
+#include <list>
+#include <random>
 
-#include "../Bot/Common.h"
+#include "../Bot/State.h"
 
 class ReinforcementLearning
 {

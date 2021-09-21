@@ -12,8 +12,9 @@
 
 #include <opencv2/opencv.hpp>
 #include <map>
+#include <functional>
 
-#include "../../Bot/Common.h"
+#include "../../Bot/State.h"
 #include "../../Bot/Controller.h"
 
 struct Point
@@ -27,15 +28,15 @@ struct Point
 	int y;
 };
 
+using ReduceStateMethod = std::function<State(State&)>;
+
 class ImageAnalyzer
 {
 public:
 
 	struct AnalyzeResult
 	{
-		cv::Mat processedImage;
-		cv::Mat processedImagePast;
-		cv::Mat processedImagePast2;
+		std::vector<cv::Mat> processedImages;
 		bool playerFound;
 		bool playerIsDead;
 		bool killedByEnemy;
@@ -50,10 +51,10 @@ public:
 	virtual ~ImageAnalyzer();
 
 	virtual void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result) = 0;
-	virtual std::vector<int> createSceneState(cv::Mat& image, cv::Mat& imagePast, cv::Mat& imagePast2,
-											  ControllerInput& controllerInput, Point& position, Point& velocity) = 0;
+	virtual std::vector<int> createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity) = 0;
 	virtual void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo);
-	virtual State reduceSceneState(const State& t_state, double action);
+
+	ReduceStateMethod getReduceStateMethod() {return reducedStateMethod;}
 protected:
 
 	void viewImage(int blockSize, std::string name, cv::Mat &image);
@@ -67,10 +68,11 @@ protected:
 	cv::Point imageSize;
 	Game game;
 
+	ReduceStateMethod reducedStateMethod = nullptr;
+
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE = 0;
 };
-
 
 
 #endif /* SRC_ANALYZERS_IMAGEANALYZER_IMAGEANALYZER_H_ */

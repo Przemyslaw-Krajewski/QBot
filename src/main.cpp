@@ -1,7 +1,6 @@
 #include <string>
 #include <assert.h>
 
-#include "Analyzers/StateAnalyzer.h"
 #include "Bot/Bot.h"
 #include "test/NNtestCPU.h"
 #include "test/NNtestGPU.h"

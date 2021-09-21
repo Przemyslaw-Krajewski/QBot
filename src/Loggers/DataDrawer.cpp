@@ -10,12 +10,14 @@
 /*
  *
  */
+/*
 void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, ControllerInput t_keys, double reward, double change)
 {
+
 	int blockSize = 15;
 //
-	int xScreenSize = sceneData.processedImage.cols;
-	int yScreenSize = sceneData.processedImage.rows;
+	int xScreenSize = sceneData.processedImages[0].cols;
+	int yScreenSize = sceneData.processedImages[0].rows;
 //	int xScreenSize = 25;
 //	int yScreenSize = 0;
 //
@@ -28,7 +30,7 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 		for(int y=0, yb=0; y<yScreenSize; y++,yb+=blockSize)
 		{
 			cv::Scalar color;
-			uchar* ptrSrc = sceneData.processedImage.ptr(y)+(x+x+x);
+			uchar* ptrSrc = sceneData.processedImages[0].ptr(y)+(x+x+x);
 
 			if(ptrSrc[0]==100) color = cv::Scalar(100,100,100); //field
 			else if(ptrSrc[2]==220) color = cv::Scalar(0,0,220); //enemy
@@ -102,7 +104,41 @@ void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, Contr
 	//Print
 	imshow("AnalyzedSceneData", map);
 	cv::waitKey(10);
+}
+*/
 
+/*
+ *
+ */
+void DataDrawer::drawReducedState(State t_reducedState)
+{
+	int reduce = 8;
+	int blockSize = 8*reduce;
+	int xSize = 64/reduce;
+	int ySize = 40/reduce;
+
+	cv::Mat viewImage = cv::Mat(ySize*blockSize, xSize*blockSize, CV_8UC3);
+	for(int x=0; x<xSize; x++)
+	{
+		for(int y=0; y<ySize; y++)
+		{
+			cv::Scalar color;
+			int ptrSrc = t_reducedState[x*ySize+y];
+			for(int yy=0; yy<blockSize; yy++)
+			{
+				for(int xx=0; xx<blockSize; xx++)
+				{
+					uchar* ptr = viewImage.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
+					ptr[0] = ptrSrc;
+					ptr[1] = ptrSrc;
+					ptr[2] = ptrSrc;
+				}
+			}
+		}
+	}
+	//Print
+	imshow("ReducedState", viewImage);
+	cv::waitKey(1);
 }
 
 void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_time, ControllerInput t_keys, bool pressedKey)
@@ -124,7 +160,7 @@ void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_
 	drawBar(&map, blockSize, barWidth, (double) t_time/t_maxTime, cv::Point(blockSize,blockSize),
 			cv::Scalar(0,255*t_time/t_maxTime,255*(1-t_time/t_maxTime)));
 
-	double reward = t_reward/StateAnalyzer::ADVANCE_REWARD;
+	double reward = t_reward/0.07;
 	if(reward > 1) reward = 1;
 	drawBar(&map, blockSize, barWidth, reward, cv::Point(blockSize,blockSize*3),cv::Scalar(255,255,255));
 
@@ -143,42 +179,6 @@ void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_
 	//Print
 	imshow("AnalyzedSceneData", map);
 	cv::waitKey(10);
-}
-
-/*
- *
- */
-void DataDrawer::drawReducedState(State t_state, StateAnalyzer *stateAnalyzer)
-{
-	int reduce = 8;
-	int blockSize = 8*reduce;
-	int xSize = 64/reduce;
-	int ySize = 40/reduce;
-
-	State result = stateAnalyzer->reduceSceneState(t_state,0);
-
-	cv::Mat viewImage = cv::Mat(ySize*blockSize, xSize*blockSize, CV_8UC3);
-	for(int x=0; x<xSize; x++)
-	{
-		for(int y=0; y<ySize; y++)
-		{
-			cv::Scalar color;
-			int ptrSrc = result[x*ySize+y];
-			for(int yy=0; yy<blockSize; yy++)
-			{
-				for(int xx=0; xx<blockSize; xx++)
-				{
-					uchar* ptr = viewImage.ptr(y*blockSize+yy)+(x*blockSize+xx)*3;
-					ptr[0] = ptrSrc;
-					ptr[1] = ptrSrc;
-					ptr[2] = ptrSrc;
-				}
-			}
-		}
-	}
-	//Print
-	imshow("ReducedState", viewImage);
-	cv::waitKey(1);
 }
 
 /*

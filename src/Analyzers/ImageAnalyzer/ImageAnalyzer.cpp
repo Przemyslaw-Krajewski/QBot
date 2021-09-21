@@ -35,16 +35,6 @@ void ImageAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, ScenarioA
 /*
  *
  */
-State ImageAnalyzer::reduceSceneState(const State& t_state, double action)
-{
-
-	State result;
-	return result;
-}
-
-/*
- *
- */
 void ImageAnalyzer::viewImage(int blockSize, std::string name, cv::Mat &image)
 {
 #ifdef PRINT_ANALYZED_IMAGE

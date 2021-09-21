@@ -5,10 +5,8 @@
  *      Author: mistrz
  */
 
-#ifndef SRC_BOT_COMMON_H_
-#define SRC_BOT_COMMON_H_
-
-#include <opencv2/opencv.hpp>
+#ifndef SRC_BOT_STATE_H_
+#define SRC_BOT_STATE_H_
 
 #include <vector>
 
@@ -41,7 +39,7 @@ struct SARS
 };
 
 
-enum class ScenarioAdditionalInfo {noInfo, killedByEnemy, fallenInPitfall, notFound, timeOut, won};
+enum class ScenarioAdditionalInfo {ok, killedByEnemy, killedByEnvironment, playerNotFound, timeOut, won};
 enum class Game {BattleToads, SuperMarioBros};
 
-#endif /* SRC_BOT_COMMON_H_ */
+#endif /* SRC_BOT_STATE_H_ */

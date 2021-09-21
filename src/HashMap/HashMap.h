@@ -12,7 +12,7 @@
 #include <vector>
 #include <map>
 
-#include "../Bot/Common.h"
+#include "../Bot/State.h"
 
 using CacheMemory = std::map<std::vector<int>,double>;
 

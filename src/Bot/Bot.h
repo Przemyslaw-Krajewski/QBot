@@ -16,10 +16,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "Common.h"
 #include "Controller.h"
+#include "State.h"
+
 #include "../Loggers/ParameterFIleHandler.h"
-#include "../Analyzers/StateAnalyzer.h"
+#include "../Analyzers/StateAnalyzer/StateAnalyzer.h"
 
 #include "../Analyzers/MemoryAnalyzer.h"
 #include "../Loggers/DataDrawer.h"
@@ -44,8 +45,8 @@ private:
 	StateAnalyzer stateAnalyzer;
 	ReinforcementLearning *reinforcementLearning;
 
-	State state;
-	State prevState;
+	StateAnalyzer::AnalyzeResult analyzeResult;
+	StateAnalyzer::AnalyzeResult prevAnalyzeResult;
 	Controller controller;
 	Controller prevController;
 	std::list<SARS> historyScenario;
@@ -53,8 +54,6 @@ private:
 	//Const parameters
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
-
-	const int TIME_LIMIT = 150;
 };
 
 #endif /* SRC_BOT_H_ */

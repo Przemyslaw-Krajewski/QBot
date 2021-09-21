@@ -12,7 +12,6 @@
 #include <string>
 
 #include "ReinforcementLearning.h"
-#include "../Bot/Common.h"
 #include "../HashMap/HashMap.h"
 #include "../NeuralNetwork/NeuralNetwork.h"
 #include "../NeuralNetworkGPU/NeuralNetwork.h"
