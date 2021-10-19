@@ -19,31 +19,31 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 			int ySize = 40;
 			int zSize = 3;
 
-			std::vector<int> median = std::vector<int>(xSize*ySize*zSize,0);
+//			std::vector<int> median = std::vector<int>(xSize*ySize*zSize,0);
 			std::vector<int> edges = std::vector<int>(xSize*ySize,0);
 			std::vector<int> erosion = std::vector<int>(xSize*ySize,0);
 
 			//median filter
-		//	for(int x=1; x<xSize-1; x++)
-		//	{
-		//		for(int y=1; y<ySize-1; y++)
-		//		{
-		//			int value = 0;
-		//			for(int z=0; z<zSize; z++)
-		//			{
-		//				std::vector<int> v;
-		//				for(int i=-1;i<=1;i++)
-		//				{
-		//					for(int j=-1;j<=1;j++)
-		//					{
-		//						v.push_back(t_state[ x+i + (y+j) *xSize + z*ySize*xSize]);
-		//					}
-		//				}
-		//				std::sort(v.begin(),v.end());
-		//				median[x+ y*xSize + z*xSize*ySize] = v[4];
-		//			}
-		//		}
-		//	}
+//			for(int x=1; x<xSize-1; x++)
+//			{
+//				for(int y=1; y<ySize-1; y++)
+//				{
+//					int value = 0;
+//					for(int z=0; z<zSize; z++)
+//					{
+//						std::vector<int> v;
+//						for(int i=-1;i<=1;i++)
+//						{
+//							for(int j=-1;j<=1;j++)
+//							{
+//								v.push_back(t_state[ x+i + (y+j) *xSize + z*ySize*xSize]);
+//							}
+//						}
+//						std::sort(v.begin(),v.end());
+//						median[x+ y*xSize + z*xSize*ySize] = v[4];
+//					}
+//				}
+//			}
 
 			//Find edges and threshold
 			for(int x=1; x<xSize-1; x++)
@@ -53,11 +53,11 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 					int value = 0;
 					for(int z=0; z<zSize; z++)
 					{
-						value += abs((t_state[ x +     y   *xSize + z*ySize*xSize]>> 0)*4 -
-									 (t_state[(x-1) +  y   *xSize + z*ySize*xSize]>> 0) -
-									 (t_state[(x+1) +  y   *xSize + z*ySize*xSize]>> 0) -
-									 (t_state[ x    + (y-1)*xSize + z*ySize*xSize]>> 0) -
-									 (t_state[ x    + (y+1)*xSize + z*ySize*xSize]>> 0));
+						value += abs((t_state[ x +     y   *xSize + z*ySize*xSize])*4 -
+									 (t_state[(x-1) +  y   *xSize + z*ySize*xSize]) -
+									 (t_state[(x+1) +  y   *xSize + z*ySize*xSize]) -
+									 (t_state[ x    + (y-1)*xSize + z*ySize*xSize]) -
+									 (t_state[ x    + (y+1)*xSize + z*ySize*xSize]));
 					}
 					if(value > 15) edges[x+y*xSize] = 255;
 				}
@@ -141,6 +141,7 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 	getLeastFrequentInImage(2, cutImage, firstPhaseImage);
 	cv::resize(firstPhaseImage, image, cv::Size(), 0.5, 0.5,CV_INTER_CUBIC);
 	oldImages.push_back(image);
+	result->processedImages.push_back(image);
 
 	//Get past image
 	if(oldImages.size() >2)
@@ -149,12 +150,11 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 		oldImages.erase(oldImages.begin());
 	}
 	else result->processedImages.push_back(cv::Mat(40, 64, CV_8UC3));
-	result->processedImages.push_back(image);
 
 
 	//draw result
-	viewImage(8,"proc", result->processedImages[0]);
-	viewImage(8,"past1", result->processedImages[1]);
+	viewImage(8,"processed image", result->processedImages[0]);
+	viewImage(8,"image 2 frames ago", result->processedImages[1]);
 }
 
 /*

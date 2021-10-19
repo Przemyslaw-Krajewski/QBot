@@ -44,6 +44,7 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze(ControllerInput &t_input)
 	}
 
 	//Draw
+	getReduceStateMethod()(result.processedState);
 	DataDrawer::drawAdditionalInfo(result.reward,
 								   StateAnalyzer::TIME_LIMIT,
 								   timeLimit,
@@ -65,22 +66,17 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB(ControllerInput &t_input)
 	imageAnalyzer->processImage(&colorImage, &imageAnalyzeResult);
 	MemoryAnalyzer::AnalyzeResult memoryAnalyzeResult = MemoryAnalyzer::getPtr()->fetchData();
 
-	//Additional info
+	//Additional info and reward
 	ScenarioAdditionalInfo additionalInfo = ScenarioAdditionalInfo::ok;
-	if(!imageAnalyzeResult.playerFound) additionalInfo = ScenarioAdditionalInfo::playerNotFound;
-	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = ScenarioAdditionalInfo::killedByEnemy;
-	else if(imageAnalyzeResult.playerIsDead) additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;
-	else if(imageAnalyzeResult.playerWon) additionalInfo = ScenarioAdditionalInfo::won;
-
-	//reward
 	double reward = NOTHING_REWARD;
-	if(!imageAnalyzeResult.playerFound)			     										 	  reward = NOTHING_REWARD;
-	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy)				  reward = DIE_REWARD;
-	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD;std::cout << "Win\n";}
-	else if(memoryAnalyzeResult.playerPositionY > 180) 											  reward = DIE_REWARD;  //pitfall
-	else if(memoryAnalyzeResult.playerPositionX < 20) 											  reward = DIE_REWARD;  // left border
-	else if(memoryAnalyzeResult.playerPositionX > 96 && memoryAnalyzeResult.playerVelocityX > 16) reward = ADVANCE_REWARD;
-	else if(memoryAnalyzeResult.playerVelocityX > 8) 										 	  reward = LITTLE_ADVANCE_REWARD;
+
+	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = NOTHING_REWARD;		  additionalInfo = ScenarioAdditionalInfo::playerNotFound;}
+	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy)				 {reward = DIE_REWARD; 	  		  additionalInfo = ScenarioAdditionalInfo::killedByEnemy;}
+	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::won;}
+	else if(memoryAnalyzeResult.playerPositionY > 180) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  //pitfall
+	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  // left border
+	else if(memoryAnalyzeResult.playerPositionX > 96 && memoryAnalyzeResult.playerVelocityX > 16){reward = ADVANCE_REWARD;		  additionalInfo = ScenarioAdditionalInfo::ok;}
+	else if(memoryAnalyzeResult.playerVelocityX > 8) 										 	 {reward = LITTLE_ADVANCE_REWARD; additionalInfo = ScenarioAdditionalInfo::ok;}
 
 	//Preparing output
 	AnalyzeResult analyzeResult;
@@ -89,6 +85,9 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB(ControllerInput &t_input)
 	analyzeResult.playerVelocity = Point(memoryAnalyzeResult.playerVelocityX,memoryAnalyzeResult.playerVelocityY);
 	analyzeResult.reward = reward;
 	analyzeResult.processedState = imageAnalyzer->createSceneState(imageAnalyzeResult.processedImages, t_input,analyzeResult.playerCoords ,analyzeResult.playerVelocity);
+	analyzeResult.stateInfo = StateInfo(imageAnalyzeResult.processedImages[0].cols,
+									    imageAnalyzeResult.processedImages[0].rows,
+										imageAnalyzeResult.processedImages.size()*3);
 
 	return analyzeResult;
 }
@@ -106,22 +105,23 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeBT(ControllerInput &t_input)
 
 	//Additional info
 	ScenarioAdditionalInfo additionalInfo = ScenarioAdditionalInfo::ok;
-	if(!imageAnalyzeResult.playerFound) additionalInfo = ScenarioAdditionalInfo::playerNotFound;
-	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy) additionalInfo = ScenarioAdditionalInfo::killedByEnemy;
-	else if(imageAnalyzeResult.playerIsDead) additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;
-	else if(imageAnalyzeResult.playerWon) additionalInfo = ScenarioAdditionalInfo::won;
-
-	//reward
 	double reward = ADVANCE_REWARD;
-	if(imageAnalyzeResult.playerWon)		 reward = WIN_REWARD;
-	else if(imageAnalyzeResult.playerIsDead) reward = DIE_REWARD;
+	if(!imageAnalyzeResult.playerFound) additionalInfo = ScenarioAdditionalInfo::playerNotFound;
+	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy){reward = DIE_REWARD; additionalInfo = ScenarioAdditionalInfo::killedByEnemy;}
+	else if(imageAnalyzeResult.playerIsDead) 									{reward = DIE_REWARD; additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}
+	else if(imageAnalyzeResult.playerWon) 										{reward = WIN_REWARD; additionalInfo = ScenarioAdditionalInfo::won;}
+
 
 	//Preparing output
 	AnalyzeResult analyzeResult;
 	analyzeResult.scenarioStatus = additionalInfo;
 	analyzeResult.reward = reward;
+
 	Point p = Point();
 	analyzeResult.processedState = imageAnalyzer->createSceneState(imageAnalyzeResult.processedImages, t_input,p ,p);
+	analyzeResult.stateInfo = StateInfo(imageAnalyzeResult.processedImages[0].cols,
+									    imageAnalyzeResult.processedImages[0].rows,
+										imageAnalyzeResult.processedImages.size()*3);
 
 	return analyzeResult;
 }

@@ -177,7 +177,7 @@ int ActorCriticNN::chooseAction(State& t_state)
 
 	//print
 #ifdef ACTORCRITICNN_LOG
-	std::cout << floor(critic[0]*100000)/100000 << "\t:\t";
+	std::cout << "V: "<< floor(critic[0]*100000)/100000 << "\tA: ";
 	for(int i=0; i<values.size(); i++) std::cout << floor(values[i]*100000)/100000 << "\t";
 	std::cout << "\n";
 #endif
@@ -193,7 +193,7 @@ int ActorCriticNN::chooseAction(State& t_state)
 	for(int i=0; i<values.size(); i++) values[i] = exp(m*values[i]);
 	int action = getWeightedRandom(values);
 #ifdef ACTORCRITICNN_LOG
-	std::cout << ">>>>  " << action << "\n";
+	std::cout << "Chosen action ===> " << action << "\n\n";
 #endif
 	return action;
 }

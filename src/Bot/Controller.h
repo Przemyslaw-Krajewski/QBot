@@ -31,7 +31,10 @@ public:
 			code = RIGHT;
 			break;
 		case 1:
-			code = RIGHT+A;
+			code = RIGHT + A;
+			break;
+		case 2:
+			code = NOTHING;
 			break;
 		default:
 			code = NOTHING;

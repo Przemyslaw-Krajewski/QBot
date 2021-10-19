@@ -22,6 +22,7 @@
 class StateAnalyzer {
 
 public:
+
 	struct AnalyzeResult
 	{
 		double reward;
@@ -29,6 +30,7 @@ public:
 		Point playerVelocity;
 		ScenarioAdditionalInfo scenarioStatus = ScenarioAdditionalInfo::ok;
 		State processedState;
+		StateInfo stateInfo;
 
 		bool isPlayerFound() {return scenarioStatus != ScenarioAdditionalInfo::playerNotFound;}
 		bool endScenario() {return scenarioStatus != ScenarioAdditionalInfo::ok;}

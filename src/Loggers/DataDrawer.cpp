@@ -10,102 +10,43 @@
 /*
  *
  */
-/*
-void DataDrawer::drawAnalyzedData(StateAnalyzer::AnalyzeResult& sceneData, ControllerInput t_keys, double reward, double change)
+void DataDrawer::drawState(State t_state, StateInfo t_stateInfo, std::string name)
 {
+	int blockSize = 8;
 
-	int blockSize = 15;
-//
-	int xScreenSize = sceneData.processedImages[0].cols;
-	int yScreenSize = sceneData.processedImages[0].rows;
-//	int xScreenSize = 25;
-//	int yScreenSize = 0;
-//
-//	if(xScreenSize <= 0 && yScreenSize <=0) return;
-//
-//	//map
-	cv::Mat map = cv::Mat(blockSize*(yScreenSize+1), blockSize*(xScreenSize), CV_8UC3);
-	for(int x=0, xb=0; x<xScreenSize; x++,xb+=blockSize)
+	cv::Mat mat = cv::Mat(blockSize*t_stateInfo.ySize, blockSize*t_stateInfo.xSize, CV_8UC3);
+
+	for(int x=0, xb=0; x<t_stateInfo.xSize; x++,xb+=blockSize)
 	{
-		for(int y=0, yb=0; y<yScreenSize; y++,yb+=blockSize)
+		for(int y=0, yb=0; y<t_stateInfo.ySize; y++,yb+=blockSize)
 		{
 			cv::Scalar color;
-			uchar* ptrSrc = sceneData.processedImages[0].ptr(y)+(x+x+x);
-
-			if(ptrSrc[0]==100) color = cv::Scalar(100,100,100); //field
-			else if(ptrSrc[2]==220) color = cv::Scalar(0,0,220); //enemy
-			else cv::Scalar(0,0,0); // blank
-
-			if(x >> 1 == xScreenSize >> 2 && y >> 1 == yScreenSize >> 2)
+			if(t_stateInfo.zSize == 1)
 			{
-				color[0] += 50;
-				color[1] += 50;
-				color[2] += 50;
+				color[0] = color[1] = color[2] = t_state[x+y*t_stateInfo.xSize];
+			}
+			else if(t_stateInfo.zSize == 2)
+			{
+				color[1] = 0;
+				color[0] = t_state[x+y*t_stateInfo.xSize];
+				color[2] = t_state[x+y*t_stateInfo.xSize + t_stateInfo.xSize*t_stateInfo.ySize];
+			}
+			else if(t_stateInfo.zSize >= 3)
+			{
+
+				color[0] = t_state[x+y*t_stateInfo.xSize];
+				color[1] = t_state[x+y*t_stateInfo.xSize + t_stateInfo.xSize*t_stateInfo.ySize];
+				color[2] = t_state[x+y*t_stateInfo.xSize + t_stateInfo.xSize*t_stateInfo.ySize*2];
 			}
 
-			drawBlock(&map,blockSize,Point(xb,yb),color);
+			drawBlock(&mat,blockSize,Point(xb,yb),color);
 		}
 	}
-	for(int x=0; x<map.cols; x++)
-	{
-		for(int y=yScreenSize*blockSize; y<map.rows; y++)
-		{
-			uchar* ptr = map.ptr(y)+(x)*3;
-			ptr[0] = ptr[1] = ptr[2] = 20;
-		}
-	}
-	//player pos x
-	drawBorderedBlock(&map,blockSize,
-			Point(1*blockSize,yScreenSize*blockSize),
-			cv::Scalar(sceneData.playerCoords.x,sceneData.playerCoords.x,sceneData.playerCoords.x));
-	//player pos y
-	drawBorderedBlock(&map,blockSize,
-			Point(2*blockSize,yScreenSize*blockSize),
-			cv::Scalar(sceneData.playerCoords.y,sceneData.playerCoords.y,sceneData.playerCoords.y));
-	//player vel x
-	drawBorderedBlock(&map,blockSize,
-			Point(3*blockSize,yScreenSize*blockSize),
-			cv::Scalar(
-					0,
-					sceneData.playerVelocity.x < 0 ? 0 : sceneData.playerVelocity.x*32,
-					sceneData.playerVelocity.x > 0 ? 0 : sceneData.playerVelocity.x*32));
-	//player vel y
-	drawBorderedBlock(&map,blockSize,
-			Point(4*blockSize,yScreenSize*blockSize),
-			cv::Scalar(
-					0,
-					sceneData.playerVelocity.y < 0 ? 0 : sceneData.playerVelocity.y*32,
-					sceneData.playerVelocity.y > 0 ? 0 : sceneData.playerVelocity.y*32));
-	//pressed keys
-	for(int i=0; i<t_keys.size(); i++)
-	{
-		int value = t_keys[i] ? 255 : 0;
-		drawBorderedBlock(&map,blockSize,
-				Point((8+i)*blockSize,yScreenSize*blockSize),
-				cv::Scalar(value,value,value));
-	}
-
-	//reward
-	drawBorderedBlock(&map,blockSize,
-			Point(20*blockSize,yScreenSize*blockSize),
-			cv::Scalar(
-					0,
-					reward > 0.06 ? reward*2500 : 0,
-					reward < 0.06 ?   (0.6-reward)*4000 : 0));
-	//change
-	change = abs(change);
-	drawBorderedBlock(&map,blockSize,
-			Point(21*blockSize,yScreenSize*blockSize),
-			cv::Scalar(
-					(change >= 40 && change < 9999) ? 255 : 0,
-					change < 40 ? 255 : 0,
-					change == 9999 ? 255 : 0));
 
 	//Print
-	imshow("AnalyzedSceneData", map);
+	imshow(name, mat);
 	cv::waitKey(10);
 }
-*/
 
 /*
  *
@@ -144,7 +85,7 @@ void DataDrawer::drawReducedState(State t_reducedState)
 void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_time, ControllerInput t_keys, bool pressedKey)
 {
 	int blockSize = 15;
-	int barWidth = 300;
+	int barWidth = 400;
 	cv::Mat map = cv::Mat(blockSize*8, blockSize*2+barWidth, CV_8UC3);
 	for(int x=0; x<map.cols; x++)
 	{
@@ -177,7 +118,7 @@ void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_
 			cv::Scalar(pressedKey*255,pressedKey*255,pressedKey*255));
 
 	//Print
-	imshow("AnalyzedSceneData", map);
+	imshow("Additional Info", map);
 	cv::waitKey(10);
 }
 

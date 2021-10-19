@@ -61,7 +61,7 @@ void Bot::execute()
 		//Reload game
 		MemoryAnalyzer::getPtr()->setController(0);
 		MemoryAnalyzer::getPtr()->loadState();
-		cv::waitKey(100);
+		cv::waitKey(1000);
 
 		//Get first state
 		analyzeResult = stateAnalyzer.analyze(controller.getInput());
@@ -90,16 +90,11 @@ void Bot::execute()
 			MemoryAnalyzer::getPtr()->setController(controller.getCode());
 
 			//End?
-			if(analyzeResult.endScenario())
-			{
-				if(time<0) historyScenario.begin()->reward = 0.5; // No kill penalty for timeout
-				scenarioResult = analyzeResult.scenarioStatus;
-				break;
-			}
-			cv::waitKey(60);
+			if(analyzeResult.endScenario()) break;
+			cv::waitKey(80);
 		}
 
-		std::cout << score << "\n";
+		std::cout << "Achieved score: "<< score << "\n";
 		LogFileHandler::logValue("score.log",score);
 
 		//End scenario
@@ -107,7 +102,7 @@ void Bot::execute()
 		handleParameters();
 
 		//Learn
-		stateAnalyzer.correctScenarioHistory(historyScenario, scenarioResult);
+		stateAnalyzer.correctScenarioHistory(historyScenario, analyzeResult.scenarioStatus);
 		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
 		double sumErrMem = reinforcementLearning->learnFromMemory();
 
