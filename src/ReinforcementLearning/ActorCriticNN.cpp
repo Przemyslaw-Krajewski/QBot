@@ -233,7 +233,7 @@ double ActorCriticNN::learnSARS(SARS &t_sars)
 /*
  *
  */
-double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
+LearningStatus ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 {
 	std::vector<SARS*> sarsPointers;
 	sarsPointers.clear();
@@ -250,18 +250,18 @@ double ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 	}
 
 	//Learning
-	for(int i=0 ;i< LEARN_FROM_HISTORY_ITERATIONS ; i++ )
+	char userInput = -1;
+	for(int i=0 ;i< LEARN_FROM_HISTORY_ITERATIONS && userInput==-1 ; i++ )
 	{
-		processLearningFromSARS(sarsPointers);
+		userInput = processLearningFromSARS(sarsPointers);
 	}
-
-	return 0;
+	return LearningStatus(0,userInput);
 }
 
 /*
  *
  */
-double ActorCriticNN::learnFromMemory()
+LearningStatus ActorCriticNN::learnFromMemory()
 {
 #ifdef ACTORCRITICNN_ONE_ACTION
 	return 0;
@@ -270,41 +270,48 @@ double ActorCriticNN::learnFromMemory()
 	std::cout << "Memory size: " << memorizedSARS.size() << "\n";
 #endif
 
-	if(LEARN_FROM_MEMORY_ITERATIONS == 0) return 0;
-	if(memorizedSARS.size() <= 0) return 0;
+	if(LEARN_FROM_MEMORY_ITERATIONS == 0) return LearningStatus(0,-1);
+	if(memorizedSARS.size() <= 0) return LearningStatus(0,-1);
 
 	//Prepare states
 	std::vector<SARS*> shuffledSARS;
 	for(std::map<State, SARS>::iterator i=memorizedSARS.begin(); i!=memorizedSARS.end(); i++) shuffledSARS.push_back(&(i->second));
 
 	//Learning
-	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS; iteration++)
+	char userInput = -1;
+	for(int iteration=0; iteration<LEARN_FROM_MEMORY_ITERATIONS && userInput==-1; iteration++)
 	{
-		processLearningFromSARS(shuffledSARS);
+		userInput = processLearningFromSARS(shuffledSARS);
 	}
-	return 0;
+	return LearningStatus(0,userInput);
 }
 
-
-void ActorCriticNN::handleParameters()
+void ActorCriticNN::handleUserInput(char t_userInput)
 {
-	if(ParameterFileHandler::checkParameter("reset.param","ActorCritic::Reset has been ordered"))
+	if(t_userInput == 'r')
 	{
+		std::cout << "ActorCritic::Reset NN" << "\n";
 		resetNN();
 	}
-	else if(ParameterFileHandler::checkParameter("save.param","ActorCritic::Save NN to file"))
+	else if(t_userInput == 's')
 	{
+		std::cout << "ActorCritic::Save NN to file" << "\n";
 		criticValues.saveToFile("CriticNN.dat");
 		actorValues.saveToFile("ActorNN.dat");
 	}
-	else if(ParameterFileHandler::checkParameter("load.param","ActorCritic::Load NN from file"))
+	else if(t_userInput == 'l')
 	{
+		std::cout << "ActorCritic::Load NN from file" << "\n";
 		criticValues.loadFromFile("CriticNN.dat");
 		actorValues.loadFromFile("ActorNN.dat");
 	}
+	else if(t_userInput == 27)
+	{
+		throw std::string("Exit program");
+	}
 }
 
-void ActorCriticNN::processLearningFromSARS(std::vector<SARS*> t_sars)
+char ActorCriticNN::processLearningFromSARS(std::vector<SARS*> t_sars)
 {
 	std::random_shuffle(t_sars.begin(),t_sars.end());
 
@@ -318,7 +325,8 @@ void ActorCriticNN::processLearningFromSARS(std::vector<SARS*> t_sars)
 		if(change >0) changesp[(*sarsIterator)->action] += change;
 		else 		  changesm[(*sarsIterator)->action] += change;
 
-		cv::waitKey(40);
+		char userInput = cv::waitKey(40);
+		if(userInput != -1) return userInput;
 	}
 #ifdef ACTORCRITICNN_LOG
 	std::cout << "Scenario Learn Actions:\n";
@@ -327,6 +335,7 @@ void ActorCriticNN::processLearningFromSARS(std::vector<SARS*> t_sars)
 		std::cout << i << ":     " << changesp[i] << "  " << changesm[i] << "\n";
 	}
 #endif
+	return -1;
 }
 
 void ActorCriticNN::putStateToMemory(SARS &t_sars)

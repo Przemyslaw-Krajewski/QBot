@@ -19,7 +19,6 @@
 #include "Controller.h"
 #include "State.h"
 
-#include "../Loggers/ParameterFIleHandler.h"
 #include "../Analyzers/StateAnalyzer/StateAnalyzer.h"
 
 #include "../Analyzers/MemoryAnalyzer.h"
@@ -38,7 +37,7 @@ public:
 	void execute();
 
 private:
-	void handleParameters();
+	int handleUserInput(char input);
 	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData, int xScreenSize=32, int yScreenSize=56);
 
 private:

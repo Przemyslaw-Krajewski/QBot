@@ -22,8 +22,6 @@
 
 #include "../Analyzers/ImageAnalyzer/ImageAnalyzer.h"
 
-#include "../Loggers/ParameterFIleHandler.h"
-
 class ActorCriticNN : public ReinforcementLearning
 {
 
@@ -35,11 +33,11 @@ public:
 	virtual int chooseAction(State& t_state) override;
 	virtual double learnSARS(SARS &t_sars) override;
 
-	virtual double learnFromScenario(std::list<SARS> &t_history) override;
-	virtual double learnFromMemory() override;
+	virtual LearningStatus learnFromScenario(std::list<SARS> &t_history) override;
+	virtual LearningStatus learnFromMemory() override;
 
 	//Additional methods
-	virtual void handleParameters();
+	virtual void handleUserInput(char t_userInput);
 	void resetNN();
 	void createNN0();
 	void createNNA();
@@ -48,7 +46,7 @@ public:
 	void createNND();
 
 private:
-	void processLearningFromSARS(std::vector<SARS*> t_sars);
+	char processLearningFromSARS(std::vector<SARS*> t_sars);
 	void putStateToMemory(SARS &t_sars);
 
 private:

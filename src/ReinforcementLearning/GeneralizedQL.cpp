@@ -131,7 +131,7 @@ std::pair<double,int> GeneralizedQL::learnAction(State &state, bool skipNotReady
 /*
  *
  */
-double GeneralizedQL::learnFromScenario(std::list<SARS> &t_history)
+LearningStatus GeneralizedQL::learnFromScenario(std::list<SARS> &t_history)
 {
 	//QLearning
 	double sumErr = 0;
@@ -171,15 +171,15 @@ double GeneralizedQL::learnFromScenario(std::list<SARS> &t_history)
 		std::cout << "Ok hist: " << alreadyOK << "/" << t_history.size()-skipped << "\n";
 	}
 
-	return sumErr;
+	return LearningStatus(sumErr,0);
 }
 
 /*
  *
  */
-double GeneralizedQL::learnFromMemory()
+LearningStatus GeneralizedQL::learnFromMemory()
 {
-	return 0;
+	return LearningStatus(0,0);
 //	if(LEARN_FROM_MEMORY_ITERATIONS == 0) return;
 //	if(discoveredStates.size() <= 0) return;
 //

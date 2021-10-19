@@ -34,7 +34,6 @@ Bot::Bot()
 	State sceneState = analyzeResult.processedState;
 	//Initialize acLearning
 	reinforcementLearning = new ActorCriticNN(numberOfActions, sceneState.size(), stateAnalyzer.getReduceStateMethod());
-	reinforcementLearning->handleParameters();
 }
 
 /*
@@ -90,8 +89,8 @@ void Bot::execute()
 			MemoryAnalyzer::getPtr()->setController(controller.getCode());
 
 			//End?
-			if(analyzeResult.endScenario()) break;
-			cv::waitKey(80);
+			bool terminate = handleUserInput(cv::waitKey(80));
+			if(analyzeResult.endScenario() || terminate) break;
 		}
 
 		std::cout << "Achieved score: "<< score << "\n";
@@ -99,22 +98,30 @@ void Bot::execute()
 
 		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
-		handleParameters();
 
 		//Learn
+		char userInput = -1;
 		stateAnalyzer.correctScenarioHistory(historyScenario, analyzeResult.scenarioStatus);
-		double sumErrHist = reinforcementLearning->learnFromScenario(historyScenario);
-		double sumErrMem = reinforcementLearning->learnFromMemory();
+		if(userInput == -1 ) userInput = reinforcementLearning->learnFromScenario(historyScenario).userInput;
+		if(userInput == -1 ) userInput = reinforcementLearning->learnFromMemory().userInput;
 
-		reinforcementLearning->handleParameters();
+		reinforcementLearning->handleUserInput(userInput);
 	}
 }
 
 /*
  *
  */
-void Bot::handleParameters()
+int Bot::handleUserInput(char input)
 {
-	if(ParameterFileHandler::checkParameter("quit.param","Bot::Exit program"))
+	if(input == 27)
+	{
+		MemoryAnalyzer::getPtr()->setController(0);
 		throw std::string("Exit program");
+	}
+	else if(input =='t')
+	{
+		return 1;
+	}
+	return 0;
 }

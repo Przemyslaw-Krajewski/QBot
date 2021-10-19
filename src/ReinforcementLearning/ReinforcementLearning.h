@@ -14,8 +14,17 @@
 
 #include "../Bot/State.h"
 
+struct LearningStatus
+{
+	LearningStatus(double t_e, char t_ui) {learnError = t_e; userInput = t_ui;}
+
+	char userInput;
+	double learnError;
+};
+
 class ReinforcementLearning
 {
+
 public:
 	ReinforcementLearning();
 	virtual ~ReinforcementLearning();
@@ -24,10 +33,10 @@ public:
 	virtual int chooseAction(State& t_state) = 0;
 	virtual double learnSARS(SARS &t_sars) = 0;
 
-	virtual double learnFromScenario(std::list<SARS> &t_history) = 0;
-	virtual double learnFromMemory() = 0;
+	virtual LearningStatus learnFromScenario(std::list<SARS> &t_history) = 0;
+	virtual LearningStatus learnFromMemory() = 0;
 
-	virtual void handleParameters() {};
+	virtual void handleUserInput(char t_userInput) {};
 
 
 protected:
