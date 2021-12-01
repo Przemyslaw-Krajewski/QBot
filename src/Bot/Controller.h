@@ -31,11 +31,11 @@ public:
 			code = RIGHT;
 			break;
 		case 1:
-			code = RIGHT + A;
+			code = RIGHT+A;
 			break;
-		case 2:
-			code = NOTHING;
-			break;
+//		case 2:
+//			code = DOWN;
+//			break;
 		default:
 			code = NOTHING;
 		}

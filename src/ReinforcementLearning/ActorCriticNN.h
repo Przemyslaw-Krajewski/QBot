@@ -46,7 +46,7 @@ public:
 	void createNND();
 
 private:
-	char processLearningFromSARS(std::vector<SARS*> t_sars);
+	char processLearningFromSARS(std::vector<SARS*> t_sars, int t_maxSarsToProcess=-1);
 	void putStateToMemory(SARS &t_sars);
 
 private:
@@ -64,7 +64,7 @@ private:
 public:
 	static constexpr double UPPER_REWARD_CUP = 0.75;
 	static constexpr double LOWER_REWARD_CUP = 0.15;
-	static constexpr double MEMORIZE_SARS_CUP = 0.70;
+	static constexpr double MEMORIZE_SARS_CUP = 0.80;
 
 	const int LEARN_FROM_HISTORY_ITERATIONS = 1;
 	const int LEARN_FROM_MEMORY_ITERATIONS  = 1;

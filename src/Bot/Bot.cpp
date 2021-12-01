@@ -89,7 +89,7 @@ void Bot::execute()
 			MemoryAnalyzer::getPtr()->setController(controller.getCode());
 
 			//End?
-			bool terminate = handleUserInput(cv::waitKey(80));
+			bool terminate = handleUserInput(cv::waitKey(40));
 			if(analyzeResult.endScenario() || terminate) break;
 		}
 

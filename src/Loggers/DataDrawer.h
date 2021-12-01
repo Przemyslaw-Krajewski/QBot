@@ -18,7 +18,7 @@ private:
 	DataDrawer();
 
 public:
-	static void drawState(State t_State, StateInfo t_stateInfo, std::string name);
+	static void drawState(State t_State, StateInfo t_stateInfo, std::string name, int t_blockSize = 8);
 	static void drawReducedState(State t_reducedState);
 	static void drawAdditionalInfo(double t_reward, double t_maxTime, double t_time, ControllerInput t_keys, bool pressedKey);
 private:

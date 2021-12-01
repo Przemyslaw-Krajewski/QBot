@@ -14,36 +14,46 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 {
 	reducedStateMethod = [](State & t_state) -> State
 		{
-			int reduceLevel = 8;
+			int reduceLevel = 4;
 			int xSize = 64;
 			int ySize = 40;
 			int zSize = 3;
 
-//			std::vector<int> median = std::vector<int>(xSize*ySize*zSize,0);
+			std::vector<int> median = std::vector<int>(xSize*ySize*zSize,0);
 			std::vector<int> edges = std::vector<int>(xSize*ySize,0);
 			std::vector<int> erosion = std::vector<int>(xSize*ySize,0);
 
+//			DataDrawer::drawState(t_state,StateInfo(64,40,3),"original");
 			//median filter
-//			for(int x=1; x<xSize-1; x++)
-//			{
-//				for(int y=1; y<ySize-1; y++)
-//				{
-//					int value = 0;
+			for(int x=1; x<xSize-1; x++)
+			{
+				for(int y=1; y<ySize-1; y++)
+				{
 //					for(int z=0; z<zSize; z++)
 //					{
-//						std::vector<int> v;
-//						for(int i=-1;i<=1;i++)
-//						{
-//							for(int j=-1;j<=1;j++)
-//							{
-//								v.push_back(t_state[ x+i + (y+j) *xSize + z*ySize*xSize]);
-//							}
-//						}
-//						std::sort(v.begin(),v.end());
-//						median[x+ y*xSize + z*xSize*ySize] = v[4];
+						int value = 0;
+						std::vector<cv::Scalar> v;
+						for(int i=-1;i<=1;i++)
+						{
+							for(int j=-1;j<=1;j++)
+							{
+								cv::Scalar c = cv::Scalar(t_state[ x+i + (y+j) *xSize],
+														  t_state[ x+i + (y+j) *xSize + ySize*xSize],
+														  t_state[ x+i + (y+j) *xSize + 2*ySize*xSize]);
+								if(c.val[0]+c.val[1]+c.val[2] != 0) v.push_back(c);
+							}
+						}
+						std::sort(v.begin(),v.end(),[](const cv::Scalar & c1, const cv::Scalar & c2) -> bool {return c1.val[0]+c1.val[1]+c1.val[2]> c2.val[0]+c2.val[1]+c2.val[2];});
+						if(v.size() > 0)
+						{
+							median[x+ y*xSize] = 				 v[v.size()/2].val[0];
+							median[x+ y*xSize + xSize*ySize] =   v[v.size()/2].val[1];
+							median[x+ y*xSize + 2*xSize*ySize] = v[v.size()/2].val[2];
+						}
 //					}
-//				}
-//			}
+				}
+			}
+//			DataDrawer::drawState(median,StateInfo(64,40,3),"median");
 
 			//Find edges and threshold
 			for(int x=1; x<xSize-1; x++)
@@ -51,17 +61,19 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 				for(int y=1; y<ySize-1; y++)
 				{
 					int value = 0;
-					for(int z=0; z<zSize; z++)
+					for(int z=0; z<3; z++)
 					{
-						value += abs((t_state[ x +     y   *xSize + z*ySize*xSize])*4 -
-									 (t_state[(x-1) +  y   *xSize + z*ySize*xSize]) -
-									 (t_state[(x+1) +  y   *xSize + z*ySize*xSize]) -
-									 (t_state[ x    + (y-1)*xSize + z*ySize*xSize]) -
-									 (t_state[ x    + (y+1)*xSize + z*ySize*xSize]));
+						value += abs((median[ x +     y   *xSize + z*ySize*xSize])*4 -
+									 (median[(x-1) +  y   *xSize + z*ySize*xSize]) -
+									 (median[(x+1) +  y   *xSize + z*ySize*xSize]) -
+									 (median[ x    + (y-1)*xSize + z*ySize*xSize]) -
+									 (median[ x    + (y+1)*xSize + z*ySize*xSize]));
 					}
-					if(value > 15) edges[x+y*xSize] = 255;
+					if(value > 222) edges[x+y*xSize] = 255;
 				}
 			}
+
+//			DataDrawer::drawState(edges,StateInfo(64,40,1),"edges");
 
 			//Erosion
 			for(int x=2; x<xSize-2; x++)
@@ -70,22 +82,24 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 				{
 					int value = 0;
 					value = edges[x-1+(y-1)*xSize] + edges[x+(y-1)*xSize] + edges[x+1+(y-1)*xSize] +
-							edges[x-1+y*xSize] + 					+ edges[x+1+y*xSize] +
+							edges[x-1+y*xSize]     + edges[x+ y*xSize]    + edges[x+1+y*xSize] +
 							edges[x-1+(y+1)*xSize] + edges[x+(y+1)*xSize] + edges[x+1+(y+1)*xSize];
 		//			value = edges[x-2+(y-2)*xSize] + edges[x-1+(y-2)*xSize] + edges[x+(y-2)*xSize] + edges[x+1+(y-2)*xSize] + edges[x+2+(y-2)*xSize] +
 		//								edges[x-2+(y-1)*xSize] + edges[x-1+(y-1)*xSize] + edges[x+(y-1)*xSize] + edges[x+1+(y-1)*xSize] + edges[x+2+(y-1)*xSize] +
 		//								edges[x-2+y*xSize] + edges[x-1+y*xSize] + 					+ edges[x+1+y*xSize] + edges[x+2+y*xSize] +
 		//								edges[x-2+(y+1)*xSize] + edges[x-1+(y+1)*xSize] + edges[x+(y+1)*xSize] + edges[x+1+(y+1)*xSize] + edges[x+2+(y+1)*xSize] +
 		//								edges[x-2+(y+2)*xSize] + edges[x-1+(y+2)*xSize] + edges[x+(y+2)*xSize] + edges[x+1+(y+2)*xSize] + edges[x+2+(y+2)*xSize];
-					if(value >= 255*8) erosion[x+y*xSize] = 255;
+					if(value >= 255*2) erosion[x+y*xSize] = 255;
 				}
 			}
 
+//			DataDrawer::drawState(erosion,StateInfo(64,40,1),"erosion");
+
 			//Reduce
 			std::vector<int> result;
-			for(int x=0;x<xSize;x+=reduceLevel)
+			for(int y=0;y<ySize;y+=reduceLevel)
 			{
-				for(int y=0;y<ySize;y+=reduceLevel)
+				for(int x=0;x<xSize;x+=reduceLevel)
 				{
 					int value=0;
 					for(int xx=0;xx<reduceLevel;xx++)
@@ -99,6 +113,7 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 					else result.push_back(0);
 				}
 			}
+//			DataDrawer::drawState(result,StateInfo(16,10,1),"result",16);
 
 			return result;
 		};

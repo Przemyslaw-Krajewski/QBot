@@ -70,11 +70,11 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB(ControllerInput &t_input)
 	ScenarioAdditionalInfo additionalInfo = ScenarioAdditionalInfo::ok;
 	double reward = NOTHING_REWARD;
 
-	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = NOTHING_REWARD;		  additionalInfo = ScenarioAdditionalInfo::playerNotFound;}
+	if(!imageAnalyzeResult.playerFound)			     										 	 {reward = NOTHING_REWARD;		  additionalInfo = ScenarioAdditionalInfo::ok;}
 	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy)				 {reward = DIE_REWARD; 	  		  additionalInfo = ScenarioAdditionalInfo::killedByEnemy;}
 	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::won;}
 	else if(memoryAnalyzeResult.playerPositionY > 180) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  //pitfall
-	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  // left border
+//	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  // left border
 	else if(memoryAnalyzeResult.playerPositionX > 96 && memoryAnalyzeResult.playerVelocityX > 16){reward = ADVANCE_REWARD;		  additionalInfo = ScenarioAdditionalInfo::ok;}
 	else if(memoryAnalyzeResult.playerVelocityX > 8) 										 	 {reward = LITTLE_ADVANCE_REWARD; additionalInfo = ScenarioAdditionalInfo::ok;}
 

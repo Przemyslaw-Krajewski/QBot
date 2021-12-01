@@ -11,7 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
-const int numberOfActions = 3;
+const int numberOfActions = 2;
 
 using State = std::vector<int>;
 using ReducedState = State;

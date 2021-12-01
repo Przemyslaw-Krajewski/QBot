@@ -10,15 +10,13 @@
 /*
  *
  */
-void DataDrawer::drawState(State t_state, StateInfo t_stateInfo, std::string name)
+void DataDrawer::drawState(State t_state, StateInfo t_stateInfo, std::string name, int t_blockSize)
 {
-	int blockSize = 8;
+	cv::Mat mat = cv::Mat(t_blockSize*t_stateInfo.ySize, t_blockSize*t_stateInfo.xSize, CV_8UC3);
 
-	cv::Mat mat = cv::Mat(blockSize*t_stateInfo.ySize, blockSize*t_stateInfo.xSize, CV_8UC3);
-
-	for(int x=0, xb=0; x<t_stateInfo.xSize; x++,xb+=blockSize)
+	for(int x=0, xb=0; x<t_stateInfo.xSize; x++,xb+=t_blockSize)
 	{
-		for(int y=0, yb=0; y<t_stateInfo.ySize; y++,yb+=blockSize)
+		for(int y=0, yb=0; y<t_stateInfo.ySize; y++,yb+=t_blockSize)
 		{
 			cv::Scalar color;
 			if(t_stateInfo.zSize == 1)
@@ -39,7 +37,7 @@ void DataDrawer::drawState(State t_state, StateInfo t_stateInfo, std::string nam
 				color[2] = t_state[x+y*t_stateInfo.xSize + t_stateInfo.xSize*t_stateInfo.ySize*2];
 			}
 
-			drawBlock(&mat,blockSize,Point(xb,yb),color);
+			drawBlock(&mat,t_blockSize,Point(xb,yb),color);
 		}
 	}
 
