@@ -9,10 +9,11 @@
 
 namespace NeuralNetworkGPU
 {
+
 	class SigmoidLayer : public NNLayer
 	{
 	public:
-		SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, NeuronsPtr t_prevLayerReference);
+		SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, ActivationFunction t_activationFunction, NeuronsPtr t_prevLayerReference);
 		virtual ~SigmoidLayer();
 
 	public:
@@ -56,8 +57,9 @@ namespace NeuralNetworkGPU
 		float *d_m, *d_v;  	// 1st moment vector, 2nd moment vector
 		float *d_B1, *d_B2; 	// Decay rates for moment vectors
 
+		ActivationFunction activationFunction;
+
 		float learnRate;
-		static double b;
 	};
 }
 

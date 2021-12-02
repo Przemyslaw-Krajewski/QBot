@@ -4,13 +4,16 @@
 
 #include "SigmoidLayer.h"
 
+#include "ActivationFunctions.h"
+
 namespace NeuralNetworkGPU
 {
-
 	/*
 	 *
 	 */
-	__global__ void determineOutputFunc(float *t_input, float *t_output, int *t_inputSize,
+	template<ActivationFunction F>
+	__global__
+	void determineOutputFunc(float *t_input, float *t_output, int *t_inputSize,
 			float *t_sums,
 			float *t_weights,
 			float *t_deltas,
@@ -47,7 +50,7 @@ namespace NeuralNetworkGPU
 		}
 		t_sums[threadIdx.x + blockIdx.x*blockDim.x] = sum;
 		//activation function
-		t_output[threadIdx.x + blockIdx.x*blockDim.x] = __frcp_rd(1 + exp(-(*d_b)*sum) );
+		t_output[threadIdx.x + blockIdx.x*blockDim.x] = activationFunctionKernel<F>(&sum, d_b);
 		//reset delta
 		t_deltas[threadIdx.x + blockIdx.x*blockDim.x] = 0;
 	}
@@ -55,7 +58,9 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void learnSGDFunc(float *t_input, int *t_inputSize,
+	template<ActivationFunction F>
+	__global__
+	void learnSGDFunc(float *t_input, int *t_inputSize,
 			float *t_output,
 			float *t_sums,
 			float *t_weights,
@@ -90,9 +95,7 @@ namespace NeuralNetworkGPU
 
 		long weightsIndex = inputSize*(index);
 		//determine common multiplier
-		float e = __powf(2.71828,(-(*d_b)*t_sums[index]));
-		float m = 1 + e;
-		float derivative = __fdiv_rd((*d_b)*e,(m*m));
+		float derivative = derivativeFunctionKernel<F>(&t_sums[index],d_b);
 
 		float p = (*d_n)* delta * derivative;
 		//calculate new weights
@@ -122,7 +125,9 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void learnAdamFunc(float *t_input, int *t_inputSize,
+	template<ActivationFunction F>
+	__global__
+	void learnAdamFunc(float *t_input, int *t_inputSize,
 			float *t_output,
 			float *t_sums,
 			float *t_weights,
@@ -158,9 +163,7 @@ namespace NeuralNetworkGPU
 
 		long weightsIndex = inputSize*(index);
 		//determine common multiplier
-		float e = __powf(2.71828,(-(*t_b)*t_sums[index]));
-		float m = 1 + e;
-		float derivative = __fdiv_rd((*t_b)*e,(m*m));
+		float derivative = derivativeFunctionKernel<F>(&t_sums[index],t_b);
 		float grad = t_deltas[index]*derivative; // gradient without x factor
 		float grad2 = grad*grad;
 
@@ -198,14 +201,14 @@ namespace NeuralNetworkGPU
 
 	}
 
-	double SigmoidLayer::b = 0;
-
 	/*
 	 *
 	 */
-	SigmoidLayer::SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, NeuronsPtr t_prevLayerReference)
+	SigmoidLayer::SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, ActivationFunction t_activationFunction, NeuronsPtr t_prevLayerReference)
 	{
 		float b1 = 0.9, b2 = 0.999;
+
+		activationFunction = t_activationFunction;
 
 		size = t_size;
 		de_input = t_prevLayerReference.inputPtr;
@@ -329,11 +332,23 @@ namespace NeuralNetworkGPU
 		return result;
 	}
 
+	/*
+	 *
+	 */
 	void SigmoidLayer::determineOutput()
 	{
-		determineOutputFunc<<< numberOfThreads , numberOfBlocks >>>(de_input, d_output, d_inputSize, d_sums, d_weights, d_deltas, d_b);
+		auto func = determineOutputFunc<ActivationFunction::Sigmoid>;
+		if(activationFunction == ActivationFunction::Sigmoid);
+		else if(activationFunction == ActivationFunction::Linear) func = determineOutputFunc<ActivationFunction::Linear>;
+		else if(activationFunction == ActivationFunction::RELU) func = determineOutputFunc<ActivationFunction::RELU>;
+		else if(activationFunction == ActivationFunction::LeakRELU) func = determineOutputFunc<ActivationFunction::LeakRELU>;
+
+		func<<< numberOfThreads , numberOfBlocks >>>(de_input, d_output, d_inputSize, d_sums, d_weights, d_deltas, d_b);
 	}
 
+	/*
+	 *
+	 */
 	void SigmoidLayer::setDelta(std::vector<double> t_z)
 	{
 //		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
@@ -345,31 +360,47 @@ namespace NeuralNetworkGPU
 		cudaMemcpy(d_deltas, deltas, sizeof(float)*size, cudaMemcpyHostToDevice);
 	}
 
-
+	/*
+	 *
+	 */
 	void SigmoidLayer::learnSGD()
 	{
 //		int64 timeBefore = cv::getTickCount();
-		learnSGDFunc<<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize,
-															 d_output,
-															 d_sums,
-															 d_weights,
-															 d_deltas, de_prevDeltas,
-															 d_n, d_b);
+		auto func = learnSGDFunc<ActivationFunction::Sigmoid>;
+		if(activationFunction == ActivationFunction::Sigmoid);
+		else if(activationFunction == ActivationFunction::Linear) func = learnSGDFunc<ActivationFunction::Linear>;
+		else if(activationFunction == ActivationFunction::RELU) func = learnSGDFunc<ActivationFunction::RELU>;
+		else if(activationFunction == ActivationFunction::LeakRELU) func = learnSGDFunc<ActivationFunction::LeakRELU>;
+		func<<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize,
+																						  d_output,
+																						  d_sums,
+																						  d_weights,
+																						  d_deltas, de_prevDeltas,
+																						  d_n, d_b);
 //		int64 afterBefore = cv::getTickCount();
 //		std::cout << "Sigm: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 	}
 
+	/*
+	 *
+	 */
 	void SigmoidLayer::learnAdam()
 	{
 //		int64 timeBefore = cv::getTickCount();
-		learnAdamFunc<<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize,
-															  d_output,
-															  d_sums,
-															  d_weights,
-															  d_deltas, de_prevDeltas,
-															  d_m, d_v,
-															  d_n, d_b,
-															  d_B1, d_B2);
+		auto func = learnAdamFunc<ActivationFunction::Sigmoid>;
+		if(activationFunction == ActivationFunction::Sigmoid);
+		else if(activationFunction == ActivationFunction::Linear) func = learnAdamFunc<ActivationFunction::Linear>;
+		else if(activationFunction == ActivationFunction::RELU) func = learnAdamFunc<ActivationFunction::RELU>;
+		else if(activationFunction == ActivationFunction::LeakRELU) func = learnAdamFunc<ActivationFunction::LeakRELU>;
+		func<<< numberOfThreads , numberOfBlocks >>>(de_input,
+																						   d_inputSize,
+																						   d_output,
+																						   d_sums,
+																						   d_weights,
+																						   d_deltas, de_prevDeltas,
+																						   d_m, d_v,
+																						   d_n, d_b,
+																						   d_B1, d_B2);
 //		int64 afterBefore = cv::getTickCount();
 //		std::cout << "Sigm: " << (afterBefore - timeBefore)/ cv::getTickFrequency() << "\n";
 	}
@@ -416,7 +447,7 @@ namespace NeuralNetworkGPU
 		t_file >> learnRate;
 		t_file >> b;
 
-		SigmoidLayer* layer = new SigmoidLayer(b,learnRate,size,t_prevLayerReference);
+		SigmoidLayer* layer = new SigmoidLayer(b,learnRate,size,NeuralNetworkGPU::ActivationFunction::Sigmoid,t_prevLayerReference);
 
 		float *weights = (float*) malloc(sizeof(float)*size*(inputSize+1));
 		float buff;
@@ -431,6 +462,9 @@ namespace NeuralNetworkGPU
 		return layer;
 	}
 
+	/*
+	 *
+	 */
 	void SigmoidLayer::drawLayer()
 	{
 		int blockSize=20;

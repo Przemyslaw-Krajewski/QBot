@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <vector>
+#include <functional>
 
 #include <opencv2/opencv.hpp>
 
@@ -14,6 +15,8 @@
 
 namespace NeuralNetworkGPU
 {
+	enum class ActivationFunction {Linear, Sigmoid, RELU, LeakRELU};
+
 	struct TensorSize
 	{
 		TensorSize(const TensorSize& t_ts) 
