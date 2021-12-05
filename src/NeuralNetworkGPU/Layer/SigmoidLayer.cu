@@ -201,14 +201,19 @@ namespace NeuralNetworkGPU
 
 	}
 
+
+	template class NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>;
+	template class NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Linear>;
+	template class NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::RELU>;
+	template class NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::LeakRELU>;
+
 	/*
 	 *
 	 */
-	SigmoidLayer::SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, ActivationFunction t_activationFunction, NeuronsPtr t_prevLayerReference)
+	template<ActivationFunction F>
+	SigmoidLayer<F>::SigmoidLayer(float t_parameterB, float t_learnRate, int t_size, NeuronsPtr t_prevLayerReference)
 	{
 		float b1 = 0.9, b2 = 0.999;
-
-		activationFunction = t_activationFunction;
 
 		size = t_size;
 		de_input = t_prevLayerReference.inputPtr;
@@ -269,7 +274,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	SigmoidLayer::~SigmoidLayer()
+	template<ActivationFunction F>
+	SigmoidLayer<F>::~SigmoidLayer()
 	{
 		cudaFree(d_n);
 		cudaFree(d_b);
@@ -293,7 +299,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void SigmoidLayer::initWeights()
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::initWeights()
 	{
 		float *randomValues = (float*) malloc(sizeof(float)*size*(inputSize+1));
 
@@ -310,7 +317,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void SigmoidLayer::setWeights(float* t_weights)
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::setWeights(float* t_weights)
 	{
 		cudaMemcpy(d_weights, t_weights, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
 	}
@@ -318,7 +326,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	std::vector<double> SigmoidLayer::getOutput()
+	template<ActivationFunction F>
+	std::vector<double> SigmoidLayer<F>::getOutput()
 	{
 		cudaMemcpy(output, d_output, sizeof(float)*size, cudaMemcpyDeviceToHost);
 
@@ -335,21 +344,17 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void SigmoidLayer::determineOutput()
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::determineOutput()
 	{
-		auto func = determineOutputFunc<ActivationFunction::Sigmoid>;
-		if(activationFunction == ActivationFunction::Sigmoid);
-		else if(activationFunction == ActivationFunction::Linear) func = determineOutputFunc<ActivationFunction::Linear>;
-		else if(activationFunction == ActivationFunction::RELU) func = determineOutputFunc<ActivationFunction::RELU>;
-		else if(activationFunction == ActivationFunction::LeakRELU) func = determineOutputFunc<ActivationFunction::LeakRELU>;
-
-		func<<< numberOfThreads , numberOfBlocks >>>(de_input, d_output, d_inputSize, d_sums, d_weights, d_deltas, d_b);
+		determineOutputFunc<F><<< numberOfThreads , numberOfBlocks >>>(de_input, d_output, d_inputSize, d_sums, d_weights, d_deltas, d_b);
 	}
 
 	/*
 	 *
 	 */
-	void SigmoidLayer::setDelta(std::vector<double> t_z)
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::setDelta(std::vector<double> t_z)
 	{
 //		#pragma omp parallel for shared(deltas,size,output, t_z) private(i) default(none)
 		for(int i=0; i<size; i++ )
@@ -363,15 +368,11 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void SigmoidLayer::learnSGD()
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::learnSGD()
 	{
 //		int64 timeBefore = cv::getTickCount();
-		auto func = learnSGDFunc<ActivationFunction::Sigmoid>;
-		if(activationFunction == ActivationFunction::Sigmoid);
-		else if(activationFunction == ActivationFunction::Linear) func = learnSGDFunc<ActivationFunction::Linear>;
-		else if(activationFunction == ActivationFunction::RELU) func = learnSGDFunc<ActivationFunction::RELU>;
-		else if(activationFunction == ActivationFunction::LeakRELU) func = learnSGDFunc<ActivationFunction::LeakRELU>;
-		func<<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize,
+		learnSGDFunc<F><<< numberOfThreads , numberOfBlocks >>>(de_input, d_inputSize,
 																						  d_output,
 																						  d_sums,
 																						  d_weights,
@@ -384,15 +385,11 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void SigmoidLayer::learnAdam()
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::learnAdam()
 	{
 //		int64 timeBefore = cv::getTickCount();
-		auto func = learnAdamFunc<ActivationFunction::Sigmoid>;
-		if(activationFunction == ActivationFunction::Sigmoid);
-		else if(activationFunction == ActivationFunction::Linear) func = learnAdamFunc<ActivationFunction::Linear>;
-		else if(activationFunction == ActivationFunction::RELU) func = learnAdamFunc<ActivationFunction::RELU>;
-		else if(activationFunction == ActivationFunction::LeakRELU) func = learnAdamFunc<ActivationFunction::LeakRELU>;
-		func<<< numberOfThreads , numberOfBlocks >>>(de_input,
+		learnAdamFunc<F><<< numberOfThreads , numberOfBlocks >>>(de_input,
 																						   d_inputSize,
 																						   d_output,
 																						   d_sums,
@@ -408,7 +405,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	NeuronsPtr SigmoidLayer::getNeuronPtr()
+	template<ActivationFunction F>
+	NeuronsPtr SigmoidLayer<F>::getNeuronPtr()
 	{
 		return NeuronsPtr(layerId, d_output,size, d_deltas);
 	}
@@ -416,7 +414,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void SigmoidLayer::saveToFile(std::ofstream & t_file)
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::saveToFile(std::ofstream & t_file)
 	{
 		t_file << (float) getLayerTypeId() << ' '; //Signature of SigmoidLayer
 		t_file << (float) size << ' ';
@@ -439,7 +438,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	SigmoidLayer* SigmoidLayer::loadFromFile(std::ifstream & t_file, NeuronsPtr t_prevLayerReference)
+	template<ActivationFunction F>
+	SigmoidLayer<F>* SigmoidLayer<F>::loadFromFile(std::ifstream & t_file, NeuronsPtr t_prevLayerReference)
 	{
 		float size, inputSize, learnRate, b;
 		t_file >> size;
@@ -447,7 +447,7 @@ namespace NeuralNetworkGPU
 		t_file >> learnRate;
 		t_file >> b;
 
-		SigmoidLayer* layer = new SigmoidLayer(b,learnRate,size,NeuralNetworkGPU::ActivationFunction::Sigmoid,t_prevLayerReference);
+		SigmoidLayer<F>* layer = new SigmoidLayer<F>(b,learnRate,size,t_prevLayerReference);
 
 		float *weights = (float*) malloc(sizeof(float)*size*(inputSize+1));
 		float buff;
@@ -465,7 +465,8 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	void SigmoidLayer::drawLayer()
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::drawLayer()
 	{
 		int blockSize=20;
 		int spaceSize=2;

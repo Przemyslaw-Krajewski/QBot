@@ -15,7 +15,7 @@ namespace Test
 	{
 		NeuralNetworkGPU::NeuralNetwork nn;
 		nn.addLayer(new NeuralNetworkGPU::InputLayer(3));
-		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,0.3,1, NeuralNetworkGPU::ActivationFunction::Sigmoid,nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,0.3,1, nn.getLastLayerNeuronRef()));
 
 		std::vector<double> in;
 		in.push_back(0.4);
@@ -143,7 +143,7 @@ namespace Test
     {
         NeuralNetworkGPU::NeuralNetwork nn;
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,0.01, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,0.01, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.6}, {0.8}},
                                            {0.4, 0.9}, &nn);
@@ -157,8 +157,8 @@ namespace Test
     {
     	NeuralNetworkGPU::NeuralNetwork nn;
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.003, 15, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.01, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(5.2,0.003, 15, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(5.2,0.01, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.6}, {0.8}},
                                            {0.4, 0.9}, &nn);
@@ -172,8 +172,8 @@ namespace Test
     {
     	NeuralNetworkGPU::NeuralNetwork nn;
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.008, 10, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(16.2,0.008, 10, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
@@ -187,9 +187,9 @@ namespace Test
     {
     	NeuralNetworkGPU::NeuralNetwork nn;
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.006, 30, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.008, 20, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(16.2,0.006, 30, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(16.2,0.008, 20, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
@@ -203,9 +203,9 @@ namespace Test
     {
     	NeuralNetworkGPU::NeuralNetwork nn;
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.006, 3800, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(0.01,0.008, 10, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(16.2,0.012, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(16.2,0.006, 3800, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.01,0.008, 10, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(16.2,0.012, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
@@ -218,9 +218,9 @@ namespace Test
         std::vector<double> z = {0.5};
         NeuralNetworkGPU::NeuralNetwork nn;
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,20.2,4000, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2,4000, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,20.2,4000, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,30.2,4000, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,30.2, 1, nn.getLastLayerNeuronRef()));
         int64 timeBefore = cv::getTickCount();
         long i;
         for (i = 0; i < 1000; i++)
@@ -241,9 +241,9 @@ namespace Test
         std::vector<double> z = {0.5};
         NeuralNetworkGPU::NeuralNetwork nn(NeuralNetworkGPU::LearnMode::Adam);
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,20.2,4000, NeuralNetworkGPU::ActivationFunction::Sigmoid,nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2,4000, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,20.2,4000, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,30.2,4000, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,30.2, 1, nn.getLastLayerNeuronRef()));
         int64 timeBefore = cv::getTickCount();
         long i;
         for (i = 0; i < 1000; i++)
@@ -266,9 +266,9 @@ namespace Test
     	NeuralNetworkGPU::NeuralNetwork nn(NeuralNetworkGPU::LearnMode::Adam);
 
         nn.addLayer(new NeuralNetworkGPU::InputLayer(1));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(11.2,0.0006, 30, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(9.2,0.0008, 20, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.0012, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(11.2,0.0006, 30, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(9.2,0.0008, 20, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(5.2,0.0012, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.6}, {0.7}, {0.8}},
                                            {0.4, 0.9, 0.4}, &nn);
@@ -328,7 +328,7 @@ namespace Test
 		NeuralNetworkGPU::NeuralNetwork nn;
 		nn.addLayer(new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(3,3,1)));
 		nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,1,NeuralNetworkGPU::MatrixSize(3,3),nn.getLastLayerNeuronRef()));
-		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(11.2,0.03, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(11.2,0.03, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0.1, 0.2, 0.3, 0.1, 0.2, 0.3, 0.1, 0.2, 0.3},
 										    {0.3, 0.2, 0.1, 0.3, 0.2, 0.1, 0.3, 0.2, 0.1},
@@ -345,7 +345,7 @@ namespace Test
         nn.addLayer(inputLayer1);
         nn.addLayer(inputLayer2);
         nn.addLayer(new NeuralNetworkGPU::FuseLayer(inputLayer1->getNeuronPtr(),inputLayer2->getNeuronPtr()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,0.01, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,0.01, 1, nn.getLastLayerNeuronRef()));
 
         std::vector<double> in;
 		in.push_back(0);in.push_back(2);
@@ -374,10 +374,10 @@ namespace Test
         NeuralNetworkGPU::InputLayer* inputLayer2 = new NeuralNetworkGPU::InputLayer(1);
         nn.addLayer(inputLayer1);
         nn.addLayer(inputLayer2);
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(11.2,0.0006, 30, NeuralNetworkGPU::ActivationFunction::Sigmoid, inputLayer1->getNeuronPtr()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(9.2,0.0008, 20, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(11.2,0.0006, 30, inputLayer1->getNeuronPtr()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(9.2,0.0008, 20, nn.getLastLayerNeuronRef()));
 		nn.addLayer(new NeuralNetworkGPU::FuseLayer(nn.getLastLayerNeuronRef(),inputLayer2->getNeuronPtr()));
-        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(5.2,0.0012, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+        nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(5.2,0.0012, 1, nn.getLastLayerNeuronRef()));
 
         long iteration = testNeuralNetwork({{0,1.6}, {0,2.8}},
                                            {0.4, 0.9}, &nn);
@@ -392,10 +392,10 @@ namespace Test
         nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,100,NeuralNetworkGPU::MatrixSize(5,5),nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,100,NeuralNetworkGPU::MatrixSize(5,5),nn.getLastLayerNeuronRef()));
         nn.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.0,0.01,10,NeuralNetworkGPU::MatrixSize(5,5),nn.getLastLayerNeuronRef()));
-		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer(13.2,30.2, 1, NeuralNetworkGPU::ActivationFunction::Sigmoid, nn.getLastLayerNeuronRef()));
+		nn.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(13.2,30.2, 1, nn.getLastLayerNeuronRef()));
         int64 timeBefore = cv::getTickCount();
         long i;
-        for (i = 0; i < 10000; i++)
+        for (i = 0; i < 100; i++)
         {
             nn.determineOutput(x);
             nn.setMeanSquareDelta(z);

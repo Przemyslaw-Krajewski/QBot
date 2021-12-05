@@ -243,9 +243,9 @@ namespace NeuralNetworkGPU {
 				layer = InputLayer::loadFromFile(file);
 				addLayer(layer);
 			}
-			else if(layerId == SigmoidLayer::getLayerTypeId())
+			else if(layerId == SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>::getLayerTypeId())
 			{
-				layer = SigmoidLayer::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
+				layer = SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
 				addLayer(layer);
 			}
 			else if(layerId == FuseLayer::getLayerTypeId())
