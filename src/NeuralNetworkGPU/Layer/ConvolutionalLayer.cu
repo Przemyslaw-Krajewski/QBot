@@ -49,7 +49,7 @@ namespace NeuralNetworkGPU
 		//activation function
 		t_output[index] =
 //				1 / (1 + exp(-(*d_b)*sum) );	//sigmoid function
-				sum > 0 ? sum : sum*0.05; 		//RELU function
+				sum > 0 ? sum : sum*0.005; 		//RELU function
 	}
 
 	/*
@@ -69,7 +69,7 @@ namespace NeuralNetworkGPU
 //		float e = exp(-(*d_b)*t_sums[index]);
 //		float m = 1 + e;
 //		float derivative = ((*d_b)*e/(m*m));
-		float derivative = t_sums[index] > 0 ? 1 : 0.05;
+		float derivative = t_sums[index] > 0 ? 1 : 0.005;
 
 		float p = (*d_n)* delta * derivative;
 		//calculate new weights
@@ -139,7 +139,7 @@ namespace NeuralNetworkGPU
 //		float m = 1 + e;
 //		float derivative = ((*t_b)*e/(m*m));
 		float sum = t_sums[index];
-		float derivative = sum > 0 && sum < 65536 ? 1 : 0.05;
+		float derivative = sum > 0 && sum < 65536 ? 1 : 0.005;
 		float grad = delta*derivative; // gradient without x factor
 		float grad2 = grad*grad;
 

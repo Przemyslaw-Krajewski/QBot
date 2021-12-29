@@ -60,12 +60,15 @@ private:
 
 	int timeLimit;
 
+	int screenPosition = 0;
+
 public:
-	static constexpr double WIN_REWARD     = 0.85;
-	static constexpr double ADVANCE_REWARD = 0.07;
+	static constexpr double WIN_REWARD     		  = 0.85;
+	static constexpr double CHECKPOINT_REWARD     = 0.35;
+	static constexpr double ADVANCE_REWARD 		  = 0.07;
 	static constexpr double LITTLE_ADVANCE_REWARD = 0.05;
-	static constexpr double NOTHING_REWARD = 0.04;
-	static constexpr double DIE_REWARD 	= 0.0001;
+	static constexpr double NOTHING_REWARD 		  = 0.04;
+	static constexpr double DIE_REWARD 			  = 0.00001;
 
 	static constexpr int TIME_LIMIT = 150;
 };

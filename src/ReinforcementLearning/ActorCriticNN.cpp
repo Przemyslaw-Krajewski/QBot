@@ -80,7 +80,7 @@ void ActorCriticNN::createNNA()
 	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000015f,6,NeuralNetworkGPU::MatrixSize(3,3),criticValues.getLastLayerNeuronRef()));
 	criticValues.addLayer(new NeuralNetworkGPU::FuseLayer(criticValues.getLastLayerNeuronRef(),cIL2->getNeuronPtr()));
 	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 3500, criticValues.getLastLayerNeuronRef()));
-	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Linear>(0.5f,0.000015f, 1, criticValues.getLastLayerNeuronRef()));
+	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.5f,0.000015f, 1, criticValues.getLastLayerNeuronRef()));
 }
 
 void ActorCriticNN::createNNB()
@@ -90,26 +90,26 @@ void ActorCriticNN::createNNB()
 	NeuralNetworkGPU::InputLayer* aIL2 = new NeuralNetworkGPU::InputLayer(dimensionStatesSize-64*40*6);
 	actorValues.addLayer(aIL2);
 	actorValues.addLayer(aIL1);
-	actorValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000006,120,NeuralNetworkGPU::MatrixSize(3,3),aIL1->getNeuronPtr()));
+	actorValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000009,120,NeuralNetworkGPU::MatrixSize(3,3),aIL1->getNeuronPtr()));
 	actorValues.addLayer(new NeuralNetworkGPU::PoolingLayer(actorValues.getLastLayerNeuronRef()));
-	actorValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000009f,60,NeuralNetworkGPU::MatrixSize(3,3),actorValues.getLastLayerNeuronRef()));
 	actorValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000015f,6,NeuralNetworkGPU::MatrixSize(3,3),actorValues.getLastLayerNeuronRef()));
+	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 2500, actorValues.getLastLayerNeuronRef()));
 	actorValues.addLayer(new NeuralNetworkGPU::FuseLayer(actorValues.getLastLayerNeuronRef(),aIL2->getNeuronPtr()));
-	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 3500, actorValues.getLastLayerNeuronRef()));
-	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.5f,0.000015f, numberOfActions, actorValues.getLastLayerNeuronRef()));
+	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.4f,0.000012f, 1000, actorValues.getLastLayerNeuronRef()));
+	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.6f,0.000015f, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
 	criticValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
 	NeuralNetworkGPU::InputLayer* cIL1 = new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(64,40,6));
 	NeuralNetworkGPU::InputLayer* cIL2 = new NeuralNetworkGPU::InputLayer(dimensionStatesSize-64*40*6);
 	criticValues.addLayer(cIL2);
 	criticValues.addLayer(cIL1);
-	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000006f,100,NeuralNetworkGPU::MatrixSize(3,3),cIL1->getNeuronPtr()));
+	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000009f,100,NeuralNetworkGPU::MatrixSize(3,3),cIL1->getNeuronPtr()));
 	criticValues.addLayer(new NeuralNetworkGPU::PoolingLayer(criticValues.getLastLayerNeuronRef()));
-	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000009f,60,NeuralNetworkGPU::MatrixSize(3,3),criticValues.getLastLayerNeuronRef()));
 	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000015f,6,NeuralNetworkGPU::MatrixSize(3,3),criticValues.getLastLayerNeuronRef()));
+	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 2500, criticValues.getLastLayerNeuronRef()));
 	criticValues.addLayer(new NeuralNetworkGPU::FuseLayer(criticValues.getLastLayerNeuronRef(),cIL2->getNeuronPtr()));
-	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 3500, criticValues.getLastLayerNeuronRef()));
-	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.5f,0.000015f, 1, criticValues.getLastLayerNeuronRef()));
+	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.4f,0.000012f, 1000, criticValues.getLastLayerNeuronRef()));
+	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.6f,0.000015f, 1, criticValues.getLastLayerNeuronRef()));
 }
 
 void ActorCriticNN::createNNC()
@@ -119,26 +119,24 @@ void ActorCriticNN::createNNC()
 	NeuralNetworkGPU::InputLayer* aIL2 = new NeuralNetworkGPU::InputLayer(dimensionStatesSize-64*40*6);
 	actorValues.addLayer(aIL2);
 	actorValues.addLayer(aIL1);
-	actorValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000015,100,NeuralNetworkGPU::MatrixSize(3,3),aIL1->getNeuronPtr()));
+	actorValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000015,120,NeuralNetworkGPU::MatrixSize(3,3),aIL1->getNeuronPtr()));
 	actorValues.addLayer(new NeuralNetworkGPU::PoolingLayer(actorValues.getLastLayerNeuronRef()));
 	actorValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000025f,6,NeuralNetworkGPU::MatrixSize(3,3),actorValues.getLastLayerNeuronRef()));
-	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 2500, actorValues.getLastLayerNeuronRef()));
 	actorValues.addLayer(new NeuralNetworkGPU::FuseLayer(actorValues.getLastLayerNeuronRef(),aIL2->getNeuronPtr()));
-	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.5f,0.000015f, 1500, actorValues.getLastLayerNeuronRef()));
-	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.8f,0.000025f, numberOfActions, actorValues.getLastLayerNeuronRef()));
+	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000015f, 3500, actorValues.getLastLayerNeuronRef()));
+	actorValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.5f,0.000025f, numberOfActions, actorValues.getLastLayerNeuronRef()));
 
 	criticValues = NeuralNetworkGPU::NeuralNetwork(NeuralNetworkGPU::LearnMode::Adam);
 	NeuralNetworkGPU::InputLayer* cIL1 = new NeuralNetworkGPU::InputLayer(NeuralNetworkGPU::TensorSize(64,40,6));
 	NeuralNetworkGPU::InputLayer* cIL2 = new NeuralNetworkGPU::InputLayer(dimensionStatesSize-64*40*6);
 	criticValues.addLayer(cIL2);
 	criticValues.addLayer(cIL1);
-	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000015f,80,NeuralNetworkGPU::MatrixSize(3,3),cIL1->getNeuronPtr()));
+	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000009f,100,NeuralNetworkGPU::MatrixSize(3,3),cIL1->getNeuronPtr()));
 	criticValues.addLayer(new NeuralNetworkGPU::PoolingLayer(criticValues.getLastLayerNeuronRef()));
-	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000025f,6,NeuralNetworkGPU::MatrixSize(3,3),criticValues.getLastLayerNeuronRef()));
-	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 2500, criticValues.getLastLayerNeuronRef()));
+	criticValues.addLayer(new NeuralNetworkGPU::ConvolutionalLayer(0.01f,0.000015f,6,NeuralNetworkGPU::MatrixSize(3,3),criticValues.getLastLayerNeuronRef()));
 	criticValues.addLayer(new NeuralNetworkGPU::FuseLayer(criticValues.getLastLayerNeuronRef(),cIL2->getNeuronPtr()));
-	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.5f,0.000015f, 1500, criticValues.getLastLayerNeuronRef()));
-	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.8f,0.000025f, 1, criticValues.getLastLayerNeuronRef()));
+	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.012f,0.000009f, 3500, criticValues.getLastLayerNeuronRef()));
+	criticValues.addLayer(new NeuralNetworkGPU::SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>(0.5f,0.000015f, 1, criticValues.getLastLayerNeuronRef()));
 }
 
 void ActorCriticNN::createNND()
@@ -226,6 +224,29 @@ double ActorCriticNN::learnSARS(SARS &t_sars)
 	previousReward = LOWER_REWARD_CUP < previousReward ? previousReward : LOWER_REWARD_CUP;
 	double change = t_sars.reward-previousReward;
 
+//	double upper = stateValue[0]-0.005;
+//	double previousReward = upper > prevStateValue[0] ? prevStateValue[0] : upper;
+//	previousReward = UPPER_REWARD_CUP > previousReward ? previousReward : UPPER_REWARD_CUP;
+//	previousReward = LOWER_REWARD_CUP < previousReward ? previousReward : LOWER_REWARD_CUP;
+//	double change = t_sars.reward-previousReward;
+
+
+//	double change;
+//	if( t_sars.reward > stateValue[0]+0.05)
+//	{
+//		double previousReward = UPPER_REWARD_CUP > prevStateValue[0] ? prevStateValue[0] : UPPER_REWARD_CUP;
+//		previousReward = LOWER_REWARD_CUP < previousReward ? previousReward : LOWER_REWARD_CUP;
+//		change = t_sars.reward-previousReward;
+//	}
+//	else
+//	{
+//		double modelReward = LOWER_REWARD_CUP < stateValue[0] ? stateValue[0] : LOWER_REWARD_CUP;
+//		modelReward = UPPER_REWARD_CUP > modelReward ? modelReward : UPPER_REWARD_CUP;
+//		change = t_sars.reward - modelReward;
+//	}
+//	std::cout << "Learn Data: "<< t_sars.reward << "  " << stateValue[0] << " <- " << prevStateValue[0] << "\n";
+
+
 	actorValues.setSoftMaxDelta(actorZ, change, t_sars.action);
 	actorValues.learnBackPropagation();
 
@@ -266,7 +287,7 @@ LearningStatus ActorCriticNN::learnFromScenario(std::list<SARS> &t_history)
 LearningStatus ActorCriticNN::learnFromMemory()
 {
 #ifdef ACTORCRITICNN_ONE_ACTION
-	return 0;
+	return LearningStatus(0,-1);
 #endif
 #ifdef ACTORCRITICNN_LOG
 	std::cout << "Memory size: " << memorizedSARS.size() << "\n";

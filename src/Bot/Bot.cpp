@@ -49,8 +49,11 @@ Bot::~Bot()
  */
 void Bot::execute()
 {
-	while(1)
+	for(int i=0; i<50;)
 	{
+#ifdef ACTORCRITICNN_ONE_ACTION
+		i++;
+#endif
 		//Reset variables
 		historyScenario.clear();
 		double score = 0;

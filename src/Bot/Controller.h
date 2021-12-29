@@ -33,9 +33,9 @@ public:
 		case 1:
 			code = RIGHT+A;
 			break;
-//		case 2:
-//			code = DOWN;
-//			break;
+		case 2:
+			code = LEFT;
+			break;
 		default:
 			code = NOTHING;
 		}

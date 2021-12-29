@@ -115,6 +115,10 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 			}
 //			DataDrawer::drawState(result,StateInfo(16,10,1),"result",16);
 
+			result.push_back(t_state[0]/7);
+			result.push_back(t_state[1]/2);
+			result.push_back(t_state[3]);
+
 			return result;
 		};
 
@@ -179,6 +183,26 @@ std::vector<int> RawImageAnalyzer::createSceneState(std::vector<cv::Mat> &t_imag
 {
 	State sceneState;
 
+	//AdditionalInfo
+	sceneState.push_back(t_velocity.x);
+	sceneState.push_back(t_velocity.y);
+
+	if(t_velocity.y == 0 && t_controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
+	else holdButtonCounter = 0;
+
+	sceneState.push_back(t_velocity.y == 0);
+	sceneState.push_back(holdButtonCounter >= 2 ? 64 : -64);
+
+	//Controller Info
+	for(bool ci : t_controllerInput)
+	{
+		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
+		else sceneState.push_back(MIN_INPUT_VALUE);
+	}
+
+	for(int i=0;i<2;i++) sceneState.push_back(0);
+
+	//Image info
 	for(cv::Mat image : t_images)
 	{
 		for(int z=0; z<image.channels(); z++)
@@ -193,25 +217,6 @@ std::vector<int> RawImageAnalyzer::createSceneState(std::vector<cv::Mat> &t_imag
 			}
 		}
 	}
-
-	//Controller
-	for(bool ci : t_controllerInput)
-	{
-		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
-		else sceneState.push_back(MIN_INPUT_VALUE);
-	}
-
-//	//AdditionalInfo
-	sceneState.push_back(t_velocity.x);
-	sceneState.push_back(t_velocity.y);
-
-	if(t_velocity.y == 0 && t_controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
-	else holdButtonCounter = 0;
-
-	sceneState.push_back(t_velocity.y == 0);
-	sceneState.push_back(holdButtonCounter >= 2 ? 2 : -2);
-
-	for(int i=0;i<2;i++) sceneState.push_back(0);
 
 	return sceneState;
 }

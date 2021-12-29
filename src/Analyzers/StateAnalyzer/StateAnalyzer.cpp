@@ -39,17 +39,16 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyze(ControllerInput &t_input)
 	//Timer
 	if(handleTimeLimit(result.reward))
 	{
-		result.reward = 0.5; // TODO hardcoded
+		result.reward = 0.4; // TODO hardcoded
 		result.scenarioStatus=ScenarioAdditionalInfo::timeOut;
 	}
 
 	//Draw
-	getReduceStateMethod()(result.processedState);
 	DataDrawer::drawAdditionalInfo(result.reward,
 								   StateAnalyzer::TIME_LIMIT,
 								   timeLimit,
 								   t_input,
-								   result.processedState[result.processedState.size()-1]);
+								   result.processedState[result.processedState.size()-1]>0);
 
 	return result;
 }
@@ -74,9 +73,12 @@ StateAnalyzer::AnalyzeResult StateAnalyzer::analyzeSMB(ControllerInput &t_input)
 	else if(imageAnalyzeResult.playerIsDead && imageAnalyzeResult.killedByEnemy)				 {reward = DIE_REWARD; 	  		  additionalInfo = ScenarioAdditionalInfo::killedByEnemy;}
 	else if(imageAnalyzeResult.playerWon) 			 									 		 {reward = WIN_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::won;}
 	else if(memoryAnalyzeResult.playerPositionY > 180) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  //pitfall
-//	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  // left border
-	else if(memoryAnalyzeResult.playerPositionX > 96 && memoryAnalyzeResult.playerVelocityX > 16){reward = ADVANCE_REWARD;		  additionalInfo = ScenarioAdditionalInfo::ok;}
-	else if(memoryAnalyzeResult.playerVelocityX > 8) 										 	 {reward = LITTLE_ADVANCE_REWARD; additionalInfo = ScenarioAdditionalInfo::ok;}
+	else if(memoryAnalyzeResult.playerPositionX < 20) 											 {reward = DIE_REWARD;    		  additionalInfo = ScenarioAdditionalInfo::killedByEnvironment;}  // left border
+	else if(memoryAnalyzeResult.screenVelocity == 2)											 {reward = ADVANCE_REWARD;		  additionalInfo = ScenarioAdditionalInfo::ok;}
+//	else if(screenPosition > (memoryAnalyzeResult.screenPosition & 127))						 {reward = CHECKPOINT_REWARD;	  additionalInfo = ScenarioAdditionalInfo::ok;}
+	else if(memoryAnalyzeResult.screenVelocity > 0) 										 	 {reward = LITTLE_ADVANCE_REWARD; additionalInfo = ScenarioAdditionalInfo::ok;}
+
+	screenPosition = (memoryAnalyzeResult.screenPosition & 127);
 
 	//Preparing output
 	AnalyzeResult analyzeResult;

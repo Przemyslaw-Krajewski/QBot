@@ -10,7 +10,7 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void determineOutputFuncPool(float *t_input, TensorSize *t_inputSize,
+	__global__ void determineOutputFuncPoolAvg(float *t_input, TensorSize *t_inputSize,
 			float *t_output,
 			float *t_deltas)
 	{
@@ -36,7 +36,7 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
-	__global__ void learnFuncPool(float *t_input, TensorSize *t_inputSize,
+	__global__ void learnFuncPoolAvg(float *t_input, TensorSize *t_inputSize,
 			float *t_output,
 			float *t_deltas, float *t_prevDeltas)
 	{
@@ -56,6 +56,72 @@ namespace NeuralNetworkGPU
 			if(maxXSize > threadIdx.x) t_prevDeltas[indexSrc+1] = delta;
 			if(maxYSize > threadIdx.y) t_prevDeltas[indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x] = delta;
 			if(maxXSize > threadIdx.x && maxYSize > threadIdx.y) t_prevDeltas[indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x+1] = delta;
+		}
+		//reset delta
+		t_deltas[indexDst] = 0;
+	}
+
+	/*
+	 *
+	 */
+	__global__ void determineOutputFuncPoolMax(float *t_input, TensorSize *t_inputSize,
+			float *t_output,
+			float *t_deltas)
+	{
+
+		long indexDst = threadIdx.x + threadIdx.y*blockDim.x + blockIdx.x*blockDim.y*blockDim.x;
+		long indexSrc = threadIdx.x+threadIdx.x +
+						(threadIdx.y+threadIdx.y)*(blockDim.x+blockDim.x) +
+						blockIdx.x*(blockDim.y+blockDim.y)*(blockDim.x+blockDim.x);
+
+		float value = 0;
+		int maxXSize = t_inputSize->x;
+		int maxYSize = t_inputSize->y;
+		if(maxYSize > threadIdx.y && maxXSize > threadIdx.x)
+		{
+			value = fmaxf(t_input[indexSrc],t_input[indexSrc+1]);
+			value = fmaxf(value,t_input[indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x]);
+			value = fmaxf(value,t_input[indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x+1]);
+		}
+		else if(maxXSize > threadIdx.x)
+		{
+			value = fmaxf(t_input[indexSrc],t_input[indexSrc+1]);
+		}
+		else if(maxYSize > threadIdx.y)
+		{
+			value = fmaxf(t_input[indexSrc],t_input[indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x]);
+		}
+//			value = __fdiv_rd(value,4);
+
+		t_output[indexDst] = value;
+		t_deltas[indexDst] = 0;
+	}
+
+	/*
+	 *
+	 */
+	__global__ void learnFuncPoolMax(float *t_input, TensorSize *t_inputSize,
+			float *t_output,
+			float *t_deltas, float *t_prevDeltas)
+	{
+		long indexDst = threadIdx.x + threadIdx.y*blockDim.x + blockIdx.x*blockDim.y*blockDim.x;
+		long indexSrc = threadIdx.x+threadIdx.x +
+						(threadIdx.y+threadIdx.y)*(blockDim.x+blockDim.x) +
+						blockIdx.x*(blockDim.y+blockDim.y)*(blockDim.x+blockDim.x);
+
+		float delta = __fdiv_rd(t_deltas[indexDst],4);
+
+		//set delta to deeper neurons
+		if(t_prevDeltas != nullptr)
+		{
+			int maxXSize = t_inputSize->x;
+			int maxYSize = t_inputSize->y;
+			int id;
+			id = indexSrc;
+			if(maxXSize > threadIdx.x && t_input[indexSrc+1] > t_input[id]) id = indexSrc+1;
+			if(maxYSize > threadIdx.y && t_prevDeltas[indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x] > t_input[id]) id = indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x;
+			if(maxXSize > threadIdx.x && maxYSize > threadIdx.y && t_input[indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x+1] > t_input[id]) id = indexSrc+(threadIdx.y+threadIdx.y)*blockDim.x+1;
+			t_prevDeltas[id] = delta;
 		}
 		//reset delta
 		t_deltas[indexDst] = 0;
@@ -118,7 +184,7 @@ namespace NeuralNetworkGPU
 	{
 		dim3 threadsPerBlock(size.x, size.y);
 		dim3 numBlocks(size.z);
-		determineOutputFuncPool<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
+		determineOutputFuncPoolMax<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
 																	    d_output,
 																	    d_deltas);
 	}
@@ -128,7 +194,7 @@ namespace NeuralNetworkGPU
 //		int64 timeBefore = cv::getTickCount();
 		dim3 threadsPerBlock(size.x, size.y);
 		dim3 numBlocks(size.z);
-		learnFuncPool<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
+		learnFuncPoolMax<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
 															 d_output,
 															 d_deltas, de_prevDeltas);
 //		int64 afterBefore = cv::getTickCount();
@@ -140,7 +206,7 @@ namespace NeuralNetworkGPU
 //		int64 timeBefore = cv::getTickCount();
 		dim3 threadsPerBlock(size.x, size.y);
 		dim3 numBlocks(size.z);
-		learnFuncPool<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
+		learnFuncPoolMax<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
 															 d_output,
 															 d_deltas, de_prevDeltas);
 //		int64 afterBefore = cv::getTickCount();
