@@ -42,17 +42,17 @@ MemoryAnalyzer::MemoryAnalyzer() {
 	std::ifstream memFile;
 	memFile.open ("mem.txt");
 
-	MEM_ADDR = 0x0;
-	if(memFile.is_open() && !memFile.eof()) memFile >> std::hex >> MEM_ADDR;
+	HEAP_ADDR = 0x0;
+	if(memFile.is_open() && !memFile.eof()) memFile >> std::hex >> HEAP_ADDR;
 	else throw std::string("mem.txt management error");
 
 	memFile.close();
 	system("rm mem.txt");
 
-	if(MEM_ADDR == 0x0) throw std::string("FCEU mem not found");
+	if(HEAP_ADDR == 0x0) throw std::string("FCEU mem not found");
 
-	RAM_ADDR = getMemValue(MEM_ADDR+RAMPTR_ADDR_OFFSET,sizeof(size_t));
-	XBUFF_ADDR = getMemValue(MEM_ADDR+XBUFFPTR_ADDR_OFFSET,sizeof(size_t));
+	RAM_ADDR = getMemValue(HEAP_ADDR+RAMPTR_ADDR_OFFSET,sizeof(off_t));
+	XBUFF_ADDR = getMemValue(HEAP_ADDR+XBUFFPTR_ADDR_OFFSET,sizeof(off_t));
 
 //	std::cout << "PID: "<< pid << "\n";
 //
@@ -83,7 +83,7 @@ MemoryAnalyzer::~MemoryAnalyzer() {
 /*
  *
  */
-unsigned long MemoryAnalyzer::getMemValue(long addr, size_t size = 1)
+off_t MemoryAnalyzer::getMemValue(off_t addr, size_t size = 1)
 {
 
 	char file[64];
@@ -94,7 +94,7 @@ unsigned long MemoryAnalyzer::getMemValue(long addr, size_t size = 1)
 	ptrace(PTRACE_ATTACH, pid, 0, 0);
 	waitpid(pid, NULL, 0);
 
-	unsigned long value = 0;
+	off_t value = 0;
 	pread(fd, &value, size, addr);
 
 	ptrace(PTRACE_DETACH, pid, 0, 0);
@@ -107,7 +107,7 @@ unsigned long MemoryAnalyzer::getMemValue(long addr, size_t size = 1)
 /*
  *
  */
-char MemoryAnalyzer::setMemValue(long addr, char value)
+char MemoryAnalyzer::setMemValue(off_t addr, char value)
 {
 	char file[64];
 	sprintf(file, "/proc/%ld/mem", (long)pid);
@@ -169,7 +169,7 @@ cv::Mat MemoryAnalyzer::fetchScreenData()
 	waitpid(pid, NULL, 0);
 
 	pread(fd, imageData, 256*256*sizeof(char), XBUFF_ADDR);
-	pread(fd, paletteData, 256*4*sizeof(char), PALETTE_ADDR);
+	pread(fd, paletteData, 256*4*sizeof(char), HEAP_ADDR+PALETTE_ADDR);
 
 	ptrace(PTRACE_DETACH, pid, 0, 0);
 	close(fd);
@@ -252,10 +252,10 @@ cv::Mat MemoryAnalyzer::fetchRawScreenData()
 
 void MemoryAnalyzer::setController(int c)
 {
-	setMemValue(CONTROL_ADDR,c);
+	setMemValue(HEAP_ADDR+CONTROL_ADDR,c);
 }
 
 void MemoryAnalyzer::loadState()
 {
-	setMemValue(LOADSTATE_ADDR,1);
+	setMemValue(HEAP_ADDR+LOADSTATE_ADDR,1);
 }

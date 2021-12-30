@@ -44,8 +44,8 @@ public:
 
 	AnalyzeResult fetchData();
 
-	unsigned long getMemValue(long addr, size_t size);
-	char setMemValue(long addr, char value);
+	off_t getMemValue(off_t addr, size_t size);
+	char setMemValue(off_t addr, char value);
 
 	cv::Mat fetchScreenData();
 	cv::Mat fetchRawScreenData();
@@ -56,7 +56,7 @@ private:
 	static MemoryAnalyzer* ptr;
 
 	int pid;
-	off_t MEM_ADDR;
+	off_t HEAP_ADDR;
 
 	const off_t RAM_VEL_X_OFFSET{0x57};
 	const off_t RAM_VEL_Y_OFFSET{0x9f};
@@ -65,14 +65,14 @@ private:
 	const off_t RAM_POS_SCREEN_OFFSET{0x71c};
 	const off_t RAM_VEL_SCREEN_OFFSET{0x775};
 
-	const off_t RAMPTR_ADDR_OFFSET{0x12f198}; // RAMptr 0x555555839198
-	const off_t XBUFFPTR_ADDR_OFFSET{0x1323c8}; // XBackBuffptr 0x55555583c3c8
+	const off_t RAMPTR_ADDR_OFFSET{0x108558}; // RAMptr
+	const off_t XBUFFPTR_ADDR_OFFSET{0x13e748}; // XBackBuffptr
 
 	off_t RAM_ADDR;
 	off_t XBUFF_ADDR;
-	const off_t PALETTE_ADDR{0x5555558c5a80}; //s_psdl
-	const off_t CONTROL_ADDR{0x55555583c747}; //sterowanie
-	const off_t LOADSTATE_ADDR{0x55555583c746}; //wczytaj
+	const off_t PALETTE_ADDR{0xbceee0}; //s_psdl
+	const off_t CONTROL_ADDR{0x10c1a7}; //sterowanie
+	const off_t LOADSTATE_ADDR{0x10c1a6}; //wczytaj
 };
 
 #endif /* SRC_ANALYZERS_MEMORYANALYZER_H_ */
