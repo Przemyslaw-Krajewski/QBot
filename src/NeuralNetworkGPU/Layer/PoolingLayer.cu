@@ -132,6 +132,8 @@ namespace NeuralNetworkGPU
 	 */
 	PoolingLayer::PoolingLayer(NeuronsPtr t_prevLayerReference)
 	{
+		prevLayerId = t_prevLayerReference.id;
+
 		size = TensorSize((t_prevLayerReference.tSize.x+1)/2,(t_prevLayerReference.tSize.y+1)/2,t_prevLayerReference.tSize.z);
 		de_input = t_prevLayerReference.inputPtr;
 
@@ -184,7 +186,7 @@ namespace NeuralNetworkGPU
 	{
 		dim3 threadsPerBlock(size.x, size.y);
 		dim3 numBlocks(size.z);
-		determineOutputFuncPoolMax<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
+		determineOutputFuncPoolAvg<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
 																	    d_output,
 																	    d_deltas);
 	}
@@ -194,7 +196,7 @@ namespace NeuralNetworkGPU
 //		int64 timeBefore = cv::getTickCount();
 		dim3 threadsPerBlock(size.x, size.y);
 		dim3 numBlocks(size.z);
-		learnFuncPoolMax<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
+		learnFuncPoolAvg<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
 															 d_output,
 															 d_deltas, de_prevDeltas);
 //		int64 afterBefore = cv::getTickCount();
@@ -206,7 +208,7 @@ namespace NeuralNetworkGPU
 //		int64 timeBefore = cv::getTickCount();
 		dim3 threadsPerBlock(size.x, size.y);
 		dim3 numBlocks(size.z);
-		learnFuncPoolMax<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
+		learnFuncPoolAvg<<< threadsPerBlock , numBlocks >>>(de_input, d_inputSize,
 															 d_output,
 															 d_deltas, de_prevDeltas);
 //		int64 afterBefore = cv::getTickCount();
@@ -227,13 +229,17 @@ namespace NeuralNetworkGPU
 	void PoolingLayer::saveToFile(std::ofstream & t_file)
 	{
 		t_file << (float) getLayerTypeId() << ' ';
+		t_file << (float) prevLayerId << ' '; 	   //Id of previous layer
 	}
 
 	/*
 	 *
 	 */
-	PoolingLayer* PoolingLayer::loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference)
+	PoolingLayer* PoolingLayer::loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences)
 	{
-		return new PoolingLayer(t_prevLayerReference);
+		float prevId;
+		t_file >> prevId;
+
+		return new PoolingLayer(t_prevLayerReferences[(int)prevId]);
 	}
 }

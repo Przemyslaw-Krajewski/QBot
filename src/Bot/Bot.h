@@ -23,6 +23,7 @@
 
 #include "../Analyzers/MemoryAnalyzer.h"
 #include "../Loggers/DataDrawer.h"
+#include "../Loggers/StateViewer.h"
 #include "../Loggers/LogFileHandler.h"
 #include "../ReinforcementLearning/QLearning.h"
 #include "../ReinforcementLearning/GeneralizedQL.h"
@@ -38,7 +39,6 @@ public:
 
 private:
 	int handleUserInput(char input);
-	std::pair<StateAnalyzer::AnalyzeResult, ControllerInput> extractSceneState(std::vector<int> sceneData, int xScreenSize=32, int yScreenSize=56);
 
 private:
 	StateAnalyzer stateAnalyzer;
@@ -50,7 +50,11 @@ private:
 	Controller prevController;
 	std::list<SARS> historyScenario;
 
+	bool viewHistory,viewMemory;
+
 	//Const parameters
+	const int numberOfActions = 3;
+
 	const int MAX_INPUT_VALUE = 1;
 	const int MIN_INPUT_VALUE= 0;
 };

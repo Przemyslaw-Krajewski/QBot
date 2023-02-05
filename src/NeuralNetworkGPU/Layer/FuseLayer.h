@@ -32,6 +32,7 @@ namespace NeuralNetworkGPU
 		static FuseLayer* loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences);
 
 		virtual void drawLayer() {std::cout << "FuseLayer::drawLayer() not implemented\n";};
+		virtual void printInfo() override;
 
 		static int getLayerTypeId() {return 2;}
 

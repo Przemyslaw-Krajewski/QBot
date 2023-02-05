@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <vector>
+#include <fstream>
 #include "../Neuron/Neuron.h"
 
 #include <opencv2/opencv.hpp>

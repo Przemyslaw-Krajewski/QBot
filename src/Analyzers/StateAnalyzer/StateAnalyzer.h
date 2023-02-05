@@ -19,7 +19,10 @@
 
 #include "../../Loggers/DataDrawer.h"
 
-class StateAnalyzer {
+enum class ScenarioAdditionalInfo {ok, killedByEnemy, killedByEnvironment, playerNotFound, timeOut, won};
+
+class StateAnalyzer
+{
 
 public:
 
@@ -30,7 +33,6 @@ public:
 		Point playerVelocity;
 		ScenarioAdditionalInfo scenarioStatus = ScenarioAdditionalInfo::ok;
 		State processedState;
-		StateInfo stateInfo;
 
 		bool isPlayerFound() {return scenarioStatus != ScenarioAdditionalInfo::playerNotFound;}
 		bool endScenario() {return scenarioStatus != ScenarioAdditionalInfo::ok;}
@@ -46,8 +48,7 @@ public:
 
 	ReduceStateMethod getReduceStateMethod() {return (imageAnalyzer->getReduceStateMethod());}
 
-	void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo)
-		{imageAnalyzer->correctScenarioHistory(t_history, t_additionalInfo);}
+	void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo);
 
 private:
 
@@ -61,16 +62,20 @@ private:
 	int timeLimit;
 
 	int screenPosition = 0;
+	int score = -1;
 
 public:
-	static constexpr double WIN_REWARD     		  = 0.85;
 	static constexpr double CHECKPOINT_REWARD     = 0.35;
-	static constexpr double ADVANCE_REWARD 		  = 0.07;
-	static constexpr double LITTLE_ADVANCE_REWARD = 0.05;
-	static constexpr double NOTHING_REWARD 		  = 0.04;
-	static constexpr double DIE_REWARD 			  = 0.00001;
+	static constexpr double GREAT_ADVANCE_REWARD  = 0.880;
+	static constexpr double ADVANCE_REWARD 		  = 0.875;
+	static constexpr double LITTLE_ADVANCE_REWARD = 0.75;
+	static constexpr double NOTHING_REWARD 		  = 0.625;
 
-	static constexpr int TIME_LIMIT = 150;
+	static constexpr double WIN_REWARD     		  = 0.90;
+	static constexpr double DIE_REWARD 			  = 0.00001;
+	static constexpr double TIMEOUT_REWARD 		  = 0.2;
+
+	static constexpr int TIME_LIMIT = 40;
 };
 
 #endif /* SRC_ANALYZERS_STATEANALYZER_H_ */

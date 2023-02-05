@@ -59,6 +59,7 @@ void Bot::execute()
 		double score = 0;
 		stateAnalyzer.resetTimeLimit();
 		ScenarioAdditionalInfo scenarioResult = ScenarioAdditionalInfo::ok;
+		viewMemory = viewHistory = false;
 
 		//Reload game
 		MemoryAnalyzer::getPtr()->setController(0);
@@ -73,6 +74,8 @@ void Bot::execute()
 
 		while(1)
 		{
+			int64 timeBefore = cv::getTickCount();
+
 			//Persist prev data
 			prevAnalyzeResult = analyzeResult;
 			prevController=controller;
@@ -86,29 +89,39 @@ void Bot::execute()
 											analyzeResult.processedState,
 											prevController.getAction(),
 											analyzeResult.reward));
+			historyScenario.begin()->score = score;
 
 			//Determine new controller input
 			controller = Controller(reinforcementLearning->chooseAction(analyzeResult.processedState));
 			MemoryAnalyzer::getPtr()->setController(controller.getCode());
 
+			int64 timeAfter = cv::getTickCount();
+			std::cout << (timeAfter - timeBefore) / cv::getTickFrequency() << "\n";
+
 			//End?
-			bool terminate = handleUserInput(cv::waitKey(40));
+			bool terminate = handleUserInput(cv::waitKey(60));
 			if(analyzeResult.endScenario() || terminate) break;
 		}
 
+		//End scenario
 		std::cout << "Achieved score: "<< score << "\n";
 		LogFileHandler::logValue("score.log",score);
-
-		//End scenario
 		MemoryAnalyzer::getPtr()->setController(0);
+
+		//Prepare history scenario
+		stateAnalyzer.correctScenarioHistory(historyScenario, analyzeResult.scenarioStatus);
+		reinforcementLearning->prepareScenario(historyScenario, analyzeResult.scenarioStatus==ScenarioAdditionalInfo::timeOut);
 
 		//Learn
 		char userInput = -1;
-		stateAnalyzer.correctScenarioHistory(historyScenario, analyzeResult.scenarioStatus);
 		if(userInput == -1 ) userInput = reinforcementLearning->learnFromScenario(historyScenario).userInput;
 		if(userInput == -1 ) userInput = reinforcementLearning->learnFromMemory().userInput;
 
 		reinforcementLearning->handleUserInput(userInput);
+
+		if(viewHistory) StateViewer::viewHistory(&historyScenario);
+		if(viewMemory) StateViewer::viewMemory(reinforcementLearning->getMemoryMap());
+
 	}
 }
 
@@ -125,6 +138,18 @@ int Bot::handleUserInput(char input)
 	else if(input =='t')
 	{
 		return 1;
+	}
+	else if(input == 'h')
+	{
+		std::cout << "History will be viewed\n";
+		viewHistory = true;
+		return 0;
+	}
+	else if(input == 'm')
+	{
+		std::cout << "Memory will be viewed\n";
+		viewMemory = true;
+		return 0;
 	}
 	return 0;
 }

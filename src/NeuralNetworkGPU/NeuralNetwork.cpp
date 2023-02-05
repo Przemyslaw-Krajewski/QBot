@@ -245,7 +245,7 @@ namespace NeuralNetworkGPU {
 			}
 			else if(layerId == SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>::getLayerTypeId())
 			{
-				layer = SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
+				layer = SigmoidLayer<NeuralNetworkGPU::ActivationFunction::Sigmoid>::loadFromFile(file,neuronPtrs);
 				addLayer(layer);
 			}
 			else if(layerId == FuseLayer::getLayerTypeId())
@@ -255,12 +255,17 @@ namespace NeuralNetworkGPU {
 			}
 			else if(layerId == ConvolutionalLayer::getLayerTypeId())
 			{
-				layer = ConvolutionalLayer::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
+				layer = ConvolutionalLayer::loadFromFile(file,neuronPtrs);
+				addLayer(layer);
+			}
+			else if(layerId == ConvSeparateWeightsLayer::getLayerTypeId())
+			{
+				layer = ConvSeparateWeightsLayer::loadFromFile(file,neuronPtrs);
 				addLayer(layer);
 			}
 			else if(layerId == PoolingLayer::getLayerTypeId())
 			{
-				layer = PoolingLayer::loadFromFile(file,neuronPtrs[neuronPtrs.size()-1]);
+				layer = PoolingLayer::loadFromFile(file,neuronPtrs);
 				addLayer(layer);
 			}
 			neuronPtrs.push_back(layer->getNeuronPtr());

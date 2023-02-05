@@ -9,38 +9,12 @@
 
 ReinforcementLearning::ReinforcementLearning()
 {
-
+	randomNumberGenerator =std::mt19937(randomDevice());
 }
 
 ReinforcementLearning::~ReinforcementLearning()
 {
 
-}
-
-/*
- *
- */
-int ReinforcementLearning::getIndexOfMaxValue(std::vector<double> t_array)
-{
-	int maxIndex = 0;
-	for(int i=1; i<t_array.size(); i++)
-	{
-		if(t_array[i] > t_array[maxIndex]) maxIndex = i;
-	}
-	return maxIndex;
-}
-
-/*
- *
- */
-double ReinforcementLearning::getMaxValue(std::vector<double> t_array)
-{
-	int maxIndex = 0;
-	for(int i=1; i<t_array.size(); i++)
-	{
-		if(t_array[i] > t_array[maxIndex]) maxIndex = i;
-	}
-	return t_array[maxIndex];
 }
 
 /*
@@ -56,8 +30,8 @@ int ReinforcementLearning::getWeightedRandom(std::vector<double> t_array)
 	}
 
 	//Choose random
-	if(sum == 0) return rand()%t_array.size();
-	double randomValue = ((double)(rand()%((int)100000000)))/100000000;
+	if(sum == 0) return std::uniform_int_distribution<>(0,t_array.size())(randomNumberGenerator);
+	double randomValue = std::uniform_real_distribution<>(0.0, 1.0)(randomNumberGenerator);
 	for(int i=0; i<t_array.size(); i++)
 	{
 		randomValue -= t_array[i]/sum;

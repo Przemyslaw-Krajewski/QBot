@@ -49,7 +49,7 @@ namespace NeuralNetworkGPU
 		//activation function
 		t_output[index] =
 //				1 / (1 + exp(-(*d_b)*sum) );	//sigmoid function
-				sum > 0 ? sum : sum*0.005; 		//RELU function
+				sum > 0 ? sum : sum*0.05; 		//RELU function
 	}
 
 	/*
@@ -69,7 +69,7 @@ namespace NeuralNetworkGPU
 //		float e = exp(-(*d_b)*t_sums[index]);
 //		float m = 1 + e;
 //		float derivative = ((*d_b)*e/(m*m));
-		float derivative = t_sums[index] > 0 ? 1 : 0.005;
+		float derivative = t_sums[index] > 0 ? 1 : 0.05;
 
 		float p = (*d_n)* delta * derivative;
 		//calculate new weights
@@ -139,7 +139,7 @@ namespace NeuralNetworkGPU
 //		float m = 1 + e;
 //		float derivative = ((*t_b)*e/(m*m));
 		float sum = t_sums[index];
-		float derivative = sum > 0 && sum < 65536 ? 1 : 0.005;
+		float derivative = sum > 0 && sum < 65536 ? 1 : 0.05;
 		float grad = delta*derivative; // gradient without x factor
 		float grad2 = grad*grad;
 
@@ -249,6 +249,8 @@ namespace NeuralNetworkGPU
 	{
 		float b1 = 0.9, b2 = 0.999;
 
+		prevLayerId = t_prevLayerReference.id;
+
 		size = TensorSize(t_prevLayerReference.tSize.x-t_filterSize.x+1,
 						  t_prevLayerReference.tSize.y-t_filterSize.y+1,
 						  convLayers);
@@ -301,7 +303,6 @@ namespace NeuralNetworkGPU
 		cudaMemcpy(d_v, zeros, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
 
 		free(zeros);
-
 	}
 
 	/*
@@ -355,6 +356,24 @@ namespace NeuralNetworkGPU
 	{
 		long weightsSize = filterSize.m*inputSize.z*size.z;
 		cudaMemcpy(d_weights, t_weights, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
+	void ConvolutionalLayer::setMomentum1(float* t_momentum)
+	{
+		long weightsSize = filterSize.m*inputSize.z*size.z;
+		cudaMemcpy(d_m, t_momentum, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
+	void ConvolutionalLayer::setMomentum2(float* t_momentum)
+	{
+		long weightsSize = filterSize.m*inputSize.z*size.z;
+		cudaMemcpy(d_v, t_momentum, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
 	}
 
 	/*
@@ -430,6 +449,7 @@ namespace NeuralNetworkGPU
 	void ConvolutionalLayer::saveToFile(std::ofstream &t_file)
 	{
 		t_file << (float) getLayerTypeId() << ' '; //Signature of SigmoidLayer
+		t_file << (float) prevLayerId << ' '; 	   //Id of previous layer
 
 		t_file << (float) inputSize.x << ' ';
 		t_file << (float) inputSize.y << ' ';
@@ -443,17 +463,32 @@ namespace NeuralNetworkGPU
 		float learnRate;
 		cudaMemcpy(&learnRate, d_n, sizeof(float), cudaMemcpyDeviceToHost);
 		t_file << learnRate << ' ';
+		float b;
+		cudaMemcpy(&b, d_b, sizeof(float), cudaMemcpyDeviceToHost);
+		t_file << b << ' ';
 
 		//Weights
 		long weightsSize = filterSize.m*inputSize.z*size.z;
-
 		float *weights = (float*) malloc(sizeof(float)*weightsSize);
-		cudaMemcpy(weights, d_weights, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
 
+		cudaMemcpy(weights, d_weights, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
 		for(int i=0; i< weightsSize; i++)
 		{
 			t_file << weights[i] << ' ';
 		}
+
+		cudaMemcpy(weights, d_m, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
+		for(int i=0; i< weightsSize; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+
+		cudaMemcpy(weights, d_v, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
+		for(int i=0; i< weightsSize; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+
 		free(weights);
 	}
 
@@ -461,10 +496,13 @@ namespace NeuralNetworkGPU
 	 *
 	 */
 
-	ConvolutionalLayer* ConvolutionalLayer::loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference)
+	ConvolutionalLayer* ConvolutionalLayer::loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences)
 	{
 		float filterSize[2], convSize, inputSize[3];
-		float learnRate;
+		float learnRate,b;
+		float prevId;
+
+		t_file >> prevId;
 
 		t_file >> inputSize[0];
 		t_file >> inputSize[1];
@@ -476,8 +514,13 @@ namespace NeuralNetworkGPU
 		t_file >> filterSize[1];
 
 		t_file >> learnRate;
+		t_file >> b;
 
-		ConvolutionalLayer* layer = new ConvolutionalLayer(0.01f,learnRate,convSize,MatrixSize(filterSize[0],filterSize[1]),t_prevLayerReference);
+		ConvolutionalLayer* layer = new ConvolutionalLayer(b,
+														   learnRate,
+														   convSize,
+														   MatrixSize(filterSize[0],filterSize[1]),
+														   t_prevLayerReferences[(int)prevId]);
 
 		long weightsSize =filterSize[0]*filterSize[1]*inputSize[2]*convSize;
 		float *weights = (float*) malloc(sizeof(float)*weightsSize);
@@ -488,6 +531,21 @@ namespace NeuralNetworkGPU
 			weights[i] = buff;
 		}
 		layer->setWeights(weights);
+
+		for(int i=0; i<weightsSize; i++)
+		{
+			t_file >> buff;
+			weights[i] = buff;
+		}
+		layer->setMomentum1(weights);
+
+		for(int i=0; i<weightsSize; i++)
+		{
+			t_file >> buff;
+			weights[i] = buff;
+		}
+		layer->setMomentum2(weights);
+
 		free(weights);
 
 		return layer;
@@ -529,10 +587,24 @@ namespace NeuralNetworkGPU
 					}
 				}
 			}
-			cv::resize(image, image, cv::Size(), 4, 4,CV_INTER_CUBIC);
+			cv::resize(image, image, cv::Size(), 4, 4,cv::INTER_CUBIC);
 			//Print
 			imshow(std::to_string(z), image);
 			cv::waitKey(3);
 		}
+	}
+
+	/*
+	 *
+	 */
+	void ConvolutionalLayer::printInfo()
+	{
+		TensorSize prevTSize;
+		cudaMemcpy(&prevTSize, d_inputSize, sizeof(TensorSize), cudaMemcpyDeviceToHost);
+		int weightsSize = filterSize.m*prevTSize.z*size.z;
+
+		std::cout << "	(" << layerId << ") Conv    <-- " << prevLayerId << " : ";
+		std::cout << prevTSize.x << "x" << prevTSize.y << "x" << prevTSize.z << " -> " << size.x << "x" << size.y << "x" << size.z;
+		std::cout << "   w:" << weightsSize << "\n";
 	}
 }

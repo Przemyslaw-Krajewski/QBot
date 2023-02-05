@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 PROJECT(QBot LANGUAGES CXX CUDA)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package( OpenCV REQUIRED )
 find_package( X11 REQUIRED )
@@ -17,18 +17,19 @@ endif()
 add_executable(QBot
 		    src/main.cpp
 			src/Bot/Bot.cpp
+			src/Bot/State.cpp
 			src/ReinforcementLearning/ReinforcementLearning.cpp
 			src/ReinforcementLearning/QLearning.cpp
 			src/ReinforcementLearning/GeneralizedQL.cpp
 			src/ReinforcementLearning/ActorCriticNN.cpp
 			src/Analyzers/StateAnalyzer/StateAnalyzer.cpp
-			src/Analyzers/DesktopHandler.cpp
 			src/Analyzers/ImageAnalyzer/ImageAnalyzer.cpp
 			src/Analyzers/ImageAnalyzer/RawImageAnalyzer.cpp
 			src/Analyzers/ImageAnalyzer/MetaDataAnalyzer.cpp
 			src/Analyzers/MemoryAnalyzer.cpp
 			src/HashMap/HashMap.cpp
 			src/Loggers/DataDrawer.cpp
+			src/Loggers/StateViewer.cpp
 			src/NeuralNetwork/NeuralNetwork.cpp
 			src/NeuralNetwork/Neuron/AdaptiveNeuron.cpp
 			src/NeuralNetwork/Neuron/InputNeuron.cpp
@@ -47,7 +48,7 @@ add_executable(QBot
 			src/NeuralNetworkGPU/Layer/FuseLayer.cu)
 			
 include_directories(${OpenCV_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
-target_link_libraries( QBot ${OpenCV_LIBRARIES} ${X11_LIBRARIES} xdo pthread)
+target_link_libraries( QBot ${OpenCV_LIBRARIES} ${X11_LIBRARIES} pthread)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/graphics DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

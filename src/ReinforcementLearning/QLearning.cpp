@@ -31,7 +31,7 @@ QLearning::~QLearning()
 int QLearning::chooseAction(State& t_state)
 {
 	std::vector<double> values = qValues.getValues(t_state);
-	int action = getIndexOfMaxValue(values);
+	int action = std::distance( values.begin(), std::max_element(values.begin(),values.end()) );
 
 	return action;
 }
@@ -42,10 +42,10 @@ int QLearning::chooseAction(State& t_state)
 double QLearning::learnSARS(SARS &t_sars)
 {
 	std::vector<double> values = qValues.getValues(t_sars.state);
-	double maxValue = getMaxValue(values);
+	double maxValue = *(std::max_element(values.begin(),values.end()));
 	double prevValue = qValues.getValue(t_sars.oldState,t_sars.action);
 
-	double newValue = prevValue + ALPHA_PARAMETER*(t_sars.reward+GAMMA_PARAMETER*maxValue - prevValue);
+	double newValue = prevValue + ALPHA_PARAMETER*(t_sars.reward+GAMMA_PARAMETER*(maxValue) - prevValue);
 	qValues.setValue(t_sars.oldState, t_sars.action, newValue);
 
 	return newValue- prevValue;

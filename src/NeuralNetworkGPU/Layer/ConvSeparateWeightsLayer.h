@@ -14,7 +14,7 @@ namespace NeuralNetworkGPU
 	class ConvSeparateWeightsLayer : public NNLayer
 	{
 	public:
-		ConvSeparateWeightsLayer(float t_parameterB, float t_learnRate, int convLayers, MatrixSize t_filterSize, NeuronsPtr t_prevLayerReference);
+		ConvSeparateWeightsLayer(float t_parameterB, float t_learnRate, int convLayers, MatrixSize t_filterSize, NeuronsPtr t_prevLayerReference, int stride=1);
 		virtual ~ConvSeparateWeightsLayer();
 
 	public:
@@ -29,15 +29,20 @@ namespace NeuralNetworkGPU
 		//configuration
 		NeuronsPtr getNeuronPtr() override;
 		void initWeights();
+		void setWeights(float* t_weights);
+		void setMomentum1(float* t_momentum);
+		void setMomentum2(float* t_momentum);
+
 
 		//visualization
 		virtual void drawLayer() override;
+		virtual void printInfo() override;
 
 		//save load
-//		void saveToFile(std::ofstream &t_file) override;
-//		void loadFromFile(std::ifstream &t_file) override;
+		void saveToFile(std::ofstream &t_file) override;
+		static ConvSeparateWeightsLayer* loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences);
 
-		virtual int getLayerTypeId() {return 5;}
+		static int getLayerTypeId() {return 5;}
 
 	protected:
 		float *de_input;
@@ -57,6 +62,8 @@ namespace NeuralNetworkGPU
 
 		float *d_m, *d_v;  	// 1st moment vector, 2nd moment vector
 		float *d_B1, *d_B2; 	// Decay rates for moment vectors
+
+		int *d_stride;
 	};
 }
 

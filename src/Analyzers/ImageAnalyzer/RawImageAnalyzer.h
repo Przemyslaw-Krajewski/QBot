@@ -18,7 +18,7 @@ public:
 	virtual ~RawImageAnalyzer();
 
 	void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result);
-	virtual std::vector<int> createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity) override;
+	virtual State createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity) override;
 protected:
 
 	void calculateSituationSMB(cv::Mat *image, ImageAnalyzer::AnalyzeResult *analyzeResult);

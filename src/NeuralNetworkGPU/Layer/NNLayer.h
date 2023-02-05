@@ -5,13 +5,17 @@
 #ifndef NEURALNETWORKGPU_NEURON_LAYER_CU_
 #define NEURALNETWORKGPU_NEURON_LAYER_CU_
 
+#define GPU_NN_STRUCTURE_LOG
+
 #include <cassert>
 #include <vector>
 #include <functional>
+#include <fstream>
+#include <random>
 
 #include <opencv2/opencv.hpp>
 
-#define INPUT_BUFFER_SIZE 4096
+#define INPUT_BUFFER_SIZE 6480
 
 namespace NeuralNetworkGPU
 {
@@ -88,7 +92,7 @@ namespace NeuralNetworkGPU
 	{
 	public:
 
-		NNLayer() {};
+		NNLayer() : randomNumberGenerator(std::mt19937(randomDevice())) {};
 		virtual ~NNLayer() = default;
 
 		//input
@@ -110,6 +114,7 @@ namespace NeuralNetworkGPU
 
 		//visualization
 		virtual void drawLayer() {std::cout << "NNLayer::drawLayer() not implemented\n";}
+		virtual void printInfo() {std::cout << "	(" << layerId << ") NNLayer <-- " << prevLayerId << "\n";}
 
 		//save load
 		virtual void saveToFile(std::ofstream &t_file) {assert("saveToFile() Not implemented" && 0);}
@@ -119,10 +124,14 @@ namespace NeuralNetworkGPU
 		void setLayerId(int id) {layerId = id;}
 
 	public:
-		static double getRandomWeight() { return 0.2*((double)((rand()%100000))/100000-0.5); }
+		double getRandomWeight() { return std::uniform_real_distribution<>(-0.1, 0.1)(randomNumberGenerator);}
 
+	protected:
 		int layerId{-1};
-
+		int prevLayerId{-1};
+	private:
+	    std::random_device randomDevice;
+	    std::mt19937 randomNumberGenerator;
 	};
 }
 

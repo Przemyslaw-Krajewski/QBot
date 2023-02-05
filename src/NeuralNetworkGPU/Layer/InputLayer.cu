@@ -169,4 +169,13 @@ namespace NeuralNetworkGPU
 		}
 
 	}
+
+	/*
+	 *
+	 */
+	void InputLayer::printInfo()
+	{
+		std::cout << "	(" << layerId << ") Input       ";
+		std::cout << size << "	" << tSize.x << "x" << tSize.y << "x" << tSize.z << "\n";
+	}
 }

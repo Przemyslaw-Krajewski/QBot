@@ -15,14 +15,16 @@ namespace NeuralNetworkGPU
 			float *t_sums,
 			float *t_weights, MatrixSize *t_filterSize,
 			float *t_deltas,
-			float *d_b)
+			float *d_b,
+			int   *d_stride)
 	{
 		long index = blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y;
 
 		//sums x[i]*w[i]
 		int yFrame = t_inputSize->x*t_inputSize->y;
 		int yfFrame = t_filterSize->y*t_filterSize->x;
-		int yOffset = blockIdx.y*t_inputSize->x;
+		int xOffset = *d_stride*blockIdx.x;
+		int yOffset = *d_stride*blockIdx.y*t_inputSize->x;
 		int zfOffset = yfFrame*t_inputSize->z*index;
 		float sum = 0;
 
@@ -32,7 +34,7 @@ namespace NeuralNetworkGPU
 			{
 				for(int z=0,zf=zfOffset,zi=0; z<t_inputSize->z; z++)
 				{
-					sum += t_input[blockIdx.x+x + yi + zi] * t_weights[x + yf + zf];
+					sum += t_input[xOffset+x + yi + zi] * t_weights[x + yf + zf];
 					zf+=yfFrame;
 					zi+=yFrame;
 				}
@@ -129,7 +131,8 @@ namespace NeuralNetworkGPU
 			float *t_deltas, float *t_prevDeltas,
 			float *t_m,float *t_v,
 			float *t_n,float *t_b,
-			float *t_B1,float *t_B2)
+			float *t_B1,float *t_B2,
+			int   *d_stride)
 	{
 		long index = blockIdx.x + blockIdx.y*gridDim.x + threadIdx.x*gridDim.x*gridDim.y;
 		float delta = t_deltas[index];
@@ -146,7 +149,8 @@ namespace NeuralNetworkGPU
 		//calculate new weights
 		int yFrame = t_inputSize->x*t_inputSize->y;
 		int yfFrame = t_filterSize->y*t_filterSize->x;
-		int yOffset = blockIdx.y*t_inputSize->x;
+		int xOffset = *d_stride*blockIdx.x;
+		int yOffset = *d_stride*blockIdx.y*t_inputSize->x;
 		int zfOffset = yfFrame*t_inputSize->z*index;
 		float mTarget,vTarget;
 		float mNew, vNew;
@@ -156,7 +160,7 @@ namespace NeuralNetworkGPU
 			{
 				for(int z=0,zf=zfOffset,zi=0; z<t_inputSize->z; z++)
 				{
-					float input = t_input[blockIdx.x+x + yi + zi];
+					float input = t_input[xOffset+x + yi + zi];
 					//calculate new m & v
 					mTarget = grad*input;
 					vTarget = grad2*input*input;
@@ -245,12 +249,14 @@ namespace NeuralNetworkGPU
 	 *
 	 */
 	ConvSeparateWeightsLayer::ConvSeparateWeightsLayer(float t_parameterB, float t_learnRate, int convLayers,
-			MatrixSize t_filterSize, NeuronsPtr t_prevLayerReference)
+			MatrixSize t_filterSize, NeuronsPtr t_prevLayerReference, int t_stride)
 	{
 		float b1 = 0.9, b2 = 0.999;
 
-		size = TensorSize(t_prevLayerReference.tSize.x-t_filterSize.x+1,
-						  t_prevLayerReference.tSize.y-t_filterSize.y+1,
+		prevLayerId = t_prevLayerReference.id;
+
+		size = TensorSize((t_prevLayerReference.tSize.x-t_filterSize.x+1)/t_stride,
+						  (t_prevLayerReference.tSize.y-t_filterSize.y+1)/t_stride,
 						  convLayers);
 		de_input = t_prevLayerReference.inputPtr;
 
@@ -265,6 +271,10 @@ namespace NeuralNetworkGPU
 		cudaMemcpy(d_B1, &(b1), sizeof(float), cudaMemcpyHostToDevice);
 		cudaMalloc( (void **) &d_B2, sizeof(float));
 		cudaMemcpy(d_B2, &(b2), sizeof(float), cudaMemcpyHostToDevice);
+		//stride
+		int stride = t_stride;
+		cudaMalloc( (void **) &d_stride, sizeof(int));
+		cudaMemcpy(d_stride, &(stride), sizeof(int), cudaMemcpyHostToDevice);
 
 		//input size
 		cudaMalloc( (void **) &d_inputSize, sizeof(TensorSize));
@@ -280,7 +290,7 @@ namespace NeuralNetworkGPU
 		cudaMalloc( (void **) &d_filterSize, sizeof(MatrixSize));
 		cudaMemcpy(d_filterSize, &t_filterSize, sizeof(MatrixSize), cudaMemcpyHostToDevice);
 		//weights
-		int weightsSize = t_filterSize.m*t_prevLayerReference.tSize.z*size.z*size.y*size.x;
+		long weightsSize = t_filterSize.m*t_prevLayerReference.tSize.z*size.z*size.y*size.x;
 		cudaMalloc( (void **) &d_weights, sizeof(float)*weightsSize);
 		initWeights();
 
@@ -301,7 +311,6 @@ namespace NeuralNetworkGPU
 		cudaMemcpy(d_v, zeros, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
 
 		free(zeros);
-
 	}
 
 	/*
@@ -351,6 +360,33 @@ namespace NeuralNetworkGPU
 	/*
 	 *
 	 */
+	void ConvSeparateWeightsLayer::setWeights(float* t_weights)
+	{
+		long weightsSize = filterSize.m*inputSize.z*size.z*size.y*size.x;
+		cudaMemcpy(d_weights, t_weights, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
+	void ConvSeparateWeightsLayer::setMomentum1(float* t_momentum)
+	{
+		long weightsSize = filterSize.m*inputSize.z*size.z*size.y*size.x;
+		cudaMemcpy(d_m, t_momentum, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
+	void ConvSeparateWeightsLayer::setMomentum2(float* t_momentum)
+	{
+		long weightsSize = filterSize.m*inputSize.z*size.z*size.y*size.x;
+		cudaMemcpy(d_v, t_momentum, sizeof(float)*weightsSize, cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
 	std::vector<double> ConvSeparateWeightsLayer::getOutput()
 	{
 		cudaMemcpy(output, d_output, sizeof(float)*size.m, cudaMemcpyDeviceToHost);
@@ -375,7 +411,8 @@ namespace NeuralNetworkGPU
 																  d_sums,
 																  d_weights, d_filterSize,
 																  d_deltas,
-																  d_b);
+																  d_b,
+																  d_stride);
 	}
 
 	void ConvSeparateWeightsLayer::learnSGD()
@@ -404,7 +441,8 @@ namespace NeuralNetworkGPU
 														d_deltas, de_prevDeltas,
 														d_m, d_v,
 														d_n, d_b,
-														d_B1, d_B2);
+														d_B1, d_B2,
+														d_stride);
 	}
 
 	/*
@@ -413,6 +451,123 @@ namespace NeuralNetworkGPU
 	NeuronsPtr ConvSeparateWeightsLayer::getNeuronPtr()
 	{
 		return NeuronsPtr(layerId, d_output,size, d_deltas);
+	}
+
+	/*
+	 *
+	 */
+	void ConvSeparateWeightsLayer::saveToFile(std::ofstream &t_file)
+	{
+		t_file << (float) getLayerTypeId() << ' '; //Signature of SigmoidLayer
+		t_file << (float) prevLayerId << ' '; 	   //Id of previous layer
+
+		t_file << (float) inputSize.x << ' ';
+		t_file << (float) inputSize.y << ' ';
+		t_file << (float) inputSize.z << ' ';
+
+		t_file << (float) size.z << ' ';
+
+		t_file << (float) filterSize.x << ' ';
+		t_file << (float) filterSize.y << ' ';
+
+		float learnRate;
+		cudaMemcpy(&learnRate, d_n, sizeof(float), cudaMemcpyDeviceToHost);
+		t_file << learnRate << ' ';
+		float b;
+		cudaMemcpy(&b, d_b, sizeof(float), cudaMemcpyDeviceToHost);
+		t_file << b << ' ';
+		int stride;
+		cudaMemcpy(&stride, d_stride, sizeof(int), cudaMemcpyDeviceToHost);
+		t_file << (float) stride << ' ';
+
+		//Weights
+		long weightsSize = filterSize.m*inputSize.z*size.z*size.y*size.x;
+		float *weights = (float*) malloc(sizeof(float)*weightsSize);
+
+		cudaMemcpy(weights, d_weights, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
+		for(int i=0; i< weightsSize; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+
+		cudaMemcpy(weights, d_m, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
+		for(int i=0; i< weightsSize; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+
+		cudaMemcpy(weights, d_v, sizeof(float)*weightsSize, cudaMemcpyDeviceToHost);
+		for(int i=0; i< weightsSize; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+
+		free(weights);
+	}
+
+	/*
+	 *
+	 */
+
+	ConvSeparateWeightsLayer* ConvSeparateWeightsLayer::loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences)
+	{
+		float filterSize[2], convSize, inputSize[3];
+		float learnRate, b, stridef;
+		float prevId;
+		int stride;
+
+		t_file >> prevId;
+
+		t_file >> inputSize[0];
+		t_file >> inputSize[1];
+		t_file >> inputSize[2];
+
+		t_file >> convSize;
+
+		t_file >> filterSize[0];
+		t_file >> filterSize[1];
+
+		t_file >> learnRate;
+		t_file >> b;
+		t_file >> stridef;
+		stride = stridef;
+
+		ConvSeparateWeightsLayer* layer = new ConvSeparateWeightsLayer(b,
+														   	   	   	   learnRate,
+																	   convSize,
+																	   MatrixSize(filterSize[0],filterSize[1]),
+																	   t_prevLayerReferences[(int)prevId],
+																	   stride);
+
+		long weightsSize = filterSize[0]*filterSize[1]*inputSize[2]*convSize
+								*((int)((inputSize[0]-filterSize[0]+1)/stride))	//size.x
+								*((int)((inputSize[1]-filterSize[1]+1)/stride));	//size.y
+		float *weights = (float*) malloc(sizeof(float)*weightsSize);
+		float buff;
+		for(int i=0; i<weightsSize; i++)
+		{
+			t_file >> buff;
+			weights[i] = buff;
+		}
+		layer->setWeights(weights);
+
+		for(int i=0; i<weightsSize; i++)
+		{
+			t_file >> buff;
+			weights[i] = buff;
+		}
+		layer->setMomentum1(weights);
+
+		for(int i=0; i<weightsSize; i++)
+		{
+			t_file >> buff;
+			weights[i] = buff;
+		}
+		layer->setMomentum2(weights);
+
+		free(weights);
+
+		return layer;
 	}
 
 	/*
@@ -435,10 +590,24 @@ namespace NeuralNetworkGPU
 					ptrDst[2] = src;
 				}
 			}
-			cv::resize(image, image, cv::Size(), 8, 8,CV_INTER_NN);
+			cv::resize(image, image, cv::Size(), 8, 8,cv::INTER_CUBIC);
 			//Print
 			imshow(std::to_string(z), image);
 			cv::waitKey(3);
 		}
+	}
+
+	/*
+	 *
+	 */
+	void ConvSeparateWeightsLayer::printInfo()
+	{
+		TensorSize prevTSize;
+		cudaMemcpy(&prevTSize, d_inputSize, sizeof(TensorSize), cudaMemcpyDeviceToHost);
+		int weightsSize = filterSize.m*prevTSize.z*size.z*size.y*size.x;
+
+		std::cout << "	(" << layerId << ") ConvSep <-- " << prevLayerId << " : ";
+		std::cout << prevTSize.x << "x" << prevTSize.y << "x" << prevTSize.z << " -> " << size.x << "x" << size.y << "x" << size.z;
+		std::cout << "   w:" << weightsSize << "\n";
 	}
 }

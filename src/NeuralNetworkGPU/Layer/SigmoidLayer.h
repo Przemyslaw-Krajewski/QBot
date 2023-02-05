@@ -30,12 +30,15 @@ namespace NeuralNetworkGPU
 		NeuronsPtr getNeuronPtr() override;
 		void initWeights();
 		void setWeights(float* t_weights);
+		void setMomentum1(float* t_momentum);
+		void setMomentum2(float* t_momentum);
 
 		//save load
 		void saveToFile(std::ofstream &t_file) override;
-		static SigmoidLayer<F>* loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference);
+		static SigmoidLayer<F>* loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences);
 
 		virtual void drawLayer();
+		virtual void printInfo() override;
 
 		static int getLayerTypeId() {return 1;}
 

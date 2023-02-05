@@ -40,6 +40,7 @@ namespace NeuralNetworkGPU
 		static InputLayer* loadFromFile(std::ifstream &t_file);
 
 		virtual void drawLayer() override {std::cout << "InputLayer::Drawing not implemented\n";};
+		virtual void printInfo() override;
 
 		static int getLayerTypeId() {return 0;}
 

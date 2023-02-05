@@ -30,7 +30,7 @@ HashMap::~HashMap()
 double HashMap::getValue(State t_state, int t_action)
 {
 	double result;
-	if(cache[t_action].count(t_state) > 0) result = cache[t_action].find(t_state)->second;
+	if(cache[t_action].count(t_state.getData()) > 0) result = cache[t_action].find(t_state.getData())->second;
 	else result = 0.9;
 
 	return result;
@@ -53,7 +53,7 @@ std::vector<double> HashMap::getValues(State t_state)
 double HashMap::getChange(State t_state)
 {
 	double result;
-	if(cache[changeIndex].count(t_state) > 0) result = cache[changeIndex].find(t_state)->second;
+	if(cache[changeIndex].count(t_state.getData()) > 0) result = cache[changeIndex].find(t_state.getData())->second;
 	else result = MAX_CHANGE;
 
 	return result;
@@ -64,6 +64,6 @@ double HashMap::getChange(State t_state)
  */
 void HashMap::setValue(State t_state, int t_action, double t_value)
 {
-	(cache[changeIndex])[t_state] = t_value - (cache[t_action])[t_state];
-	(cache[t_action])[t_state] = t_value;
+	(cache[changeIndex])[t_state.getData()] = t_value - (cache[t_action])[t_state.getData()];
+	(cache[t_action])[t_state.getData()] = t_value;
 }

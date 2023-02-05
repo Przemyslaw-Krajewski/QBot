@@ -31,10 +31,10 @@ public:
 			code = RIGHT;
 			break;
 		case 1:
-			code = RIGHT+A;
+			code = A+RIGHT;
 			break;
 		case 2:
-			code = LEFT;
+			code = DOWN;
 			break;
 		default:
 			code = NOTHING;

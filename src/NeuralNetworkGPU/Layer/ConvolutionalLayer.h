@@ -30,13 +30,16 @@ namespace NeuralNetworkGPU
 		NeuronsPtr getNeuronPtr() override;
 		void initWeights();
 		void setWeights(float* t_weights);
+		void setMomentum1(float* t_momentum);
+		void setMomentum2(float* t_momentum);
 
 		//visualization
-		virtual void drawLayer();
+		virtual void drawLayer() override;
+		virtual void printInfo() override;
 
 		//save load
 		void saveToFile(std::ofstream &t_file) override;
-		static ConvolutionalLayer* loadFromFile(std::ifstream &t_file, NeuronsPtr t_prevLayerReference);
+		static ConvolutionalLayer* loadFromFile(std::ifstream &t_file, std::vector<NeuronsPtr> &t_prevLayerReferences);
 
 		static int getLayerTypeId() {return 3;}
 

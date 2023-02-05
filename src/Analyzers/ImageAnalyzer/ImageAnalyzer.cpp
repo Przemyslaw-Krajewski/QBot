@@ -27,7 +27,7 @@ ImageAnalyzer::~ImageAnalyzer()
 /*
  *
  */
-void ImageAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo)
+void ImageAnalyzer::correctScenarioHistory(std::list<SARS> &t_history, bool t_killedByEnemy)
 {
 
 }

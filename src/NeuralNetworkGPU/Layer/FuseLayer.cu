@@ -93,7 +93,6 @@ namespace NeuralNetworkGPU
 				assert(numberOfBlocks < 20 && "Could not match thread/block size");
 			}
 		}
-
 	}
 
 	/*
@@ -185,5 +184,13 @@ namespace NeuralNetworkGPU
 		t_file >> idFusedLayer2;
 
 		return new FuseLayer(t_prevLayerReferences[idFusedLayer1], t_prevLayerReferences[idFusedLayer2]);
+	}
+
+	/*
+	 *
+	 */
+	void FuseLayer::printInfo()
+	{
+		std::cout << "	(" << layerId << ") Fuse    <-- " << idFusedLayer1 << "," << idFusedLayer2 << "\n";
 	}
 }

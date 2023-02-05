@@ -143,6 +143,35 @@ MemoryAnalyzer::AnalyzeResult MemoryAnalyzer::fetchData()
 	result.screenPosition = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_SCREEN_OFFSET);
 	result.screenVelocity = (unsigned int) getMemValue(RAM_ADDR+RAM_VEL_SCREEN_OFFSET);
 
+
+	result.score = (unsigned int) getMemValue(RAM_ADDR+RAM_SCORE_OFFSET);
+
+//	std::cout << result.playerVelocityX << "  " << result.playerVelocityY << "\n";
+
+	return result;
+}
+
+/*
+ *
+ */
+MemoryAnalyzer::AnalyzeResult MemoryAnalyzer::fetchDataBT()
+{
+	AnalyzeResult result;
+
+	result.playerVelocityX = (unsigned int) 0;
+	result.playerVelocityY = (unsigned int) 0;
+	if(result.playerVelocityX > 128) result.playerVelocityX = result.playerVelocityX-255;
+	if(result.playerVelocityY > 128) result.playerVelocityY = result.playerVelocityY-255;
+
+	result.playerPositionX = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_X_BT_OFFSET);
+	result.playerPositionY = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_Y_BT_OFFSET);
+
+	result.screenPosition = (unsigned int) 0;
+	result.screenVelocity = (unsigned int) 0;
+
+	result.obstaclePositionX = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_X_OBST_BT_OFFSET);
+	result.obstaclePositionZ = (unsigned int) getMemValue(RAM_ADDR+RAM_POS_Z_OBST_BT_OFFSET);
+
 //	std::cout << result.playerVelocityX << "  " << result.playerVelocityY << "\n";
 
 	return result;

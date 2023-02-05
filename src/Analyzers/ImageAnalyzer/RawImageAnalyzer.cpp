@@ -14,46 +14,50 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 {
 	reducedStateMethod = [](State & t_state) -> State
 		{
-			int reduceLevel = 4;
 			int xSize = 64;
 			int ySize = 40;
 			int zSize = 3;
+			int imageOffset = 12;
 
-			std::vector<int> median = std::vector<int>(xSize*ySize*zSize,0);
-			std::vector<int> edges = std::vector<int>(xSize*ySize,0);
-			std::vector<int> erosion = std::vector<int>(xSize*ySize,0);
+			State median = State(0,xSize,ySize,zSize);
+			State edges = State(0,xSize,ySize,1);
+			State dilatation = State(0,xSize,ySize,1);
 
-//			DataDrawer::drawState(t_state,StateInfo(64,40,3),"original");
+#ifdef PRINT_REDUCED_IMAGE
+			DataDrawer::drawState(t_state,"original");
+#endif
 			//median filter
 			for(int x=1; x<xSize-1; x++)
 			{
 				for(int y=1; y<ySize-1; y++)
 				{
-//					for(int z=0; z<zSize; z++)
-//					{
-						int value = 0;
-						std::vector<cv::Scalar> v;
-						for(int i=-1;i<=1;i++)
+					int value = 0;
+					cv::Scalar color;
+					std::vector<cv::Scalar> v;
+					for(int i=-1;i<=1;i++)
+					{
+						for(int j=-1;j<=1;j++)
 						{
-							for(int j=-1;j<=1;j++)
+							int val = t_state[imageOffset + x+i + (y+j) *xSize] +
+									  t_state[imageOffset + x+i + (y+j) *xSize + ySize*xSize] +
+									  t_state[imageOffset + x+i + (y+j) *xSize + 2*ySize*xSize];
+							if(val > value)
 							{
-								cv::Scalar c = cv::Scalar(t_state[ x+i + (y+j) *xSize],
-														  t_state[ x+i + (y+j) *xSize + ySize*xSize],
-														  t_state[ x+i + (y+j) *xSize + 2*ySize*xSize]);
-								if(c.val[0]+c.val[1]+c.val[2] != 0) v.push_back(c);
+								color = cv::Scalar(t_state[imageOffset + x+i + (y+j) *xSize],
+										  	  	   t_state[imageOffset + x+i + (y+j) *xSize + ySize*xSize],
+												   t_state[imageOffset + x+i + (y+j) *xSize + 2*ySize*xSize]);
+								value = val;
 							}
 						}
-						std::sort(v.begin(),v.end(),[](const cv::Scalar & c1, const cv::Scalar & c2) -> bool {return c1.val[0]+c1.val[1]+c1.val[2]> c2.val[0]+c2.val[1]+c2.val[2];});
-						if(v.size() > 0)
-						{
-							median[x+ y*xSize] = 				 v[v.size()/2].val[0];
-							median[x+ y*xSize + xSize*ySize] =   v[v.size()/2].val[1];
-							median[x+ y*xSize + 2*xSize*ySize] = v[v.size()/2].val[2];
-						}
-//					}
+					}
+					median[x+ y*xSize] = 				 color.val[0];
+					median[x+ y*xSize + xSize*ySize] =   color.val[1];
+					median[x+ y*xSize + 2*xSize*ySize] = color.val[2];
 				}
 			}
-//			DataDrawer::drawState(median,StateInfo(64,40,3),"median");
+#ifdef PRINT_REDUCED_IMAGE
+			DataDrawer::drawState(median,"median");
+#endif
 
 			//Find edges and threshold
 			for(int x=1; x<xSize-1; x++)
@@ -69,13 +73,16 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 									 (median[ x    + (y-1)*xSize + z*ySize*xSize]) -
 									 (median[ x    + (y+1)*xSize + z*ySize*xSize]));
 					}
-					if(value > 222) edges[x+y*xSize] = 255;
+					if(value > 120) edges[x+y*xSize] = 255;
+					else edges[x+y*xSize] = 0;
 				}
 			}
 
-//			DataDrawer::drawState(edges,StateInfo(64,40,1),"edges");
+#ifdef PRINT_REDUCED_IMAGE
+			DataDrawer::drawState(edges,"edges");
+#endif
 
-			//Erosion
+			//Dilatation
 			for(int x=2; x<xSize-2; x++)
 			{
 				for(int y=2; y<ySize-2; y++)
@@ -84,19 +91,19 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 					value = edges[x-1+(y-1)*xSize] + edges[x+(y-1)*xSize] + edges[x+1+(y-1)*xSize] +
 							edges[x-1+y*xSize]     + edges[x+ y*xSize]    + edges[x+1+y*xSize] +
 							edges[x-1+(y+1)*xSize] + edges[x+(y+1)*xSize] + edges[x+1+(y+1)*xSize];
-		//			value = edges[x-2+(y-2)*xSize] + edges[x-1+(y-2)*xSize] + edges[x+(y-2)*xSize] + edges[x+1+(y-2)*xSize] + edges[x+2+(y-2)*xSize] +
-		//								edges[x-2+(y-1)*xSize] + edges[x-1+(y-1)*xSize] + edges[x+(y-1)*xSize] + edges[x+1+(y-1)*xSize] + edges[x+2+(y-1)*xSize] +
-		//								edges[x-2+y*xSize] + edges[x-1+y*xSize] + 					+ edges[x+1+y*xSize] + edges[x+2+y*xSize] +
-		//								edges[x-2+(y+1)*xSize] + edges[x-1+(y+1)*xSize] + edges[x+(y+1)*xSize] + edges[x+1+(y+1)*xSize] + edges[x+2+(y+1)*xSize] +
-		//								edges[x-2+(y+2)*xSize] + edges[x-1+(y+2)*xSize] + edges[x+(y+2)*xSize] + edges[x+1+(y+2)*xSize] + edges[x+2+(y+2)*xSize];
-					if(value >= 255*2) erosion[x+y*xSize] = 255;
+					if(value >= 255*3) dilatation[x+y*xSize] = 255;
+					else dilatation[x+y*xSize] = 0;
 				}
 			}
 
-//			DataDrawer::drawState(erosion,StateInfo(64,40,1),"erosion");
+#ifdef PRINT_REDUCED_IMAGE
+			DataDrawer::drawState(dilatation,"dilatation");
+#endif
 
 			//Reduce
-			std::vector<int> result;
+			int reduceLevel = 4;
+			int i = 0;
+			State reduced = State(0,xSize/4,ySize/4,1);
 			for(int y=0;y<ySize;y+=reduceLevel)
 			{
 				for(int x=0;x<xSize;x+=reduceLevel)
@@ -106,18 +113,51 @@ RawImageAnalyzer::RawImageAnalyzer(Game t_game) : ImageAnalyzer(t_game)
 					{
 						for(int yy=0;yy<reduceLevel;yy++)
 						{
-							value += erosion[x+xx+(y+yy)*xSize];
+							value += dilatation[x+xx+(y+yy)*xSize];
 						}
 					}
-					if(value > reduceLevel*64) result.push_back(255);
-					else result.push_back(0);
+					if(value > reduceLevel*64-1) reduced[i] = 255;
+					else reduced[i] = 0;
+					i++;
 				}
 			}
-//			DataDrawer::drawState(result,StateInfo(16,10,1),"result",16);
 
-			result.push_back(t_state[0]/7);
-			result.push_back(t_state[1]/2);
-			result.push_back(t_state[3]);
+			xSize /= reduceLevel;
+			ySize /= reduceLevel;
+
+#ifdef PRINT_REDUCED_IMAGE
+			DataDrawer::drawState(reduced,"reduced",32);
+#endif
+
+			//Reduce
+			reduceLevel = 2;
+			i = 0;
+			State result = State(3,xSize/2,ySize/2,1);
+
+			result[i] = t_state[0] == 0 ? 0 : (t_state[0] > 0 ? 1 : -1); i++;
+			result[i] = t_state[1] == 0 ? 0 : (t_state[1] > 0 ? 1 : -1); i++;
+			result[i] = t_state[3]; i++;
+
+			for(int y=0;y<ySize;y+=reduceLevel)
+			{
+				for(int x=0;x<xSize;x+=reduceLevel)
+				{
+					int value=0;
+					for(int xx=0;xx<reduceLevel;xx++)
+					{
+						for(int yy=0;yy<reduceLevel;yy++)
+						{
+							value += reduced[x+xx+(y+yy)*xSize];
+						}
+					}
+					result[i] = (value/4);
+					i++;
+				}
+			}
+
+#ifdef PRINT_REDUCED_IMAGE
+			DataDrawer::drawState(result,"result",64);
+#endif
 
 			return result;
 		};
@@ -158,18 +198,17 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 
 	cv::Mat firstPhaseImage, image;
 	getLeastFrequentInImage(2, cutImage, firstPhaseImage);
-	cv::resize(firstPhaseImage, image, cv::Size(), 0.5, 0.5,CV_INTER_CUBIC);
-	oldImages.push_back(image);
+	cv::resize(firstPhaseImage, image, cv::Size(), 0.5, 0.5,cv::INTER_CUBIC);
+	oldImages.push_back(image.clone());
 	result->processedImages.push_back(image);
 
 	//Get past image
-	if(oldImages.size() >2)
+	if(oldImages.size() >=2)
 	{
-		result->processedImages.push_back(*oldImages.begin());
+		result->processedImages.push_back(oldImages.begin()->clone());
 		oldImages.erase(oldImages.begin());
 	}
 	else result->processedImages.push_back(cv::Mat(40, 64, CV_8UC3));
-
 
 	//draw result
 	viewImage(8,"processed image", result->processedImages[0]);
@@ -179,28 +218,30 @@ void RawImageAnalyzer::processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeR
 /*
  *
  */
-std::vector<int> RawImageAnalyzer::createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity)
+State RawImageAnalyzer::createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity)
 {
-	State sceneState;
+	State sceneState(12, t_images[0].cols, t_images[0].rows, t_images[0].channels()*t_images.size());
+	int i=0;
 
 	//AdditionalInfo
-	sceneState.push_back(t_velocity.x);
-	sceneState.push_back(t_velocity.y);
+	sceneState[i] = t_velocity.x; i++;
+	sceneState[i] = t_velocity.y; i++;
 
 	if(t_velocity.y == 0 && t_controllerInput[0] && holdButtonCounter <=1024) holdButtonCounter++;
 	else holdButtonCounter = 0;
 
-	sceneState.push_back(t_velocity.y == 0);
-	sceneState.push_back(holdButtonCounter >= 2 ? 64 : -64);
+	sceneState[i] = t_velocity.y == 0; i++;
+	sceneState[i] = holdButtonCounter >= 3 ? 64 : -64; i++;
 
 	//Controller Info
 	for(bool ci : t_controllerInput)
 	{
-		if(ci==true) sceneState.push_back(MAX_INPUT_VALUE);
-		else sceneState.push_back(MIN_INPUT_VALUE);
+		if(ci==true) sceneState[i] = MAX_INPUT_VALUE;
+		else sceneState[i] = MIN_INPUT_VALUE;
+		i++;
 	}
 
-	for(int i=0;i<2;i++) sceneState.push_back(0);
+	for(int j=0;j<2;j++) {sceneState[i] = 0; i++;}
 
 	//Image info
 	for(cv::Mat image : t_images)
@@ -212,7 +253,7 @@ std::vector<int> RawImageAnalyzer::createSceneState(std::vector<cv::Mat> &t_imag
 				for(int x=0; x<image.cols; x++)
 				{
 					uchar* ptrSrc = image.ptr(y)+(3*(x));
-					sceneState.push_back(ptrSrc[z]);
+					sceneState[i] = ptrSrc[z]; i++;
 				}
 			}
 		}

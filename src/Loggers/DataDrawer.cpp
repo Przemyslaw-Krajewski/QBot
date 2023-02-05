@@ -10,34 +10,61 @@
 /*
  *
  */
-void DataDrawer::drawState(State t_state, StateInfo t_stateInfo, std::string name, int t_blockSize)
+void DataDrawer::drawState(State t_state, std::string name, int t_blockSize)
 {
-	cv::Mat mat = cv::Mat(t_blockSize*t_stateInfo.ySize, t_blockSize*t_stateInfo.xSize, CV_8UC3);
+	cv::Mat mat = cv::Mat(t_blockSize*t_state.getSizeY()*2, t_blockSize*t_state.getSizeX(), CV_8UC3);
 
-	for(int x=0, xb=0; x<t_stateInfo.xSize; x++,xb+=t_blockSize)
+	for(int x=0, xb=0; x<t_state.getSizeX(); x++,xb+=t_blockSize)
 	{
-		for(int y=0, yb=0; y<t_stateInfo.ySize; y++,yb+=t_blockSize)
+		for(int y=0, yb=0; y<t_state.getSizeY(); y++,yb+=t_blockSize)
 		{
 			cv::Scalar color;
-			if(t_stateInfo.zSize == 1)
+			if(t_state.getSizeZ() == 1)
 			{
-				color[0] = color[1] = color[2] = t_state[x+y*t_stateInfo.xSize];
+				color[0] = color[1] = color[2] = t_state[t_state.getImageOffset()+x+y*t_state.getSizeX()];
 			}
-			else if(t_stateInfo.zSize == 2)
+			else if(t_state.getSizeZ() == 2)
 			{
 				color[1] = 0;
-				color[0] = t_state[x+y*t_stateInfo.xSize];
-				color[2] = t_state[x+y*t_stateInfo.xSize + t_stateInfo.xSize*t_stateInfo.ySize];
+				color[0] = t_state[t_state.getImageOffset()+x+y*t_state.getSizeX()];
+				color[2] = t_state[t_state.getImageOffset()+x+y*t_state.getSizeX() + t_state.getSizeX()*t_state.getSizeY()];
 			}
-			else if(t_stateInfo.zSize >= 3)
+			else if(t_state.getSizeZ() >= 3)
 			{
 
-				color[0] = t_state[x+y*t_stateInfo.xSize];
-				color[1] = t_state[x+y*t_stateInfo.xSize + t_stateInfo.xSize*t_stateInfo.ySize];
-				color[2] = t_state[x+y*t_stateInfo.xSize + t_stateInfo.xSize*t_stateInfo.ySize*2];
+				color[0] = t_state[t_state.getImageOffset()+x+y*t_state.getSizeX()];
+				color[1] = t_state[t_state.getImageOffset()+x+y*t_state.getSizeX() + t_state.getSizeX()*t_state.getSizeY()];
+				color[2] = t_state[t_state.getImageOffset()+x+y*t_state.getSizeX() + t_state.getSizeX()*t_state.getSizeY()*2];
 			}
 
-			drawBlock(&mat,t_blockSize,Point(xb,yb),color);
+			drawBlock(&mat,t_blockSize,cv::Point(xb,yb),color);
+		}
+	}
+	int imageSize = t_state.getSizeX()*t_state.getSizeY()*3;
+	for(int x=0, xb=0; x<t_state.getSizeX(); x++,xb+=t_blockSize)
+	{
+		for(int y=0, yb=0; y<t_state.getSizeY(); y++,yb+=t_blockSize)
+		{
+			cv::Scalar color;
+			if(t_state.getSizeZ() == 1)
+			{
+				color[0] = color[1] = color[2] = t_state[imageSize+t_state.getImageOffset()+x+y*t_state.getSizeX()];
+			}
+			else if(t_state.getSizeZ() == 2)
+			{
+				color[1] = 0;
+				color[0] = t_state[imageSize+t_state.getImageOffset()+x+y*t_state.getSizeX()];
+				color[2] = t_state[imageSize+t_state.getImageOffset()+x+y*t_state.getSizeX() + t_state.getSizeX()*t_state.getSizeY()];
+			}
+			else if(t_state.getSizeZ() >= 3)
+			{
+
+				color[0] = t_state[imageSize+t_state.getImageOffset()+x+y*t_state.getSizeX()];
+				color[1] = t_state[imageSize+t_state.getImageOffset()+x+y*t_state.getSizeX() + t_state.getSizeX()*t_state.getSizeY()];
+				color[2] = t_state[imageSize+t_state.getImageOffset()+x+y*t_state.getSizeX() + t_state.getSizeX()*t_state.getSizeY()*2];
+			}
+
+			drawBlock(&mat,t_blockSize,cv::Point(xb,yb+t_state.getSizeY()*t_blockSize),color);
 		}
 	}
 
@@ -108,11 +135,11 @@ void DataDrawer::drawAdditionalInfo(double t_reward, double t_maxTime, double t_
 	{
 		int value = t_keys[i] ? 255 : 0;
 		drawBorderedBlock(&map,blockSize,
-				Point((1+i)*blockSize,5*blockSize),
+				cv::Point((1+i)*blockSize,5*blockSize),
 				cv::Scalar(value,value,value));
 	}
 	drawBorderedBlock(&map,blockSize,
-			Point((1)*blockSize,7*blockSize),
+			cv::Point((1)*blockSize,7*blockSize),
 			cv::Scalar(pressedKey*255,pressedKey*255,pressedKey*255));
 
 	//Print
@@ -148,7 +175,7 @@ void DataDrawer::drawBar(cv::Mat *mat, int t_barHeight, int t_barWidth, double p
 /*
  *
  */
-void DataDrawer::drawBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color)
+void DataDrawer::drawBlock(cv::Mat *mat, int t_blockSize, cv::Point t_point, cv::Scalar t_color)
 {
 	for(int xx=0; xx<t_blockSize; xx++)
 	{
@@ -165,7 +192,7 @@ void DataDrawer::drawBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Sca
 /*
  *
  */
-void DataDrawer::drawBorderedBlock(cv::Mat *mat, int t_blockSize, Point t_point, cv::Scalar t_color)
+void DataDrawer::drawBorderedBlock(cv::Mat *mat, int t_blockSize, cv::Point t_point, cv::Scalar t_color)
 {
 	for(int xx=0; xx<t_blockSize; xx++)
 	{

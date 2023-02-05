@@ -9,16 +9,20 @@
 #define SRC_ANALYZERS_IMAGEANALYZER_IMAGEANALYZER_H_
 
 //#define PRINT_ANALYZED_IMAGE
+//#define PRINT_REDUCED_IMAGE
 
 #include <opencv2/opencv.hpp>
 #include <map>
 #include <functional>
 
+#include "Point.h"
 #include "../../Bot/State.h"
 #include "../../Bot/Controller.h"
 
 #include "../../Loggers/DataDrawer.h"
 
+
+enum class Game {BattleToads, SuperMarioBros};
 using ReduceStateMethod = std::function<State(State&)>;
 
 class ImageAnalyzer
@@ -42,8 +46,8 @@ public:
 	virtual ~ImageAnalyzer();
 
 	virtual void processImage(cv::Mat* colorImage, ImageAnalyzer::AnalyzeResult *result) = 0;
-	virtual std::vector<int> createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity) = 0;
-	virtual void correctScenarioHistory(std::list<SARS> &t_history, ScenarioAdditionalInfo t_additionalInfo);
+	virtual State createSceneState(std::vector<cv::Mat> &t_images, ControllerInput& t_controllerInput, Point& t_position, Point& t_velocity) = 0;
+	virtual void correctScenarioHistory(std::list<SARS> &t_history, bool t_killedByEnemy);
 
 	ReduceStateMethod getReduceStateMethod() {return reducedStateMethod;}
 protected:

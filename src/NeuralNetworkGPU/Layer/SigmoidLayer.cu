@@ -215,6 +215,8 @@ namespace NeuralNetworkGPU
 	{
 		float b1 = 0.9, b2 = 0.999;
 
+		prevLayerId = t_prevLayerReference.id;
+
 		size = t_size;
 		de_input = t_prevLayerReference.inputPtr;
 
@@ -268,7 +270,6 @@ namespace NeuralNetworkGPU
 
 			assert(numberOfBlocks < 20 && "Could not match thread/block size");
 		}
-
 	}
 
 	/*
@@ -321,6 +322,24 @@ namespace NeuralNetworkGPU
 	void SigmoidLayer<F>::setWeights(float* t_weights)
 	{
 		cudaMemcpy(d_weights, t_weights, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::setMomentum1(float* t_momentum)
+	{
+		cudaMemcpy(d_m, t_momentum, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
+	}
+
+	/*
+	 *
+	 */
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::setMomentum2(float* t_momentum)
+	{
+		cudaMemcpy(d_v, t_momentum, sizeof(float)*size*(inputSize+1), cudaMemcpyHostToDevice);
 	}
 
 	/*
@@ -418,6 +437,7 @@ namespace NeuralNetworkGPU
 	void SigmoidLayer<F>::saveToFile(std::ofstream & t_file)
 	{
 		t_file << (float) getLayerTypeId() << ' '; //Signature of SigmoidLayer
+		t_file << (float) prevLayerId << ' '; 	   //Id of previous layer
 		t_file << (float) size << ' ';
 		t_file << (float) inputSize << ' ';
 		t_file << (float) learnRate << ' ';
@@ -426,12 +446,25 @@ namespace NeuralNetworkGPU
 		t_file << b << ' ';
 
 		float *weights = (float*) malloc(sizeof(float)*size*(inputSize+1));
-		cudaMemcpy(weights, d_weights, sizeof(float)*size*(inputSize+1), cudaMemcpyDeviceToHost);
 
+		cudaMemcpy(weights, d_weights, sizeof(float)*size*(inputSize+1), cudaMemcpyDeviceToHost);
 		for(int i=0; i<(inputSize+1)*size; i++)
 		{
 			t_file << weights[i] << ' ';
 		}
+
+		cudaMemcpy(weights, d_m, sizeof(float)*size*(inputSize+1), cudaMemcpyDeviceToHost);
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+
+		cudaMemcpy(weights, d_v, sizeof(float)*size*(inputSize+1), cudaMemcpyDeviceToHost);
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			t_file << weights[i] << ' ';
+		}
+
 		free(weights);
 	}
 
@@ -439,15 +472,17 @@ namespace NeuralNetworkGPU
 	 *
 	 */
 	template<ActivationFunction F>
-	SigmoidLayer<F>* SigmoidLayer<F>::loadFromFile(std::ifstream & t_file, NeuronsPtr t_prevLayerReference)
+	SigmoidLayer<F>* SigmoidLayer<F>::loadFromFile(std::ifstream & t_file, std::vector<NeuronsPtr> &t_prevLayerReferences)
 	{
 		float size, inputSize, learnRate, b;
+		float prevId;
+		t_file >> prevId;
 		t_file >> size;
 		t_file >> inputSize;
 		t_file >> learnRate;
 		t_file >> b;
 
-		SigmoidLayer<F>* layer = new SigmoidLayer<F>(b,learnRate,size,t_prevLayerReference);
+		SigmoidLayer<F>* layer = new SigmoidLayer<F>(b,learnRate,size,t_prevLayerReferences[(int)prevId]);
 
 		float *weights = (float*) malloc(sizeof(float)*size*(inputSize+1));
 		float buff;
@@ -457,6 +492,21 @@ namespace NeuralNetworkGPU
 			weights[i] = buff;
 		}
 		layer->setWeights(weights);
+
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			t_file >> buff;
+			weights[i] = buff;
+		}
+		layer->setMomentum1(weights);
+
+		for(int i=0; i<(inputSize+1)*size; i++)
+		{
+			t_file >> buff;
+			weights[i] = buff;
+		}
+		layer->setMomentum2(weights);
+
 		free(weights);
 
 		return layer;
@@ -510,5 +560,15 @@ namespace NeuralNetworkGPU
 		//Print
 		imshow("SigmoidLayer", mat);
 		cv::waitKey(10);
+	}
+
+	/*
+	 *
+	 */
+	template<ActivationFunction F>
+	void SigmoidLayer<F>::printInfo()
+	{
+		std::cout << "	(" << layerId << ") Sigmoid <-- " << prevLayerId << " : ";
+		std::cout << inputSize << " -> " << size << "   w:" << size*(inputSize+1) << "\n";
 	}
 }

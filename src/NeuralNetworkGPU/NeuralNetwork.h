@@ -60,6 +60,7 @@ namespace NeuralNetworkGPU {
 		public:
 			//debug
 			void drawLayer(int layer);
+			void printInfo() {std::cout << "NeuralNetwork:\n";for(auto it : layers) it->printInfo();}
 //			void drawNeuralNetwork() {for(auto it : layers) it->drawLayer();}
 
 		protected:

@@ -58,7 +58,7 @@ int GeneralizedQL::chooseAction(State& t_state)
 	std::vector<double> values;
 	if(controlMode == ControlMode::NN)
 	{
-		values = actions->determineOutput(t_state);
+		values = actions->determineOutput(t_state.data);
 	}
 	else if (controlMode == ControlMode::QL)
 	{
@@ -66,7 +66,7 @@ int GeneralizedQL::chooseAction(State& t_state)
 	}
 	else if (controlMode == ControlMode::Hybrid || controlMode == ControlMode::NNNoLearn)
 	{
-		if(qValues.getChange(t_state) > ACTION_LEARN_THRESHOLD) values = actions->determineOutput(t_state);
+		if(qValues.getChange(t_state) > ACTION_LEARN_THRESHOLD) values = actions->determineOutput(t_state.data);
 		else values = qValues.getValues(t_state);
 	}
 	else assert("no such control mode" && 0);
@@ -74,7 +74,7 @@ int GeneralizedQL::chooseAction(State& t_state)
 //	for (int i=0; i< values.size() ;i++) std::cout << values[i] << "   ";
 //	std::cout << "\n";
 
-	int action = getIndexOfMaxValue(values);
+	int action = std::distance( values.begin(), std::max_element(values.begin(),values.end()) );
 
 	return action;
 }
@@ -107,9 +107,9 @@ std::pair<double,int> GeneralizedQL::learnAction(State &state, bool skipNotReady
 	if(qValues.getChange(state) > ACTION_LEARN_THRESHOLD && skipNotReady) return std::pair<double,int>(0,2);
 
 	std::vector<double> qlValues = qValues.getValues(state);
-	std::vector<double> nnValues = actions->determineOutput(state);
-	int qlAction = getIndexOfMaxValue(qlValues);
-	int nnAction = getIndexOfMaxValue(nnValues);
+	std::vector<double> nnValues = actions->determineOutput(state.data);
+	int qlAction = std::distance( qlValues.begin(), std::max_element(qlValues.begin(),qlValues.end()) );
+	int nnAction = std::distance( nnValues.begin(), std::max_element(nnValues.begin(),nnValues.end()) );
 
 	if(qlAction == nnAction) return std::pair<double,int>(0,1);
 

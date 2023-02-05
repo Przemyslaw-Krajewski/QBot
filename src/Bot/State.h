@@ -11,57 +11,71 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
-const int numberOfActions = 2;
-
-using State = std::vector<int>;
-using ReducedState = State;
-
-struct Point
+struct State
 {
-	Point() {x=y=0;}
-	Point(int t_x, int t_y) {x=t_x;y=t_y;}
-	Point& operator=(const cv::Point& t_p ) {x=t_p.x;y=t_p.y;return *this;}
-	Point& operator=(const Point & t_p ) {x=t_p.x;y=t_p.y;return *this;}
-	bool operator==(const Point & t_p ) {return (x==t_p.x && y==t_p.y);}
-	int x;
-	int y;
-};
+	State();
+	State(std::vector<int>& t_v);
+	State(int t_size);
+	State(int t_additionalInfoSize, int t_xSize, int t_ySize, int t_zSize);
 
-struct StateInfo
-{
-	StateInfo() : StateInfo(-1,-1,-1) {}
-	StateInfo(int t_x, int t_y, int t_z) {xSize=t_x;ySize=t_y;zSize=t_z;}
+	int size() {return aSize;}
+	int getSizeX() {return xSize;}
+	int getSizeY() {return ySize;}
+	int getSizeZ() {return zSize;}
+	int getImageOffset() {return imageOffset;}
 
+	std::vector<int>& getData() {return data;}
+	const std::vector<int>& getDataConst() const {return data;}
+
+	int& operator[](int index) {return data[index];}
+
+	std::vector<int> data;
+	int aSize;
+
+	int imageOffset;
 	int xSize;
 	int ySize;
 	int zSize;
 };
+using ReducedState = State;
+
+bool operator<(const State& state1, const State& state2);
 
 struct SARS
 {
-	SARS()
-	{
-		state = State();
-		oldState = State();
-		reward = 0;
-		action = 0;
-	}
 	SARS(State t_oldState, State t_state, int t_action, double t_reward)
 	{
 		state = t_state;
 		oldState = t_oldState;
-		reward = t_reward;
 		action = t_action;
+		reward = t_reward;
+		tdReward = 0;
+		sumReward = 0;
+		tdSumReward = t_reward;
+
+		score = 0;
+
+		actorValues = std::vector<double>();
+		stateValue = 0;
+		prevStateValue = 0;
+		actorChange = 0;
 	}
+	SARS() : SARS(State(),State(),0,0) {}
 
 	State state;
 	State oldState;
 	int action;
 	double reward;
+	double tdReward;
+	double sumReward;
+	double tdSumReward;
+
+	int score;
+
+	double actorChange;
+	std::vector<double> actorValues;
+	double stateValue;
+	double prevStateValue;
 };
-
-
-enum class ScenarioAdditionalInfo {ok, killedByEnemy, killedByEnvironment, playerNotFound, timeOut, won};
-enum class Game {BattleToads, SuperMarioBros};
 
 #endif /* SRC_BOT_STATE_H_ */
